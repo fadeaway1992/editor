@@ -5,9 +5,13 @@
   <title>more-editor</title>
 </head>
 <body>
+  <div class="editable" contenteditable="true"></div>
   <script src="../dist/js/more-editor.js"></script>
   <script>
-    var editor = new MoreEditor()
+    var editor = new MoreEditor('.editable', {
+      imageUploadAddress: 'zi.com'
+    })
+    console.log(editor)
   </script> 
 </body>
 </html>
