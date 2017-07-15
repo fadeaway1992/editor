@@ -11,4 +11,4 @@
         root.MoreEditor = factory;
     }
 }(this, function () {
-    'use strict';
+    'use strict';  

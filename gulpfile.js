@@ -12,20 +12,20 @@ var concatArr = [
     'src/js/end.js'
 ]
 
-// gulp.task('css', function() {
-//     gulp.src('src/sass/*.scss')
-//     .pipe(sass().on('error', sass.logError))
-//     .pipe(autoprefixer({
-//         browsers:['last 10 versions', '> 5%']
-//     }))
-//     .pipe(gulp.dest('dist/css'))
-// })
+gulp.task('css', function() {
+    gulp.src('src/sass/*.scss')
+    .pipe(sass().on('error', sass.logError))
+    .pipe(autoprefixer({
+        browsers:['last 10 versions', '> 5%']
+    }))
+    .pipe(gulp.dest('dist/css'))
+})
 
-// var cssWatcher = gulp.watch('src/sass/*.scss', ['css'])
+var cssWatcher = gulp.watch('src/sass/*.scss', ['css'])
 
-// cssWatcher.on('change', function() {
-//     console.log('侦听到 css 改动，重新启动 gulp')
-// })
+cssWatcher.on('change', function() {
+    console.log('侦听到 css 改动，重新启动 gulp')
+})
 
 
 gulp.task('default', ['js'], function() {

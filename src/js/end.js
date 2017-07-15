@@ -1,6 +1,3 @@
-/* eslint-disable */
-
     return MoreEditor;
-}()));
+}()));  // eslint-disable-line
 
-/* eslint-enable */
