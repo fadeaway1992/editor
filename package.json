@@ -4,7 +4,7 @@
   "description": "web editor developed for 'zi.com' and 'duodian.com'",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "open demo/index.html"
   },
   "keywords": [
     "'contenteditable'",
@@ -19,6 +19,7 @@
     "gulp-autoprefixer": "^4.0.0",
     "gulp-clean-css": "^3.6.0",
     "gulp-concat": "^2.6.1",
+    "gulp-open": "^2.0.0",
     "gulp-sass": "^3.1.0",
     "gulp-uglify": "^3.0.0"
   }

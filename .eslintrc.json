@@ -7,7 +7,7 @@
   },
   "rules": {
     "semi": "off",
-    "indent": ["error", 4],
+    "indent": "off",
     "no-console": "off"
   }
 }

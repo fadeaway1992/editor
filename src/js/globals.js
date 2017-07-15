@@ -1,10 +1,10 @@
 /* eslint-disable no-unused-vars, no-undef */
 
-function MoreEditor(elements, options) {
+var MoreEditor = function(elements, options) {
     'use strict'
     return this.init(elements, options)
 }
 
-MeoreEditor.extensions = {}
+MoreEditor.extensions = {};
 
 /* eslint-enable no-unused-vars, no-undef */
