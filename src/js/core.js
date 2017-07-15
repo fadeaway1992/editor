@@ -26,6 +26,14 @@ MoreEditor.prototype = {
     },
     setup: function() {
         this.events = new MoreEditor.Events(this)
-    }
+    },
+    on: function (target, event, listener, useCapture) {
+        this.events.attachDOMEvent(target, event, listener, useCapture);
+        return this;
+    },
+    off: function (target, event, listener, useCapture) {
+        this.events.detachDOMEvent(target, event, listener, useCapture);
+        return this;
+    },
 }
 
