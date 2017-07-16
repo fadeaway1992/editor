@@ -17,21 +17,28 @@ function handleBackAndEnterKeydown(event) {
     if(MoreEditor.util.isKey(event, [MoreEditor.util.keyCode.BACKSPACE, MoreEditor.util.keyCode.ENTER])) {
         console.log('按下了 back 或者 enter 键')
         if(range.collapsed===true) {  // 只有光标没有选区
-            if(MoreEditor.util.isKey(event, [MoreEditor.util.keyCode.ENTER]) &&  // 按下的是 enter 键
-                MoreEditor.util.isElementAtEndofBlock(node) &&   // 当前元素后面不再有文本
-                MoreEditor.selection.getCaretOffsets(node).right === 0 ) {  // 光标在当前元素的最后一个字符后
-                    if(cloestBlockContainer.nodeName.toLowerCase() === 'li' || topBlockContainer.nodeName.toLowerCase() === 'ul' || topBlockContainer.nodeName.toLowerCase() === 'ol') return
-                    var newLine = document.createElement('p')
-                    newLine.innerHTML = '<br>'
-                    if(topBlockContainer.nextElementSibling) {
-                        topBlockContainer.parentNode.insertBefore(newLine, topBlockContainer.nextElementSibling)
-                        console.log('插入新行')
-                    } else {
-                        topBlockContainer.parentNode.appendChild(newLine)
-                        console.log('插入新行')
-                    }
-                    MoreEditor.selection.moveCursor(document, newLine, 0)
-                    event.preventDefault()
+            /* 
+                在当前块元素的最后一个字符按下 enter 键,并且不是在列表中。这时新插入一行 p
+            */
+            if(MoreEditor.util.isKey(event, MoreEditor.util.keyCode.ENTER) && MoreEditor.util.isElementAtEndofBlock(node) && MoreEditor.selection.getCaretOffsets(node).right === 0 ) {
+                if(cloestBlockContainer.nodeName.toLowerCase() === 'li' || topBlockContainer.nodeName.toLowerCase() === 'ul' || topBlockContainer.nodeName.toLowerCase() === 'ol') return
+                var newLine = document.createElement('p')
+                newLine.innerHTML = '<br>'
+                if(topBlockContainer.nextElementSibling) {
+                    topBlockContainer.parentNode.insertBefore(newLine, topBlockContainer.nextElementSibling)
+                    console.log('插入新行')
+                } else {
+                    topBlockContainer.parentNode.appendChild(newLine)
+                    console.log('插入新行')
+                }
+                MoreEditor.selection.moveCursor(document, newLine, 0)
+                event.preventDefault()
+            }
+            /* 
+                当 editor 中只剩下一个空元素的时候，按下 delete 键默认会删除这个元素(至少要留下一个块元素)，要禁止这个默认事件发生。
+            */
+            if(MoreEditor.util.isKey(event, MoreEditor.util.keyCode.BACKSPACE) && !topBlockContainer.nextElementSibling && !topBlockContainer.previousElementSibling && topBlockContainer.textContent === '') {
+                event.preventDefault()
             }
         } else {
             console.log('有选区')
