@@ -1,11 +1,38 @@
+/* eslint-disable no-undef */
+
 /* MoreEditor 的原型属性和原型方法 */
+
+/* 
+    定义在 MoreEditor 中按下 BACKSPACE 或者 ENTER 时的行为
+*/
 function handleBackAndEnterKeydown(event) {
     var range = document.getSelection().getRangeAt(0)
+    var node = MoreEditor.selection.getSelectionStart(this.options.ownerDocument)
+    var topBlockContainer = MoreEditor.util.getTopBlockContainer(node)
+    var cloestBlockContainer = MoreEditor.util.getClosestBlockContainer(node)
+    if(!range) {
+        return
+    }
 
     if(MoreEditor.util.isKey(event, [MoreEditor.util.keyCode.BACKSPACE, MoreEditor.util.keyCode.ENTER])) {
         console.log('按下了 back 或者 enter 键')
         if(range.collapsed===true) {  // 只有光标没有选区
-            console.log('只有光标没有选区')
+            if(MoreEditor.util.isKey(event, [MoreEditor.util.keyCode.ENTER]) &&  // 按下的是 enter 键
+                MoreEditor.util.isElementAtEndofBlock(node) &&   // 当前元素后面不再有文本
+                MoreEditor.selection.getCaretOffsets(node).right === 0 ) {  // 光标在当前元素的最后一个字符后
+                    if(cloestBlockContainer.nodeName.toLowerCase() === 'li' || topBlockContainer.nodeName.toLowerCase() === 'ul' || topBlockContainer.nodeName.toLowerCase() === 'ol') return
+                    var newLine = document.createElement('p')
+                    newLine.innerHTML = '<br>'
+                    if(topBlockContainer.nextElementSibling) {
+                        topBlockContainer.parentNode.insertBefore(newLine, topBlockContainer.nextElementSibling)
+                        console.log('插入新行')
+                    } else {
+                        topBlockContainer.parentNode.appendChild(newLine)
+                        console.log('插入新行')
+                    }
+                    MoreEditor.selection.moveCursor(document, newLine, 0)
+                    event.preventDefault()
+            }
         } else {
             console.log('有选区')
         }
@@ -14,6 +41,7 @@ function handleBackAndEnterKeydown(event) {
     }
 }
 
+/* MoreEditor 实例初始化时增添的一些属性 */
 var initialOptions = {
     contentWindow: window,
     ownerDocument: document,
@@ -48,6 +76,7 @@ MoreEditor.prototype = {
         editableElement.innerHTML = '<p><br></p>'
     },
     /* 
+        setup 方法：
         添加 events 属性
         初始化拓展对象
         绑定退格、回车等处理事件
@@ -68,4 +97,6 @@ MoreEditor.prototype = {
         return this;
     },
 }
+
+/* eslint-enable no-undef */
 

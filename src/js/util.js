@@ -961,6 +961,7 @@
          * If element is within editor element but not within any other block element,
          * the editor element is returned
          */
+        // 向上获取 MoreEditor 元素下的最顶级的块元素。如果没有则返回 MoreEditor 元素
         getTopBlockContainer: function (element) {
             var topBlock  
             Util.traverseUp(element, function (el) {  // 向上追溯
@@ -975,6 +976,8 @@
             });
             return topBlock;
         },
+
+        // 向上获取 MoreEditor 元素下的最顶级的块元素。如果没有返回 false
         getTopBlockContainerWithoutMoreEditor: function (element) {
             var topBlock = false
             if (Util.isMoreEditorElement(element)) {
