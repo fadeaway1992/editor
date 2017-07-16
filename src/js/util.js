@@ -115,7 +115,7 @@
             'address', 'article', 'aside', 'audio', 'canvas', 'dd', 'dl', 'dt', 'fieldset',
             'figcaption', 'figure', 'footer', 'form', 'header', 'hgroup', 'main', 'nav',
             'noscript', 'output', 'section', 'video',
-            'table', 'thead', 'tbody', 'tfoot', 'tr', 'th', 'td'
+            'table', 'thead', 'tbody', 'tfoot', 'tr', 'th', 'td', 'div'
         ],
 
         emptyElementNames: ['br', 'col', 'colgroup', 'hr', 'img', 'input', 'source', 'wbr'],
@@ -962,10 +962,10 @@
          * the editor element is returned
          */
         getTopBlockContainer: function (element) {
-            var topBlock = Util.isBlockContainer(element) ? element : false;
-            Util.traverseUp(element, function (el) {
-                if (Util.isBlockContainer(el)) {
-                    topBlock = el;
+            var topBlock  
+            Util.traverseUp(element, function (el) {  // 向上追溯
+                if (Util.isBlockContainer(el) && !Util.isMoreEditorElement(el)) {
+                    topBlock = el;    
                 }
                 if (!topBlock && Util.isMoreEditorElement(el)) {
                     topBlock = el;
@@ -976,8 +976,19 @@
             return topBlock;
         },
         getTopBlockContainerWithoutMoreEditor: function (element) {
-
-        }
+            var topBlock = false
+            if (Util.isMoreEditorElement(element)) {
+                return false
+            }
+            Util.traverseUp(element, function (el) {  // 向上追溯
+                if (Util.isBlockContainer(el) && Util.isMoreEditorElement(el.parentNode)) {
+                    topBlock = el; 
+                    return true   
+                }
+                return false;
+            });
+            return topBlock;
+        },
 
         getFirstSelectableLeafNode: function (element) {
             while (element && element.firstChild) {
