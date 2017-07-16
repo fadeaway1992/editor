@@ -900,7 +900,7 @@
             return node1;
         },
         /* END - based on http://stackoverflow.com/a/6183069 */
-
+        // 判断元素是否为块元素中第一个有文本的元素
         isElementAtBeginningOfBlock: function (node) {
             var textVal,
                 sibling;
@@ -916,9 +916,25 @@
             }
             return true;
         },
+        // 判断元素是否为块元素中最后一个有文本的元素
+        isElementAtEndofBlock: function(node) {
+            var textVal,
+                sibling;
+            while(!Util.isBlockContainer(node)&&!Util.isMediumEditorElement(node)) {
+            sibling = node;
+            while (sibling = sibling.nextSibling ) {
+                textVal = sibling.nodeType ===3 ? sibling.nodeValue : sibling.textContent;
+                if(textVal.length>0) {
+                return false;
+                }
+            }
+            node = node.parentNode;
+            }
+            return true;
+        },
 
         isMoreEditorElement: function (element) {
-            return element && element.getAttribute && !!element.getAttribute('data-medium-editor-element');
+            return element && element.getAttribute && !!element.getAttribute('data-more-editor-element');
         },
 
         getContainerEditorElement: function (element) {
@@ -959,6 +975,9 @@
             });
             return topBlock;
         },
+        getTopBlockContainerWithoutMoreEditor: function (element) {
+
+        }
 
         getFirstSelectableLeafNode: function (element) {
             while (element && element.firstChild) {
