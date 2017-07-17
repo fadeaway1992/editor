@@ -101,6 +101,7 @@ function initExtensions() {
 function attachHandlers() {
     this.on(this.editableElement, 'keydown', handleBackAndEnterKeydown.bind(this))
     this.on(this.editableElement, 'keydown', checkCaretPosition.bind(this))
+    this.on(document.body, 'click', this.delegate.updateStatus.bind(this.delegate))
 }
 
 
@@ -131,7 +132,7 @@ MoreEditor.prototype = {
     setup: function() {
         this.events = new MoreEditor.Events(this)
         this.delegate = new MoreEditor.Delegate(this)
-        this.API = {}
+        this.API = new MoreEditor.API(this)
         initExtensions.call(this)
         attachHandlers.call(this)
     },

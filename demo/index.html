@@ -14,7 +14,13 @@
       imageUploadAddress: 'zi.com'
     })
     console.log(editor)
-  </script> 
+</script>
+<script>
+  var h2 = document.querySelector('.h2')
+  h2.addEventListener('click',function(){
+    editor.API.h2(editor.delegate.range, editor.delegate.crossBlock)
+  })
+</script>
 </body>
 </html>
 

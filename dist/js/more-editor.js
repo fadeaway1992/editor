@@ -197,7 +197,7 @@ MoreEditor.extensions = {};
         isElementAtEndofBlock: function(node) {
             var textVal,
                 sibling;
-            while(!Util.isBlockContainer(node)&&!Util.isMediumEditorElement(node)) {
+            while(!Util.isBlockContainer(node)&&!Util.isMoreEditorElement(node)) {
             sibling = node;
             while (sibling = sibling.nextSibling ) {
                 textVal = sibling.nodeType ===3 ? sibling.nodeValue : sibling.textContent;
@@ -268,7 +268,7 @@ MoreEditor.extensions = {};
         execFormatBlock: function (doc, tagName) {
             console.log('execFormatBlock 函数执行')
             // Get the top level block element that contains the selection
-            var blockContainer = Util.getTopBlockContainer(MediumEditor.selection.getSelectionStart(doc)),
+            var blockContainer = Util.getTopBlockContainer(MoreEditor.selection.getSelectionStart(doc)),
                 childNodes;
 
             // Special handling for blockquote
@@ -478,13 +478,54 @@ MoreEditor.extensions = {};
   };
 
   Delegate.prototype = {
-    range: null
+    range: null,
+    crossBlock: false,
+    // topBlockContainer: null,
+    // closestContainer: null,
+    h2: {
+      setAlready: false
+    },
+    updateStatus: function() {
+      var selection = document.getSelection()
+      if(selection.rangeCount>0) {
+        var range = selection.getRangeAt(0)
+        this.range = range
+        if(MoreEditor.util.getClosestBlockContainer(range.startContainer) !== MoreEditor.util.getClosestBlockContainer(range.endContainer)) {
+          this.crossBlock = true
+        } else {
+          this.crossBlock = false
+        }
+      } else {
+        this.setDefault()
+      }
+    },
+    setDefault: function() {
+      this.range = null
+      this.crossBlock = false
+      this.h2.setAlready = false
+    }
   }
 
   MoreEditor.Delegate = Delegate
 }());
 
 
+(function() {
+  var API = function (instance) {
+    this.base = instance;
+    this.options = this.base.options;
+  };
+
+  API.prototype = {
+    h2: function(range, crossBlock) {
+      console.log(range, crossBlock)
+      if (crossBlock || !range || range.collapsed) return
+      MoreEditor.util.execFormatBlock(document, 'h2')
+    }
+  }
+
+  MoreEditor.API = API
+}());
 /* eslint-disable no-undef */
 
 /* MoreEditor 的原型属性和原型方法 */
@@ -588,6 +629,7 @@ function initExtensions() {
 function attachHandlers() {
     this.on(this.editableElement, 'keydown', handleBackAndEnterKeydown.bind(this))
     this.on(this.editableElement, 'keydown', checkCaretPosition.bind(this))
+    this.on(document.body, 'click', this.delegate.updateStatus.bind(this.delegate))
 }
 
 
@@ -618,7 +660,7 @@ MoreEditor.prototype = {
     setup: function() {
         this.events = new MoreEditor.Events(this)
         this.delegate = new MoreEditor.Delegate(this)
-        this.API = {}
+        this.API = new MoreEditor.API(this)
         initExtensions.call(this)
         attachHandlers.call(this)
     },

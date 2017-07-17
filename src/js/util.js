@@ -173,7 +173,7 @@
         isElementAtEndofBlock: function(node) {
             var textVal,
                 sibling;
-            while(!Util.isBlockContainer(node)&&!Util.isMediumEditorElement(node)) {
+            while(!Util.isBlockContainer(node)&&!Util.isMoreEditorElement(node)) {
             sibling = node;
             while (sibling = sibling.nextSibling ) {
                 textVal = sibling.nodeType ===3 ? sibling.nodeValue : sibling.textContent;
@@ -244,7 +244,7 @@
         execFormatBlock: function (doc, tagName) {
             console.log('execFormatBlock 函数执行')
             // Get the top level block element that contains the selection
-            var blockContainer = Util.getTopBlockContainer(MediumEditor.selection.getSelectionStart(doc)),
+            var blockContainer = Util.getTopBlockContainer(MoreEditor.selection.getSelectionStart(doc)),
                 childNodes;
 
             // Special handling for blockquote

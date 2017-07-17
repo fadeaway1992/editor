@@ -12,7 +12,32 @@
   };
 
   Delegate.prototype = {
-    range: null
+    range: null,
+    crossBlock: false,
+    // topBlockContainer: null,
+    // closestContainer: null,
+    h2: {
+      setAlready: false
+    },
+    updateStatus: function() {
+      var selection = document.getSelection()
+      if(selection.rangeCount>0) {
+        var range = selection.getRangeAt(0)
+        this.range = range
+        if(MoreEditor.util.getClosestBlockContainer(range.startContainer) !== MoreEditor.util.getClosestBlockContainer(range.endContainer)) {
+          this.crossBlock = true
+        } else {
+          this.crossBlock = false
+        }
+      } else {
+        this.setDefault()
+      }
+    },
+    setDefault: function() {
+      this.range = null
+      this.crossBlock = false
+      this.h2.setAlready = false
+    }
   }
 
   MoreEditor.Delegate = Delegate
