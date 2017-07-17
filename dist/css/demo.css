@@ -1,3 +1,12 @@
 .editable {
-  border: 1px solid red;
-  outline: none; }
+  border: 2px solid lightcoral;
+  outline: none;
+  -webkit-border-radius: 4px;
+          border-radius: 4px;
+  min-height: 500px; }
+
+.toolbar {
+  text-align: center;
+  margin-bottom: 10px; }
+  .toolbar .h2-disabled {
+    opacity: .5; }
