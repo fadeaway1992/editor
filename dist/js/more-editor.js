@@ -264,6 +264,70 @@ MoreEditor.extensions = {};
             });
             return topBlock;
         },
+
+        execFormatBlock: function (doc, tagName) {
+            console.log('execFormatBlock 函数执行')
+            // Get the top level block element that contains the selection
+            var blockContainer = Util.getTopBlockContainer(MediumEditor.selection.getSelectionStart(doc)),
+                childNodes;
+
+            // Special handling for blockquote
+            if (tagName === 'blockquote') {
+                if (blockContainer) {
+                    childNodes = Array.prototype.slice.call(blockContainer.childNodes);
+                    // Check if the blockquote has a block element as a child (nested blocks)
+                    if (childNodes.some(function (childNode) {
+                        return Util.isBlockContainer(childNode);
+                    })) {
+                        // FF handles blockquote differently on formatBlock
+                        // allowing nesting, we need to use outdent
+                        // https://developer.mozilla.org/en-US/docs/Rich-Text_Editing_in_Mozilla
+                        return doc.execCommand('outdent', false, null);
+                    }
+                }
+
+                // When IE blockquote needs to be called as indent
+                // http://stackoverflow.com/questions/1816223/rich-text-editor-with-blockquote-function/1821777#1821777
+                if (Util.isIE) {
+                    return doc.execCommand('indent', false, tagName);
+                }
+            }
+
+            // If the blockContainer is already the element type being passed in
+            // treat it as 'undo' formatting and just convert it to a <p>
+            if (blockContainer && tagName === blockContainer.nodeName.toLowerCase()) {
+                tagName = 'p';
+            }
+
+            // When IE we need to add <> to heading elements
+            // http://stackoverflow.com/questions/10741831/execcommand-formatblock-headings-in-ie
+            if (Util.isIE) {
+                tagName = '<' + tagName + '>';
+            }
+
+            // When FF, IE and Edge, we have to handle blockquote node seperately as 'formatblock' does not work.
+            // https://developer.mozilla.org/en-US/docs/Web/API/Document/execCommand#Commands
+            if (blockContainer && blockContainer.nodeName.toLowerCase() === 'blockquote') {
+                // For IE, just use outdent
+                if (Util.isIE && tagName === '<p>') {
+                    return doc.execCommand('outdent', false, tagName);
+                }
+
+                // For Firefox and Edge, make sure there's a nested block element before calling outdent
+                if ((Util.isFF || Util.isEdge) && tagName === 'p') {
+                    childNodes = Array.prototype.slice.call(blockContainer.childNodes);
+                    // If there are some non-block elements we need to wrap everything in a <p> before we outdent
+                    if (childNodes.some(function (childNode) {
+                        return !Util.isBlockContainer(childNode);
+                    })) {
+                        doc.execCommand('formatBlock', false, tagName);
+                    }
+                    return doc.execCommand('outdent', false, tagName);
+                }
+            }
+
+            return doc.execCommand('formatBlock', false, tagName);
+        },
     };
 
     MoreEditor.util = Util;
@@ -400,6 +464,27 @@ MoreEditor.extensions = {};
     MoreEditor.Events = Events;
 }());
 
+/* 
+  Delegate 对象存储触发修改 DOM 的函数的参数。 例如用户点击 小标题按钮，程序会调用一个函数将当前用户选中的文字转为
+  小标题。这个函数需要的参数：用户选中了哪些文字、当前文字是否可以转化成小标题、小标题按钮是否被禁用，等。 这些参数都
+  存储在 Delegate 对象中。
+*/
+
+
+(function() {
+  var Delegate = function (instance) {
+    this.base = instance;
+    this.options = this.base.options;
+  };
+
+  Delegate.prototype = {
+    range: null
+  }
+
+  MoreEditor.Delegate = Delegate
+}());
+
+
 /* eslint-disable no-undef */
 
 /* MoreEditor 的原型属性和原型方法 */
@@ -532,6 +617,8 @@ MoreEditor.prototype = {
     */
     setup: function() {
         this.events = new MoreEditor.Events(this)
+        this.delegate = new MoreEditor.Delegate(this)
+        this.API = {}
         initExtensions.call(this)
         attachHandlers.call(this)
     },

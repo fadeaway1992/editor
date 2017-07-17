@@ -9,6 +9,7 @@ var concatArr = [
     'src/js/util.js',
     'src/js/selection.js',
     'src/js/events.js',
+    'src/js/delegate.js',
     'src/js/core.js',
     'src/js/end.js'
 ]

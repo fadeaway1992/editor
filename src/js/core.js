@@ -130,6 +130,8 @@ MoreEditor.prototype = {
     */
     setup: function() {
         this.events = new MoreEditor.Events(this)
+        this.delegate = new MoreEditor.Delegate(this)
+        this.API = {}
         initExtensions.call(this)
         attachHandlers.call(this)
     },
