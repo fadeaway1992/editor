@@ -6,7 +6,10 @@
   <link rel="stylesheet" href="../dist/css/demo.css">
 </head>
 <body>
-  <div class="toolbar"><button class="h2">H2</button></div>
+  <div class="toolbar">
+    <button class="h2">H2</button>
+    <button class="quote">quote</button>
+  </div>
   <div class="editable" contenteditable="true"></div>
   <script src="../dist/js/more-editor.js"></script>
   <script>
@@ -18,10 +21,9 @@
 
 <script>
   var h2 = document.querySelector('.h2')
-  h2.addEventListener('click',function(){
-    console.log('clicked')
-    editor.API.h2()
-  })
+  h2.addEventListener('click', editor.API.h2.bind(editor.API))
+  var quote = document.querySelector('.quote')
+  quote.addEventListener('click',editor.API.quote.bind(editor.API))
 </script>
 
 </body>

@@ -35,8 +35,6 @@
       } else {   // 没有选区或者选区不在 editableElement 内
         this.setDefault()
       }
-
-      console.log(this.range, 'range', this.crossBlock, 'crossBlock')
     },
 
     setDefault: function() {

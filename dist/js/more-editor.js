@@ -343,7 +343,6 @@ MoreEditor.extensions = {};
 
 
         isDescendant: function isDescendant(parent, child, checkEquality) {
-            console.log(parent, child, 'parent and child')
             if (!parent || !child) {
                 return false;
             }
@@ -539,8 +538,6 @@ MoreEditor.extensions = {};
       } else {   // 没有选区或者选区不在 editableElement 内
         this.setDefault()
       }
-
-      console.log(this.range, 'range', this.crossBlock, 'crossBlock')
     },
 
     setDefault: function() {
@@ -562,10 +559,14 @@ MoreEditor.extensions = {};
 
   API.prototype = {
     h2: function() {
-      console.log(this)
       this.base.delegate.updateStatus()
       if (this.base.delegate.crossBlock || !this.base.delegate.range || this.base.delegate.range.collapsed) return
       MoreEditor.util.execFormatBlock(document, 'h2')
+    },
+    quote: function() {
+      this.base.delegate.updateStatus()
+      if (this.base.delegate.crossBlock || !this.base.delegate.range || this.base.delegate.range.collapsed) return
+      MoreEditor.util.execFormatBlock(document, 'blockquote')
     }
   }
 

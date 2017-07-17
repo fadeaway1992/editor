@@ -319,7 +319,6 @@
 
 
         isDescendant: function isDescendant(parent, child, checkEquality) {
-            console.log(parent, child, 'parent and child')
             if (!parent || !child) {
                 return false;
             }
