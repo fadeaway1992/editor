@@ -15,12 +15,15 @@
     })
     console.log(editor)
 </script>
+
 <script>
   var h2 = document.querySelector('.h2')
   h2.addEventListener('click',function(){
-    editor.API.h2(editor.delegate.range, editor.delegate.crossBlock)
+    console.log('clicked')
+    editor.API.h2()
   })
 </script>
+
 </body>
 </html>
 

@@ -13,26 +13,32 @@
 
   Delegate.prototype = {
     range: null,
+
     crossBlock: false,
-    // topBlockContainer: null,
-    // closestContainer: null,
+
+
     h2: {
       setAlready: false
     },
+
+
     updateStatus: function() {
-      var selection = document.getSelection()
-      if(selection.rangeCount>0) {
-        var range = selection.getRangeAt(0)
+      console.log('updateStatus')
+      var range = document.getSelection().getRangeAt(0)
+      if(range && MoreEditor.util.isDescendant(this.base.editableElement, range.startContainer, false) && MoreEditor.util.isDescendant(this.base.editableElement, range.endContainer, false)) {
         this.range = range
         if(MoreEditor.util.getClosestBlockContainer(range.startContainer) !== MoreEditor.util.getClosestBlockContainer(range.endContainer)) {
           this.crossBlock = true
         } else {
           this.crossBlock = false
         }
-      } else {
+      } else {   // 没有选区或者选区不在 editableElement 内
         this.setDefault()
       }
+
+      console.log(this.range, 'range', this.crossBlock, 'crossBlock')
     },
+
     setDefault: function() {
       this.range = null
       this.crossBlock = false

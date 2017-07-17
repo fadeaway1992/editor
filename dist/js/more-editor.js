@@ -49,6 +49,18 @@ MoreEditor.extensions = {};
     }
 
 
+    // https://developer.mozilla.org/en-US/docs/Web/API/Node/contains
+    // Some browsers (including phantom) don't return true for Node.contains(child)
+    // if child is a text node.  Detect these cases here and use a fallback
+    // for calls to Util.isDescendant()
+    var nodeContainsWorksWithTextNodes = false;
+    try {
+        var testParent = document.createElement('div'),
+            testText = document.createTextNode(' ');
+        testParent.appendChild(testText);
+        nodeContainsWorksWithTextNodes = testParent.contains(testText);
+    } catch (exc) {}
+
     var Util = {
 
         // http://stackoverflow.com/questions/17907445/how-to-detect-ie11#comment30165888_17907562
@@ -328,6 +340,32 @@ MoreEditor.extensions = {};
 
             return doc.execCommand('formatBlock', false, tagName);
         },
+
+
+        isDescendant: function isDescendant(parent, child, checkEquality) {
+            console.log(parent, child, 'parent and child')
+            if (!parent || !child) {
+                return false;
+            }
+            if (parent === child) {
+                return !!checkEquality;
+            }
+            // If parent is not an element, it can't have any descendants
+            if (parent.nodeType !== 1) {
+                return false;
+            }
+            if (nodeContainsWorksWithTextNodes || child.nodeType !== 3) {
+                return parent.contains(child);
+            }
+            var node = child.parentNode;
+            while (node !== null) {
+                if (node === parent) {
+                    return true;
+                }
+                node = node.parentNode;
+            }
+            return false;
+        },
     };
 
     MoreEditor.util = Util;
@@ -479,26 +517,32 @@ MoreEditor.extensions = {};
 
   Delegate.prototype = {
     range: null,
+
     crossBlock: false,
-    // topBlockContainer: null,
-    // closestContainer: null,
+
+
     h2: {
       setAlready: false
     },
+
+
     updateStatus: function() {
-      var selection = document.getSelection()
-      if(selection.rangeCount>0) {
-        var range = selection.getRangeAt(0)
+      console.log('updateStatus')
+      var range = document.getSelection().getRangeAt(0)
+      if(range && MoreEditor.util.isDescendant(this.base.editableElement, range.startContainer, false) && MoreEditor.util.isDescendant(this.base.editableElement, range.endContainer, false)) {
         this.range = range
         if(MoreEditor.util.getClosestBlockContainer(range.startContainer) !== MoreEditor.util.getClosestBlockContainer(range.endContainer)) {
           this.crossBlock = true
         } else {
           this.crossBlock = false
         }
-      } else {
+      } else {   // 没有选区或者选区不在 editableElement 内
         this.setDefault()
       }
+
+      console.log(this.range, 'range', this.crossBlock, 'crossBlock')
     },
+
     setDefault: function() {
       this.range = null
       this.crossBlock = false
@@ -517,9 +561,10 @@ MoreEditor.extensions = {};
   };
 
   API.prototype = {
-    h2: function(range, crossBlock) {
-      console.log(range, crossBlock)
-      if (crossBlock || !range || range.collapsed) return
+    h2: function() {
+      console.log(this)
+      this.base.delegate.updateStatus()
+      if (this.base.delegate.crossBlock || !this.base.delegate.range || this.base.delegate.range.collapsed) return
       MoreEditor.util.execFormatBlock(document, 'h2')
     }
   }
@@ -629,7 +674,6 @@ function initExtensions() {
 function attachHandlers() {
     this.on(this.editableElement, 'keydown', handleBackAndEnterKeydown.bind(this))
     this.on(this.editableElement, 'keydown', checkCaretPosition.bind(this))
-    this.on(document.body, 'click', this.delegate.updateStatus.bind(this.delegate))
 }
 
 

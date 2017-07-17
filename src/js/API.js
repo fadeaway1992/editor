@@ -5,9 +5,10 @@
   };
 
   API.prototype = {
-    h2: function(range, crossBlock) {
-      console.log(range, crossBlock)
-      if (crossBlock || !range || range.collapsed) return
+    h2: function() {
+      console.log(this)
+      this.base.delegate.updateStatus()
+      if (this.base.delegate.crossBlock || !this.base.delegate.range || this.base.delegate.range.collapsed) return
       MoreEditor.util.execFormatBlock(document, 'h2')
     }
   }

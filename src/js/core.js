@@ -101,7 +101,6 @@ function initExtensions() {
 function attachHandlers() {
     this.on(this.editableElement, 'keydown', handleBackAndEnterKeydown.bind(this))
     this.on(this.editableElement, 'keydown', checkCaretPosition.bind(this))
-    this.on(document.body, 'click', this.delegate.updateStatus.bind(this.delegate))
 }
 
 
