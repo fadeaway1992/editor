@@ -1913,7 +1913,8 @@ function handleBackAndEnterKeydown(event) {
 function checkCaretPosition (event) {
     var node = MoreEditor.selection.getSelectionStart(this.options.ownerDocument)  
 
-    if (!node) {
+    if (!node || event.keyCode !==13 && event.keyCode !== 40) {
+        console.log('return')
         return;
     }
 
