@@ -29,7 +29,7 @@
       if(selection.rangeCount>0) {
         range = selection.getRangeAt(0)
       }
-      if(range && MoreEditor.util.isDescendant(this.base.editableElement, range.startContainer, false) && MoreEditor.util.isDescendant(this.base.editableElement, range.endContainer, false)) {
+      if(range && MoreEditor.util.isRangeInsideMoreEditor(this.base.editableElement, range)) {  // 选区存在并且选区在 editableElement 中
         this.range = range
         if(MoreEditor.util.getClosestBlockContainer(range.startContainer) !== MoreEditor.util.getClosestBlockContainer(range.endContainer)) {
           this.crossBlock = true

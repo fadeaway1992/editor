@@ -146,6 +146,6 @@ MoreEditor.prototype = {
         return this;
     },
 }
-
+  
 /* eslint-enable no-undef */
 

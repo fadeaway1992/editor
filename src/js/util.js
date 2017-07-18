@@ -377,6 +377,12 @@
             return node1;
         },
         /* END - based on http://stackoverflow.com/a/6183069 */
+
+        isRangeInsideMoreEditor: function(editableElement, range) {
+            if(!range) return
+            var commonRoot = MoreEditor.util.findCommonRoot(range.startContainer, range.endContainer)
+            return MoreEditor.util.isDescendant(editableElement, commonRoot, true)
+        }
     };
 
     MoreEditor.util = Util;

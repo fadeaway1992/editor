@@ -401,6 +401,12 @@ MoreEditor.extensions = {};
             return node1;
         },
         /* END - based on http://stackoverflow.com/a/6183069 */
+
+        isRangeInsideMoreEditor: function(editableElement, range) {
+            if(!range) return
+            var commonRoot = MoreEditor.util.findCommonRoot(range.startContainer, range.endContainer)
+            return MoreEditor.util.isDescendant(editableElement, commonRoot, true)
+        }
     };
 
     MoreEditor.util = Util;
@@ -568,7 +574,7 @@ MoreEditor.extensions = {};
       if(selection.rangeCount>0) {
         range = selection.getRangeAt(0)
       }
-      if(range && MoreEditor.util.isDescendant(this.base.editableElement, range.startContainer, false) && MoreEditor.util.isDescendant(this.base.editableElement, range.endContainer, false)) {
+      if(range && MoreEditor.util.isRangeInsideMoreEditor(this.base.editableElement, range)) {  // 选区存在并且选区在 editableElement 中
         this.range = range
         if(MoreEditor.util.getClosestBlockContainer(range.startContainer) !== MoreEditor.util.getClosestBlockContainer(range.endContainer)) {
           this.crossBlock = true
@@ -761,7 +767,7 @@ MoreEditor.prototype = {
         return this;
     },
 }
-
+  
 /* eslint-enable no-undef */
 
 
