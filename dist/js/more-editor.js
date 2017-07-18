@@ -283,28 +283,6 @@ MoreEditor.extensions = {};
             var blockContainer = Util.getTopBlockContainer(MoreEditor.selection.getSelectionStart(doc)),
                 childNodes;
 
-            // Special handling for blockquote
-            if (tagName === 'blockquote') {
-                if (blockContainer) {
-                    childNodes = Array.prototype.slice.call(blockContainer.childNodes);
-                    // Check if the blockquote has a block element as a child (nested blocks)
-                    if (childNodes.some(function (childNode) {
-                        return Util.isBlockContainer(childNode);
-                    })) {
-                        // FF handles blockquote differently on formatBlock
-                        // allowing nesting, we need to use outdent
-                        // https://developer.mozilla.org/en-US/docs/Rich-Text_Editing_in_Mozilla
-                        return doc.execCommand('outdent', false, null);
-                    }
-                }
-
-                // When IE blockquote needs to be called as indent
-                // http://stackoverflow.com/questions/1816223/rich-text-editor-with-blockquote-function/1821777#1821777
-                if (Util.isIE) {
-                    return doc.execCommand('indent', false, tagName);
-                }
-            }
-
             // If the blockContainer is already the element type being passed in
             // treat it as 'undo' formatting and just convert it to a <p>
             if (blockContainer && tagName === blockContainer.nodeName.toLowerCase()) {
@@ -315,27 +293,6 @@ MoreEditor.extensions = {};
             // http://stackoverflow.com/questions/10741831/execcommand-formatblock-headings-in-ie
             if (Util.isIE) {
                 tagName = '<' + tagName + '>';
-            }
-
-            // When FF, IE and Edge, we have to handle blockquote node seperately as 'formatblock' does not work.
-            // https://developer.mozilla.org/en-US/docs/Web/API/Document/execCommand#Commands
-            if (blockContainer && blockContainer.nodeName.toLowerCase() === 'blockquote') {
-                // For IE, just use outdent
-                if (Util.isIE && tagName === '<p>') {
-                    return doc.execCommand('outdent', false, tagName);
-                }
-
-                // For Firefox and Edge, make sure there's a nested block element before calling outdent
-                if ((Util.isFF || Util.isEdge) && tagName === 'p') {
-                    childNodes = Array.prototype.slice.call(blockContainer.childNodes);
-                    // If there are some non-block elements we need to wrap everything in a <p> before we outdent
-                    if (childNodes.some(function (childNode) {
-                        return !Util.isBlockContainer(childNode);
-                    })) {
-                        doc.execCommand('formatBlock', false, tagName);
-                    }
-                    return doc.execCommand('outdent', false, tagName);
-                }
             }
 
             return doc.execCommand('formatBlock', false, tagName);
@@ -401,12 +358,37 @@ MoreEditor.extensions = {};
             return node1;
         },
         /* END - based on http://stackoverflow.com/a/6183069 */
-
+        
+        /* 判断选区是否在 editableElement 元素内 */
         isRangeInsideMoreEditor: function(editableElement, range) {
             if(!range) return
             var commonRoot = MoreEditor.util.findCommonRoot(range.startContainer, range.endContainer)
             return MoreEditor.util.isDescendant(editableElement, commonRoot, true)
-        }
+        },
+       
+        /* 判断选区是否跨越块元素 */
+        isRangeCrossBlock: function(range) {
+            if(!range) return
+            return MoreEditor.util.getClosestBlockContainer(range.startContainer) !== MoreEditor.util.getClosestBlockContainer(range.endContainer)
+        },
+
+        /* 扒掉元素最外层的标签  比如在 p 标签里插入了 ul ,这时需要扒掉 p */
+        unwrap: function (el, doc) {
+            var fragment = doc.createDocumentFragment(),
+                nodes = Array.prototype.slice.call(el.childNodes);
+
+            // cast nodeList to array since appending child
+            // to a different node will alter length of el.childNodes
+            for (var i = 0; i < nodes.length; i++) {
+                fragment.appendChild(nodes[i]);
+            }
+
+            if (fragment.childNodes.length) {
+                el.parentNode.replaceChild(fragment, el);
+            } else {
+                el.parentNode.removeChild(el);
+            }
+        },
     };
 
     MoreEditor.util = Util;
@@ -571,16 +553,20 @@ MoreEditor.extensions = {};
       console.log('updateStatus')
       var selection = document.getSelection()
       var range
+
       if(selection.rangeCount>0) {
         range = selection.getRangeAt(0)
       }
+
       if(range && MoreEditor.util.isRangeInsideMoreEditor(this.base.editableElement, range)) {  // 选区存在并且选区在 editableElement 中
         this.range = range
-        if(MoreEditor.util.getClosestBlockContainer(range.startContainer) !== MoreEditor.util.getClosestBlockContainer(range.endContainer)) {
+
+        if(MoreEditor.util.isRangeCrossBlock(range)) {  // 判断选区是否跨越块元素
           this.crossBlock = true
         } else {
           this.crossBlock = false
         }
+
       } else {   // 没有选区或者选区不在 editableElement 内
         console.log('setDefaults')
         this.setDefault()
@@ -612,8 +598,16 @@ MoreEditor.extensions = {};
     },
     quote: function() {
       this.base.delegate.updateStatus()
-      if (this.base.delegate.crossBlock || !this.base.delegate.range || this.base.delegate.range.collapsed) return
-      MoreEditor.util.execFormatBlock(document, 'blockquote')
+      if (this.base.delegate.crossBlock || !this.base.delegate.range ) return
+      document.execCommand('insertUnorderedList',false)
+
+      var node = MoreEditor.selection.getSelectionStart(document)
+      var topBlock = MoreEditor.util.getTopBlockContainerWithoutMoreEditor(node)
+      MoreEditor.util.unwrap(topBlock,document)
+
+      topBlock = MoreEditor.util.getTopBlockContainerWithoutMoreEditor(node)
+      topBlock.classList.add('blockquote')
+      topBlock.setAttribute('data-type', 'blockquote')
     }
   }
 
@@ -634,15 +628,16 @@ function handleBackAndEnterKeydown(event) {
     if(!range) {
         return
     }
-
+    
     if(MoreEditor.util.isKey(event, [MoreEditor.util.keyCode.BACKSPACE, MoreEditor.util.keyCode.ENTER])) {
         console.log('按下了 back 或者 enter 键')
         if(range.collapsed===true) {  // 只有光标没有选区
+
             /* 
                 在当前块元素的最后一个字符按下 enter 键,并且不是在列表中。这时新插入一行 p
             */
             if(MoreEditor.util.isKey(event, MoreEditor.util.keyCode.ENTER) && MoreEditor.util.isElementAtEndofBlock(node) && MoreEditor.selection.getCaretOffsets(node).right === 0 ) {
-                if(cloestBlockContainer.nodeName.toLowerCase() === 'li' || topBlockContainer.nodeName.toLowerCase() === 'ul' || topBlockContainer.nodeName.toLowerCase() === 'ol') return
+                if(cloestBlockContainer.nodeName.toLowerCase() === 'li' || topBlockContainer.nodeName.toLowerCase() === 'ul' || topBlockContainer.nodeName.toLowerCase() === 'ol' || topBlockContainer.nodeName.toLowerCase() === 'blockquote') return
                 var newLine = document.createElement('p')
                 newLine.innerHTML = '<br>'
                 if(topBlockContainer.nextElementSibling) {
@@ -654,13 +649,9 @@ function handleBackAndEnterKeydown(event) {
                 }
                 MoreEditor.selection.moveCursor(document, newLine, 0)
                 event.preventDefault()
+                return
             }
-            /* 
-                当 editor 中只剩下一个空元素的时候，按下 delete 键默认会删除这个元素(至少要留下一个块元素)，要禁止这个默认事件发生。
-            */
-            if(MoreEditor.util.isKey(event, MoreEditor.util.keyCode.BACKSPACE) && !topBlockContainer.nextElementSibling && !topBlockContainer.previousElementSibling && topBlockContainer.textContent === '') {
-                event.preventDefault()
-            }
+
         } else {
             console.log('有选区')
         }
@@ -668,6 +659,20 @@ function handleBackAndEnterKeydown(event) {
         return
     }
 }
+
+
+/* 不能删没了，至少保留一个 p 标签 */
+function handleKeyup(event) {
+    console.log('handlekeyup')
+    if(!this.editableElement.hasChildNodes()) {
+        this.editableElement.innerHTML = '<p><br></p>'
+        event.preventDefault()
+        return
+    }
+
+}
+
+
 
 /* 
     每次 keydown 检查光标位置是否距离窗口底部距离太近，适当滚动文档，保持光标在窗口中。
@@ -722,6 +727,7 @@ function initExtensions() {
 function attachHandlers() {
     this.on(this.editableElement, 'keydown', handleBackAndEnterKeydown.bind(this))
     this.on(this.editableElement, 'keydown', checkCaretPosition.bind(this))
+    this.on(this.editableElement, 'keyup', handleKeyup.bind(this))
 }
 
 

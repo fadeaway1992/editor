@@ -259,28 +259,6 @@
             var blockContainer = Util.getTopBlockContainer(MoreEditor.selection.getSelectionStart(doc)),
                 childNodes;
 
-            // Special handling for blockquote
-            if (tagName === 'blockquote') {
-                if (blockContainer) {
-                    childNodes = Array.prototype.slice.call(blockContainer.childNodes);
-                    // Check if the blockquote has a block element as a child (nested blocks)
-                    if (childNodes.some(function (childNode) {
-                        return Util.isBlockContainer(childNode);
-                    })) {
-                        // FF handles blockquote differently on formatBlock
-                        // allowing nesting, we need to use outdent
-                        // https://developer.mozilla.org/en-US/docs/Rich-Text_Editing_in_Mozilla
-                        return doc.execCommand('outdent', false, null);
-                    }
-                }
-
-                // When IE blockquote needs to be called as indent
-                // http://stackoverflow.com/questions/1816223/rich-text-editor-with-blockquote-function/1821777#1821777
-                if (Util.isIE) {
-                    return doc.execCommand('indent', false, tagName);
-                }
-            }
-
             // If the blockContainer is already the element type being passed in
             // treat it as 'undo' formatting and just convert it to a <p>
             if (blockContainer && tagName === blockContainer.nodeName.toLowerCase()) {
@@ -291,27 +269,6 @@
             // http://stackoverflow.com/questions/10741831/execcommand-formatblock-headings-in-ie
             if (Util.isIE) {
                 tagName = '<' + tagName + '>';
-            }
-
-            // When FF, IE and Edge, we have to handle blockquote node seperately as 'formatblock' does not work.
-            // https://developer.mozilla.org/en-US/docs/Web/API/Document/execCommand#Commands
-            if (blockContainer && blockContainer.nodeName.toLowerCase() === 'blockquote') {
-                // For IE, just use outdent
-                if (Util.isIE && tagName === '<p>') {
-                    return doc.execCommand('outdent', false, tagName);
-                }
-
-                // For Firefox and Edge, make sure there's a nested block element before calling outdent
-                if ((Util.isFF || Util.isEdge) && tagName === 'p') {
-                    childNodes = Array.prototype.slice.call(blockContainer.childNodes);
-                    // If there are some non-block elements we need to wrap everything in a <p> before we outdent
-                    if (childNodes.some(function (childNode) {
-                        return !Util.isBlockContainer(childNode);
-                    })) {
-                        doc.execCommand('formatBlock', false, tagName);
-                    }
-                    return doc.execCommand('outdent', false, tagName);
-                }
             }
 
             return doc.execCommand('formatBlock', false, tagName);
@@ -377,12 +334,37 @@
             return node1;
         },
         /* END - based on http://stackoverflow.com/a/6183069 */
-
+        
+        /* 判断选区是否在 editableElement 元素内 */
         isRangeInsideMoreEditor: function(editableElement, range) {
             if(!range) return
             var commonRoot = MoreEditor.util.findCommonRoot(range.startContainer, range.endContainer)
             return MoreEditor.util.isDescendant(editableElement, commonRoot, true)
-        }
+        },
+       
+        /* 判断选区是否跨越块元素 */
+        isRangeCrossBlock: function(range) {
+            if(!range) return
+            return MoreEditor.util.getClosestBlockContainer(range.startContainer) !== MoreEditor.util.getClosestBlockContainer(range.endContainer)
+        },
+
+        /* 扒掉元素最外层的标签  比如在 p 标签里插入了 ul ,这时需要扒掉 p */
+        unwrap: function (el, doc) {
+            var fragment = doc.createDocumentFragment(),
+                nodes = Array.prototype.slice.call(el.childNodes);
+
+            // cast nodeList to array since appending child
+            // to a different node will alter length of el.childNodes
+            for (var i = 0; i < nodes.length; i++) {
+                fragment.appendChild(nodes[i]);
+            }
+
+            if (fragment.childNodes.length) {
+                el.parentNode.replaceChild(fragment, el);
+            } else {
+                el.parentNode.removeChild(el);
+            }
+        },
     };
 
     MoreEditor.util = Util;

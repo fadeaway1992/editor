@@ -13,15 +13,16 @@ function handleBackAndEnterKeydown(event) {
     if(!range) {
         return
     }
-
+    
     if(MoreEditor.util.isKey(event, [MoreEditor.util.keyCode.BACKSPACE, MoreEditor.util.keyCode.ENTER])) {
         console.log('按下了 back 或者 enter 键')
         if(range.collapsed===true) {  // 只有光标没有选区
+
             /* 
                 在当前块元素的最后一个字符按下 enter 键,并且不是在列表中。这时新插入一行 p
             */
             if(MoreEditor.util.isKey(event, MoreEditor.util.keyCode.ENTER) && MoreEditor.util.isElementAtEndofBlock(node) && MoreEditor.selection.getCaretOffsets(node).right === 0 ) {
-                if(cloestBlockContainer.nodeName.toLowerCase() === 'li' || topBlockContainer.nodeName.toLowerCase() === 'ul' || topBlockContainer.nodeName.toLowerCase() === 'ol') return
+                if(cloestBlockContainer.nodeName.toLowerCase() === 'li' || topBlockContainer.nodeName.toLowerCase() === 'ul' || topBlockContainer.nodeName.toLowerCase() === 'ol' || topBlockContainer.nodeName.toLowerCase() === 'blockquote') return
                 var newLine = document.createElement('p')
                 newLine.innerHTML = '<br>'
                 if(topBlockContainer.nextElementSibling) {
@@ -33,13 +34,9 @@ function handleBackAndEnterKeydown(event) {
                 }
                 MoreEditor.selection.moveCursor(document, newLine, 0)
                 event.preventDefault()
+                return
             }
-            /* 
-                当 editor 中只剩下一个空元素的时候，按下 delete 键默认会删除这个元素(至少要留下一个块元素)，要禁止这个默认事件发生。
-            */
-            if(MoreEditor.util.isKey(event, MoreEditor.util.keyCode.BACKSPACE) && !topBlockContainer.nextElementSibling && !topBlockContainer.previousElementSibling && topBlockContainer.textContent === '') {
-                event.preventDefault()
-            }
+
         } else {
             console.log('有选区')
         }
@@ -47,6 +44,20 @@ function handleBackAndEnterKeydown(event) {
         return
     }
 }
+
+
+/* 不能删没了，至少保留一个 p 标签 */
+function handleKeyup(event) {
+    console.log('handlekeyup')
+    if(!this.editableElement.hasChildNodes()) {
+        this.editableElement.innerHTML = '<p><br></p>'
+        event.preventDefault()
+        return
+    }
+
+}
+
+
 
 /* 
     每次 keydown 检查光标位置是否距离窗口底部距离太近，适当滚动文档，保持光标在窗口中。
@@ -101,6 +112,7 @@ function initExtensions() {
 function attachHandlers() {
     this.on(this.editableElement, 'keydown', handleBackAndEnterKeydown.bind(this))
     this.on(this.editableElement, 'keydown', checkCaretPosition.bind(this))
+    this.on(this.editableElement, 'keyup', handleKeyup.bind(this))
 }
 
 

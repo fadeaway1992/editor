@@ -26,16 +26,20 @@
       console.log('updateStatus')
       var selection = document.getSelection()
       var range
+
       if(selection.rangeCount>0) {
         range = selection.getRangeAt(0)
       }
+
       if(range && MoreEditor.util.isRangeInsideMoreEditor(this.base.editableElement, range)) {  // 选区存在并且选区在 editableElement 中
         this.range = range
-        if(MoreEditor.util.getClosestBlockContainer(range.startContainer) !== MoreEditor.util.getClosestBlockContainer(range.endContainer)) {
+
+        if(MoreEditor.util.isRangeCrossBlock(range)) {  // 判断选区是否跨越块元素
           this.crossBlock = true
         } else {
           this.crossBlock = false
         }
+
       } else {   // 没有选区或者选区不在 editableElement 内
         console.log('setDefaults')
         this.setDefault()

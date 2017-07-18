@@ -21,7 +21,9 @@ gulp.task('js', function() {
         .pipe(concat('more-editor.js'))
         .pipe(gulp.dest('dist/js'))
 })
-gulp.task('js-watch', ['js'], browserSync.reload)
+gulp.task('js-watch', ['js'], function() {
+    browserSync.reload()
+})
 
 gulp.task('css', function() {
     gulp.src('src/sass/*.scss')

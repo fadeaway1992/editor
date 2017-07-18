@@ -11,8 +11,9 @@
   .toolbar .h2-disabled {
     opacity: .5; }
 
-blockquote {
+.blockquote {
   border-left: 4px solid blue;
+  list-style: none;
   font-style: italic;
   padding-left: 10px;
-  margin-left: 0px; }
+  margin: 20px 0 20px 10px; }

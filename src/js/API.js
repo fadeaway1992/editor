@@ -12,8 +12,16 @@
     },
     quote: function() {
       this.base.delegate.updateStatus()
-      if (this.base.delegate.crossBlock || !this.base.delegate.range || this.base.delegate.range.collapsed) return
-      MoreEditor.util.execFormatBlock(document, 'blockquote')
+      if (this.base.delegate.crossBlock || !this.base.delegate.range ) return
+      document.execCommand('insertUnorderedList',false)
+
+      var node = MoreEditor.selection.getSelectionStart(document)
+      var topBlock = MoreEditor.util.getTopBlockContainerWithoutMoreEditor(node)
+      MoreEditor.util.unwrap(topBlock,document)
+
+      topBlock = MoreEditor.util.getTopBlockContainerWithoutMoreEditor(node)
+      topBlock.classList.add('blockquote')
+      topBlock.setAttribute('data-type', 'blockquote')
     }
   }
 
