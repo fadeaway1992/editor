@@ -26,8 +26,8 @@ function handleBackAndEnterKeydown(event) {
                 /* 如果是在列表元素中 */
                 if(cloestBlockContainer.nodeName.toLowerCase() === 'li') {
 
-                    /* 最后一个空列表 */
-                    if(!cloestBlockContainer.nextElementSibling && !node.textContent) {
+                    /* 空列表 */
+                    if(!cloestBlockContainer.textContent) {
                         setTimeout(function(){
                             MoreEditor.util.execFormatBlock(document, 'p')
                             MoreEditor.util.getClosestBlockContainer(document.getSelection().anchorNode).innerHTML = '<br>'
