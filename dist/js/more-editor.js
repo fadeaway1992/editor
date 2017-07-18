@@ -634,10 +634,26 @@ function handleBackAndEnterKeydown(event) {
         if(range.collapsed===true) {  // 只有光标没有选区
 
             /* 
-                在当前块元素的最后一个字符按下 enter 键,并且不是在列表中。这时新插入一行 p
+                在当前块元素的最后一个字符按下 enter 键
             */
             if(MoreEditor.util.isKey(event, MoreEditor.util.keyCode.ENTER) && MoreEditor.util.isElementAtEndofBlock(node) && MoreEditor.selection.getCaretOffsets(node).right === 0 ) {
-                if(cloestBlockContainer.nodeName.toLowerCase() === 'li' || topBlockContainer.nodeName.toLowerCase() === 'ul' || topBlockContainer.nodeName.toLowerCase() === 'ol' || topBlockContainer.nodeName.toLowerCase() === 'blockquote') return
+
+                /* 如果是在列表元素中 */
+                if(cloestBlockContainer.nodeName.toLowerCase() === 'li') {
+
+                    /* 最后一个空列表 */
+                    if(!cloestBlockContainer.nextElementSibling && !node.textContent) {
+                        setTimeout(function(){
+                            MoreEditor.util.execFormatBlock(document, 'p')
+                            MoreEditor.util.getClosestBlockContainer(document.getSelection().anchorNode).innerHTML = '<br>'
+                        },0)
+                        return
+                    }
+
+                    return
+                }
+
+                /* 如果不是在列表元素中，新增一行 p 标签 */
                 var newLine = document.createElement('p')
                 newLine.innerHTML = '<br>'
                 if(topBlockContainer.nextElementSibling) {
