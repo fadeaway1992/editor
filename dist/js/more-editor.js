@@ -389,6 +389,14 @@ MoreEditor.extensions = {};
                 el.parentNode.removeChild(el);
             }
         },
+
+        /* 改变节点的包裹标签，内容不变 */
+        changeTag: function(element, tagName) {
+            var newElement = document.createElement(tagName)
+            newElement.innerHTML = element.innerHTML
+            element.parentNode.replaceChild(newElement, element)
+            return newElement
+        }
     };
 
     MoreEditor.util = Util;
@@ -558,25 +566,42 @@ MoreEditor.extensions = {};
         range = selection.getRangeAt(0)
       }
 
-      if(range && MoreEditor.util.isRangeInsideMoreEditor(this.base.editableElement, range)) {  // 选区存在并且选区在 editableElement 中
+      /* 选区存在并且选区在 editableElement 中 */
+      if(range && MoreEditor.util.isRangeInsideMoreEditor(this.base.editableElement, range)) {   
         this.range = range
+        this.startElement = MoreEditor.selection.getSelectionStart(document)
+        this.closestBlock = MoreEditor.util.getClosestBlockContainer(this.startElement)
+        this.topBlock = MoreEditor.util.getTopBlockContainerWithoutMoreEditor(this.startElement)
 
-        if(MoreEditor.util.isRangeCrossBlock(range)) {  // 判断选区是否跨越块元素
+        /* 判断选区是否跨越块元素 */
+        if(MoreEditor.util.isRangeCrossBlock(range)) {
           this.crossBlock = true
         } else {
           this.crossBlock = false
         }
 
-      } else {   // 没有选区或者选区不在 editableElement 内
-        console.log('setDefaults')
+        /* 判断是否有选中 列表 */
+        if(this.closestBlock.nodeName.toLowerCase() === 'li') {
+          this.hasListItem = true
+        } else {
+          this.hasListIem = false
+        }
+
+      /* 没有选区或者选区不在 editableElement 内 */
+      } else {
+        console.log('set defaults')
         this.setDefault()
       }
     },
 
     setDefault: function() {
       this.range = null
+      this.startElement = null
+      this.closestBlock = null
+      this.topBlock = null
       this.crossBlock = false
       this.h2.setAlready = false
+      this.hasListItem = false
     }
   }
 
@@ -591,23 +616,97 @@ MoreEditor.extensions = {};
   };
 
   API.prototype = {
+
+    /* 增加大标题 */
     h2: function() {
       this.base.delegate.updateStatus()
       if (this.base.delegate.crossBlock || !this.base.delegate.range || this.base.delegate.range.collapsed) return
       MoreEditor.util.execFormatBlock(document, 'h2')
     },
+
+    /* 添加小标题 */
+    h3: function() {
+      this.base.delegate.updateStatus()
+      if (this.base.delegate.crossBlock || !this.base.delegate.range || this.base.delegate.range.collapsed) return
+      MoreEditor.util.execFormatBlock(document, 'h3')
+    },
+
+    /* 创建引用列表 */
     quote: function() {
       this.base.delegate.updateStatus()
-      if (this.base.delegate.crossBlock || !this.base.delegate.range ) return
+      var delegate = this.base.delegate
+
+      /* 如果选区中有列表就取消整个列表 */
+      if(delegate.hasListItem === true) {
+        this.unWrapWholeList()
+        return
+      }
+
+      if (delegate.crossBlock || !delegate.range || delegate.closestBlock.nodeName.toLowerCase() !== 'p') return
       document.execCommand('insertUnorderedList',false)
 
+      // 扒掉原来的标签
       var node = MoreEditor.selection.getSelectionStart(document)
       var topBlock = MoreEditor.util.getTopBlockContainerWithoutMoreEditor(node)
       MoreEditor.util.unwrap(topBlock,document)
 
+      // 给 ul 加上 blockquote 类
       topBlock = MoreEditor.util.getTopBlockContainerWithoutMoreEditor(node)
       topBlock.classList.add('blockquote')
       topBlock.setAttribute('data-type', 'blockquote')
+    },
+
+    /* 创建无需列表 */
+    ul: function() {
+      this.base.delegate.updateStatus()
+      var delegate = this.base.delegate
+
+      /* 如果选区中有列表就取消整个列表 */
+      if(delegate.hasListItem === true) {
+        this.unWrapWholeList()
+        return
+      }
+
+      if (delegate.crossBlock || !delegate.range || delegate.closestBlock.nodeName.toLowerCase() !== 'p') return
+      document.execCommand('insertUnorderedList',false)
+
+      // 扒掉原来的标签
+      var node = MoreEditor.selection.getSelectionStart(document)
+      var topBlock = MoreEditor.util.getTopBlockContainerWithoutMoreEditor(node)
+      MoreEditor.util.unwrap(topBlock,document)
+    },
+
+    /* 创建有序列表 */
+    ol: function() {
+      this.base.delegate.updateStatus()
+      var delegate = this.base.delegate
+
+      /* 如果选区中有列表就取消整个列表 */
+      if(delegate.hasListItem === true) {
+        this.unWrapWholeList()
+        return
+      }
+
+      if (delegate.crossBlock || !delegate.range || delegate.closestBlock.nodeName.toLowerCase() !== 'p') return
+      document.execCommand('insertOrderedList',false)
+
+      // 扒掉原来的标签
+      var node = MoreEditor.selection.getSelectionStart(document)
+      var topBlock = MoreEditor.util.getTopBlockContainerWithoutMoreEditor(node)
+      MoreEditor.util.unwrap(topBlock,document)
+    },
+    
+    /* 取消列表 , 这时用户选区中包含 List Item */
+    unWrapWholeList: function() {
+      var delegate = this.base.delegate
+      var topBlock = delegate.topBlock
+      
+      var listItems = Array.prototype.slice.apply(topBlock.children) // 将所有 li 放入一个数组
+      for (var i=0; i<listItems.length; i++) {
+        MoreEditor.util.changeTag(listItems[i],'p')
+      }
+      MoreEditor.util.unwrap(topBlock, document)
+
     }
   }
 
@@ -633,25 +732,44 @@ function handleBackAndEnterKeydown(event) {
         console.log('按下了 back 或者 enter 键')
         if(range.collapsed===true) {  // 只有光标没有选区
 
-            /* 
-                在当前块元素的最后一个字符按下 enter 键
-            */
-            if(MoreEditor.util.isKey(event, MoreEditor.util.keyCode.ENTER) && MoreEditor.util.isElementAtEndofBlock(node) && MoreEditor.selection.getCaretOffsets(node).right === 0 ) {
+            /* 如果是在列表元素中 */
+            if(cloestBlockContainer.nodeName.toLowerCase() === 'li') {
 
-                /* 如果是在列表元素中 */
-                if(cloestBlockContainer.nodeName.toLowerCase() === 'li') {
+                /* 空列表中按下 enter */
+                if(!cloestBlockContainer.textContent && MoreEditor.util.isKey(event, MoreEditor.util.keyCode.ENTER)) {
 
-                    /* 空列表 */
-                    if(!cloestBlockContainer.textContent) {
-                        setTimeout(function(){
+                    /* 最后一个空列表 */
+                    if(!cloestBlockContainer.nextElementSibling) {
+                        setTimeout(function(){   // 利用默认事件，删除这个 li ，在后面生成一个新的 div 或者 p， 利用 settimeout 将这个新生成的元素确保为 <p><br></p>
                             MoreEditor.util.execFormatBlock(document, 'p')
                             MoreEditor.util.getClosestBlockContainer(document.getSelection().anchorNode).innerHTML = '<br>'
                         },0)
                         return
                     }
-
+                    
+                    /* 中间的或者第一个空列表，默认行为会删除这个列表元素 */
+                    var newLi = document.createElement('li')
+                    newLi.innerHTML = '<br>'
+                    cloestBlockContainer.parentNode.insertBefore(newLi, cloestBlockContainer)
+                    event.preventDefault()
                     return
                 }
+
+                /* 第一个空列表中按下 backspace */
+                if(!cloestBlockContainer.textContent && MoreEditor.util.isKey(event, MoreEditor.util.keyCode.BACKSPACE) && !cloestBlockContainer.previousElementSibling) {
+                    var newLine = document.createElement('p')
+                    newLine.innerHTML = '<br>'
+                    topBlockContainer.parentNode.insertBefore(newLine,topBlockContainer)
+                    MoreEditor.selection.moveCursor(document,newLine,0)
+                    topBlockContainer.removeChild(cloestBlockContainer)
+                    event.preventDefault()
+                    return
+                }
+                return
+            }
+
+            /*  在当前块元素的最后一个字符按下 enter 键 */
+            if(MoreEditor.util.isKey(event, MoreEditor.util.keyCode.ENTER) && MoreEditor.util.isElementAtEndofBlock(node) && MoreEditor.selection.getCaretOffsets(node).right === 0 ) {
 
                 /* 如果不是在列表元素中，新增一行 p 标签 */
                 var newLine = document.createElement('p')
@@ -666,6 +784,11 @@ function handleBackAndEnterKeydown(event) {
                 MoreEditor.selection.moveCursor(document, newLine, 0)
                 event.preventDefault()
                 return
+            }
+
+            /*  在当前块元素的第一个字符按下 backspace 键 */
+            if(MoreEditor.util.isKey(event, MoreEditor.util.keyCode.BACKSPACE) && MoreEditor.util.isElementAtBeginningOfBlock(node) && MoreEditor.selection.getCaretOffsets(node).left === 0 ) {
+
             }
 
         } else {

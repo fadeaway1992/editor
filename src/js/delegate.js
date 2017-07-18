@@ -31,25 +31,42 @@
         range = selection.getRangeAt(0)
       }
 
-      if(range && MoreEditor.util.isRangeInsideMoreEditor(this.base.editableElement, range)) {  // 选区存在并且选区在 editableElement 中
+      /* 选区存在并且选区在 editableElement 中 */
+      if(range && MoreEditor.util.isRangeInsideMoreEditor(this.base.editableElement, range)) {   
         this.range = range
+        this.startElement = MoreEditor.selection.getSelectionStart(document)
+        this.closestBlock = MoreEditor.util.getClosestBlockContainer(this.startElement)
+        this.topBlock = MoreEditor.util.getTopBlockContainerWithoutMoreEditor(this.startElement)
 
-        if(MoreEditor.util.isRangeCrossBlock(range)) {  // 判断选区是否跨越块元素
+        /* 判断选区是否跨越块元素 */
+        if(MoreEditor.util.isRangeCrossBlock(range)) {
           this.crossBlock = true
         } else {
           this.crossBlock = false
         }
 
-      } else {   // 没有选区或者选区不在 editableElement 内
-        console.log('setDefaults')
+        /* 判断是否有选中 列表 */
+        if(this.closestBlock.nodeName.toLowerCase() === 'li') {
+          this.hasListItem = true
+        } else {
+          this.hasListIem = false
+        }
+
+      /* 没有选区或者选区不在 editableElement 内 */
+      } else {
+        console.log('set defaults')
         this.setDefault()
       }
     },
 
     setDefault: function() {
       this.range = null
+      this.startElement = null
+      this.closestBlock = null
+      this.topBlock = null
       this.crossBlock = false
       this.h2.setAlready = false
+      this.hasListItem = false
     }
   }
 

@@ -18,25 +18,44 @@ function handleBackAndEnterKeydown(event) {
         console.log('按下了 back 或者 enter 键')
         if(range.collapsed===true) {  // 只有光标没有选区
 
-            /* 
-                在当前块元素的最后一个字符按下 enter 键
-            */
-            if(MoreEditor.util.isKey(event, MoreEditor.util.keyCode.ENTER) && MoreEditor.util.isElementAtEndofBlock(node) && MoreEditor.selection.getCaretOffsets(node).right === 0 ) {
+            /* 如果是在列表元素中 */
+            if(cloestBlockContainer.nodeName.toLowerCase() === 'li') {
 
-                /* 如果是在列表元素中 */
-                if(cloestBlockContainer.nodeName.toLowerCase() === 'li') {
+                /* 空列表中按下 enter */
+                if(!cloestBlockContainer.textContent && MoreEditor.util.isKey(event, MoreEditor.util.keyCode.ENTER)) {
 
-                    /* 空列表 */
-                    if(!cloestBlockContainer.textContent) {
-                        setTimeout(function(){
+                    /* 最后一个空列表 */
+                    if(!cloestBlockContainer.nextElementSibling) {
+                        setTimeout(function(){   // 利用默认事件，删除这个 li ，在后面生成一个新的 div 或者 p， 利用 settimeout 将这个新生成的元素确保为 <p><br></p>
                             MoreEditor.util.execFormatBlock(document, 'p')
                             MoreEditor.util.getClosestBlockContainer(document.getSelection().anchorNode).innerHTML = '<br>'
                         },0)
                         return
                     }
-
+                    
+                    /* 中间的或者第一个空列表，默认行为会删除这个列表元素 */
+                    var newLi = document.createElement('li')
+                    newLi.innerHTML = '<br>'
+                    cloestBlockContainer.parentNode.insertBefore(newLi, cloestBlockContainer)
+                    event.preventDefault()
                     return
                 }
+
+                /* 第一个空列表中按下 backspace */
+                if(!cloestBlockContainer.textContent && MoreEditor.util.isKey(event, MoreEditor.util.keyCode.BACKSPACE) && !cloestBlockContainer.previousElementSibling) {
+                    var newLine = document.createElement('p')
+                    newLine.innerHTML = '<br>'
+                    topBlockContainer.parentNode.insertBefore(newLine,topBlockContainer)
+                    MoreEditor.selection.moveCursor(document,newLine,0)
+                    topBlockContainer.removeChild(cloestBlockContainer)
+                    event.preventDefault()
+                    return
+                }
+                return
+            }
+
+            /*  在当前块元素的最后一个字符按下 enter 键 */
+            if(MoreEditor.util.isKey(event, MoreEditor.util.keyCode.ENTER) && MoreEditor.util.isElementAtEndofBlock(node) && MoreEditor.selection.getCaretOffsets(node).right === 0 ) {
 
                 /* 如果不是在列表元素中，新增一行 p 标签 */
                 var newLine = document.createElement('p')
@@ -51,6 +70,11 @@ function handleBackAndEnterKeydown(event) {
                 MoreEditor.selection.moveCursor(document, newLine, 0)
                 event.preventDefault()
                 return
+            }
+
+            /*  在当前块元素的第一个字符按下 backspace 键 */
+            if(MoreEditor.util.isKey(event, MoreEditor.util.keyCode.BACKSPACE) && MoreEditor.util.isElementAtBeginningOfBlock(node) && MoreEditor.selection.getCaretOffsets(node).left === 0 ) {
+
             }
 
         } else {

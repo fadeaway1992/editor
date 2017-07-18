@@ -365,6 +365,14 @@
                 el.parentNode.removeChild(el);
             }
         },
+
+        /* 改变节点的包裹标签，内容不变 */
+        changeTag: function(element, tagName) {
+            var newElement = document.createElement(tagName)
+            newElement.innerHTML = element.innerHTML
+            element.parentNode.replaceChild(newElement, element)
+            return newElement
+        }
     };
 
     MoreEditor.util = Util;
