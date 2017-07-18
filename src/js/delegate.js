@@ -24,7 +24,11 @@
 
     updateStatus: function() {
       console.log('updateStatus')
-      var range = document.getSelection().getRangeAt(0)
+      var selection = document.getSelection()
+      var range
+      if(selection.rangeCount>0) {
+        range = selection.getRangeAt(0)
+      }
       if(range && MoreEditor.util.isDescendant(this.base.editableElement, range.startContainer, false) && MoreEditor.util.isDescendant(this.base.editableElement, range.endContainer, false)) {
         this.range = range
         if(MoreEditor.util.getClosestBlockContainer(range.startContainer) !== MoreEditor.util.getClosestBlockContainer(range.endContainer)) {
@@ -33,6 +37,7 @@
           this.crossBlock = false
         }
       } else {   // 没有选区或者选区不在 editableElement 内
+        console.log('setDefaults')
         this.setDefault()
       }
     },

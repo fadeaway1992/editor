@@ -365,6 +365,42 @@ MoreEditor.extensions = {};
             }
             return false;
         },
+
+        /* based on http://stackoverflow.com/a/6183069 */
+        depthOfNode: function (inNode) {
+            var theDepth = 0,
+                node = inNode;
+            while (node.parentNode !== null) {
+                node = node.parentNode;
+                theDepth++;
+            }
+            return theDepth;
+        },
+
+        findCommonRoot: function (inNode1, inNode2) {
+            var depth1 = Util.depthOfNode(inNode1),
+                depth2 = Util.depthOfNode(inNode2),
+                node1 = inNode1,
+                node2 = inNode2;
+
+            while (depth1 !== depth2) {
+                if (depth1 > depth2) {
+                    node1 = node1.parentNode;
+                    depth1 -= 1;
+                } else {
+                    node2 = node2.parentNode;
+                    depth2 -= 1;
+                }
+            }
+
+            while (node1 !== node2) {
+                node1 = node1.parentNode;
+                node2 = node2.parentNode;
+            }
+
+            return node1;
+        },
+        /* END - based on http://stackoverflow.com/a/6183069 */
     };
 
     MoreEditor.util = Util;
@@ -527,7 +563,11 @@ MoreEditor.extensions = {};
 
     updateStatus: function() {
       console.log('updateStatus')
-      var range = document.getSelection().getRangeAt(0)
+      var selection = document.getSelection()
+      var range
+      if(selection.rangeCount>0) {
+        range = selection.getRangeAt(0)
+      }
       if(range && MoreEditor.util.isDescendant(this.base.editableElement, range.startContainer, false) && MoreEditor.util.isDescendant(this.base.editableElement, range.endContainer, false)) {
         this.range = range
         if(MoreEditor.util.getClosestBlockContainer(range.startContainer) !== MoreEditor.util.getClosestBlockContainer(range.endContainer)) {
@@ -536,6 +576,7 @@ MoreEditor.extensions = {};
           this.crossBlock = false
         }
       } else {   // 没有选区或者选区不在 editableElement 内
+        console.log('setDefaults')
         this.setDefault()
       }
     },

@@ -2,6 +2,7 @@ var gulp = require('gulp')
 var autoprefixer = require('gulp-autoprefixer')
 var sass = require('gulp-sass')
 var concat = require('gulp-concat')
+var browserSync = require('browser-sync').create();
 
 var concatArr = [
     'src/js/start.js',
@@ -20,6 +21,7 @@ gulp.task('js', function() {
         .pipe(concat('more-editor.js'))
         .pipe(gulp.dest('dist/js'))
 })
+gulp.task('js-watch', ['js'], browserSync.reload)
 
 gulp.task('css', function() {
     gulp.src('src/sass/*.scss')
@@ -28,11 +30,20 @@ gulp.task('css', function() {
         browsers:['last 10 versions', '> 5%']
     }))
     .pipe(gulp.dest('dist/css'))
+    .pipe(browserSync.stream())
 })
 
 
 gulp.task('default', ['js','css'], function() {
-    gulp.watch(concatArr, ['js'])
+     
+    browserSync.init({
+        server: {
+            baseDir: "./dist/",
+            index: "demo/index.html"
+        }
+    })
+
+    gulp.watch(concatArr, ['js-watch'])
     gulp.watch('src/sass/*.scss', ['css'])
 })
 
