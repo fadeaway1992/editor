@@ -631,53 +631,37 @@ MoreEditor.extensions = {};
       MoreEditor.util.execFormatBlock(document, 'h3')
     },
 
+
     /* 创建引用列表 */
     quote: function() {
-      this.base.delegate.updateStatus()
-      var delegate = this.base.delegate
-
-      /* 如果选区中有列表就取消整个列表 */
-      if(delegate.hasListItem === true) {
-        this.unWrapWholeList()
-        return
-      }
-
-      if (delegate.crossBlock || !delegate.range || delegate.closestBlock.nodeName.toLowerCase() !== 'p') return
-      document.execCommand('insertUnorderedList',false)
-
-      // 扒掉原来的标签
-      var node = MoreEditor.selection.getSelectionStart(document)
-      var topBlock = MoreEditor.util.getTopBlockContainerWithoutMoreEditor(node)
-      MoreEditor.util.unwrap(topBlock,document)
+      
+      var list = this.createList()
+      console.log(list, '这里应该是创建列表时返回的列表')
 
       // 给 ul 加上 blockquote 类
-      topBlock = MoreEditor.util.getTopBlockContainerWithoutMoreEditor(node)
-      topBlock.classList.add('blockquote')
-      topBlock.setAttribute('data-type', 'blockquote')
+      list.classList.add('blockquote')
+      list.setAttribute('data-type', 'blockquote')
+
     },
+
 
     /* 创建无需列表 */
     ul: function() {
-      this.base.delegate.updateStatus()
-      var delegate = this.base.delegate
-
-      /* 如果选区中有列表就取消整个列表 */
-      if(delegate.hasListItem === true) {
-        this.unWrapWholeList()
-        return
-      }
-
-      if (delegate.crossBlock || !delegate.range || delegate.closestBlock.nodeName.toLowerCase() !== 'p') return
-      document.execCommand('insertUnorderedList',false)
-
-      // 扒掉原来的标签
-      var node = MoreEditor.selection.getSelectionStart(document)
-      var topBlock = MoreEditor.util.getTopBlockContainerWithoutMoreEditor(node)
-      MoreEditor.util.unwrap(topBlock,document)
+      this.createList()
     },
 
-    /* 创建有序列表 */
+
+    /* 创建顺序列表 */
     ol: function() {
+      this.createList(true)
+    },
+
+
+    /*  
+    **  创建列表 
+    **  接收一个 ordered 参数,参数为 true 创建顺序列表，否则创建无序列表 
+    */
+    createList: function(ordered) {
       this.base.delegate.updateStatus()
       var delegate = this.base.delegate
 
@@ -688,12 +672,22 @@ MoreEditor.extensions = {};
       }
 
       if (delegate.crossBlock || !delegate.range || delegate.closestBlock.nodeName.toLowerCase() !== 'p') return
-      document.execCommand('insertOrderedList',false)
-
+      if(ordered) {
+        document.execCommand('insertOrderedList',false)
+      } else {
+        document.execCommand('insertUnorderedList',false)
+      }
+      
       // 扒掉原来的标签
       var node = MoreEditor.selection.getSelectionStart(document)
       var topBlock = MoreEditor.util.getTopBlockContainerWithoutMoreEditor(node)
-      MoreEditor.util.unwrap(topBlock,document)
+      if(topBlock.nodeName.toLowerCase() !== 'ul' && topBlock.nodeName.toLowerCase() !== 'ol') {
+        MoreEditor.util.unwrap(topBlock,document)
+        return MoreEditor.util.getTopBlockContainerWithoutMoreEditor(node)
+      } else {
+        return topBlock
+      }
+      
     },
     
     /* 取消列表 , 这时用户选区中包含 List Item */
