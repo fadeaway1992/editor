@@ -83,15 +83,13 @@
       }
 
       if(topBlock.nodeName.toLowerCase() !== 'ol' && topBlock.nodeName.toLowerCase() !== 'ul') {
-          console.error('创建标签的过程中出现错误')
+          console.error('%c创建标签的过程中出现错误', 'color:red;')
       }
 
-      console.log(topBlock.querySelector('li').textContent, 'textContent')
       if(topBlock.querySelector('li').textContent !== '') {
         topBlock.querySelector('li').innerHTML = topBlock.querySelector('li').innerHTML.replace(/<br>/g, '')
       }
-      
-      console.log(topBlock.querySelector('li').innerHTML, 'li innerHTML')
+      MoreEditor.selection.moveCursor(document, topBlock.firstChild, 0)
       return topBlock
     },
     
