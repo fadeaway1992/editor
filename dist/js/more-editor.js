@@ -584,7 +584,7 @@ MoreEditor.extensions = {};
         if(this.closestBlock.nodeName.toLowerCase() === 'li') {
           this.hasListItem = true
         } else {
-          this.hasListIem = false
+          this.hasListItem = false
         }
 
       /* 没有选区或者选区不在 editableElement 内 */
@@ -638,6 +638,10 @@ MoreEditor.extensions = {};
       var list = this.createList()
       console.log(list, '这里应该是创建列表时返回的列表')
 
+      // 执行了取消列表，不再继续
+      if(list === 'stop') return
+
+
       // 给 ul 加上 blockquote 类
       list.classList.add('blockquote')
       list.setAttribute('data-type', 'blockquote')
@@ -664,14 +668,16 @@ MoreEditor.extensions = {};
     createList: function(ordered) {
       this.base.delegate.updateStatus()
       var delegate = this.base.delegate
+      console.log(this.base.delegate, 'delegate')
 
       /* 如果选区中有列表就取消整个列表 */
       if(delegate.hasListItem === true) {
         this.unWrapWholeList()
-        return
+        return 'stop'
       }
 
-      if (delegate.crossBlock || !delegate.range || delegate.closestBlock.nodeName.toLowerCase() !== 'p') return
+      if (delegate.crossBlock || !delegate.range || delegate.closestBlock.nodeName.toLowerCase() !== 'p') return 'stop'
+      
       if(ordered) {
         document.execCommand('insertOrderedList',false)
       } else {
@@ -681,13 +687,23 @@ MoreEditor.extensions = {};
       // 扒掉原来的标签
       var node = MoreEditor.selection.getSelectionStart(document)
       var topBlock = MoreEditor.util.getTopBlockContainerWithoutMoreEditor(node)
+
       if(topBlock.nodeName.toLowerCase() !== 'ul' && topBlock.nodeName.toLowerCase() !== 'ol') {
         MoreEditor.util.unwrap(topBlock,document)
-        return MoreEditor.util.getTopBlockContainerWithoutMoreEditor(node)
-      } else {
-        return topBlock
+        topBlock =  MoreEditor.util.getTopBlockContainerWithoutMoreEditor(node)
+      }
+
+      if(topBlock.nodeName.toLowerCase() !== 'ol' && topBlock.nodeName.toLowerCase() !== 'ul') {
+          console.error('创建标签的过程中出现错误')
+      }
+
+      console.log(topBlock.querySelector('li').textContent, 'textContent')
+      if(topBlock.querySelector('li').textContent !== '') {
+        topBlock.querySelector('li').innerHTML = topBlock.querySelector('li').innerHTML.replace(/<br>/g, '')
       }
       
+      console.log(topBlock.querySelector('li').innerHTML, 'li innerHTML')
+      return topBlock
     },
     
     /* 取消列表 , 这时用户选区中包含 List Item */
@@ -716,14 +732,45 @@ MoreEditor.extensions = {};
 function handleBackAndEnterKeydown(event) {
     var range = document.getSelection().getRangeAt(0)
     var node = MoreEditor.selection.getSelectionStart(this.options.ownerDocument)
-    var topBlockContainer = MoreEditor.util.getTopBlockContainer(node)
+    var topBlockContainer = MoreEditor.util.getTopBlockContainerWithoutMoreEditor(node)
     var cloestBlockContainer = MoreEditor.util.getClosestBlockContainer(node)
     if(!range) {
         return
     }
-    
+
     if(MoreEditor.util.isKey(event, [MoreEditor.util.keyCode.BACKSPACE, MoreEditor.util.keyCode.ENTER])) {
         console.log('按下了 back 或者 enter 键')
+
+        /* 处理在 chrome 中第一个元素为空列表时无法获取正确 range 的错误 */
+        if(node === this.editableElement) {
+            console.log('获取 range 不正确')
+
+            /* 唯一的一个子元素已经被删掉了 */
+            if(!node.hasChildNodes()) {
+                return
+            }
+
+            /* 第一个空元素是列表 */
+            if(node.firstChild.firstChild.nodeName.toLowerCase() === 'li') {
+                this.editableElement.removeChild(this.editableElement.firstChild)
+                event.preventDefault()
+                return
+            }
+
+            /* 第一个空元素是 p */
+            if(node.firstChild.nodeName.toLowerCase() === 'p' && MoreEditor.util.isKey(event, MoreEditor.util.keyCode.ENTER)) {
+                var newLine = document.createElement('p')
+                newLine.innerHTML = '<br>'
+                this.editableElement.appendChild(newLine)
+                MoreEditor.selection.moveCursor(document, newLine, 0)
+                console.log('插入新行')
+                event.preventDefault()
+                return
+            }
+            return
+            
+        }
+
         if(range.collapsed===true) {  // 只有光标没有选区
 
             /* 如果是在列表元素中 */
@@ -734,6 +781,7 @@ function handleBackAndEnterKeydown(event) {
 
                     /* 最后一个空列表 */
                     if(!cloestBlockContainer.nextElementSibling) {
+                        console.log('下一个不存在')
                         setTimeout(function(){   // 利用默认事件，删除这个 li ，在后面生成一个新的 div 或者 p， 利用 settimeout 将这个新生成的元素确保为 <p><br></p>
                             MoreEditor.util.execFormatBlock(document, 'p')
                             MoreEditor.util.getClosestBlockContainer(document.getSelection().anchorNode).innerHTML = '<br>'
@@ -756,6 +804,12 @@ function handleBackAndEnterKeydown(event) {
                     topBlockContainer.parentNode.insertBefore(newLine,topBlockContainer)
                     MoreEditor.selection.moveCursor(document,newLine,0)
                     topBlockContainer.removeChild(cloestBlockContainer)
+
+                    /* 判断原列表是否还有内容 */
+                    if(!topBlockContainer.hasChildNodes()) {
+                        topBlockContainer.parentNode.removeChild(topBlockContainer)
+                    }
+
                     event.preventDefault()
                     return
                 }
@@ -795,10 +849,13 @@ function handleBackAndEnterKeydown(event) {
 
 
 /* 不能删没了，至少保留一个 p 标签 */
-function handleKeyup(event) {
-    console.log('handlekeyup')
+function keepAtleastOneParagraph(event) {
     if(!this.editableElement.hasChildNodes()) {
-        this.editableElement.innerHTML = '<p><br></p>'
+        console.log('删没了')
+        var newLine = document.createElement('p')
+        newLine.innerHTML = '<br>'
+        this.editableElement.appendChild(newLine)
+        MoreEditor.selection.moveCursor(document, newLine, 0)
         event.preventDefault()
         return
     }
@@ -860,7 +917,7 @@ function initExtensions() {
 function attachHandlers() {
     this.on(this.editableElement, 'keydown', handleBackAndEnterKeydown.bind(this))
     this.on(this.editableElement, 'keydown', checkCaretPosition.bind(this))
-    this.on(this.editableElement, 'keyup', handleKeyup.bind(this))
+    this.on(this.editableElement, 'keyup', keepAtleastOneParagraph.bind(this))
 }
 
 

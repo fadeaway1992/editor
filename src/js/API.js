@@ -27,6 +27,10 @@
       var list = this.createList()
       console.log(list, '这里应该是创建列表时返回的列表')
 
+      // 执行了取消列表，不再继续
+      if(list === 'stop') return
+
+
       // 给 ul 加上 blockquote 类
       list.classList.add('blockquote')
       list.setAttribute('data-type', 'blockquote')
@@ -53,14 +57,16 @@
     createList: function(ordered) {
       this.base.delegate.updateStatus()
       var delegate = this.base.delegate
+      console.log(this.base.delegate, 'delegate')
 
       /* 如果选区中有列表就取消整个列表 */
       if(delegate.hasListItem === true) {
         this.unWrapWholeList()
-        return
+        return 'stop'
       }
 
-      if (delegate.crossBlock || !delegate.range || delegate.closestBlock.nodeName.toLowerCase() !== 'p') return
+      if (delegate.crossBlock || !delegate.range || delegate.closestBlock.nodeName.toLowerCase() !== 'p') return 'stop'
+      
       if(ordered) {
         document.execCommand('insertOrderedList',false)
       } else {
@@ -70,13 +76,23 @@
       // 扒掉原来的标签
       var node = MoreEditor.selection.getSelectionStart(document)
       var topBlock = MoreEditor.util.getTopBlockContainerWithoutMoreEditor(node)
+
       if(topBlock.nodeName.toLowerCase() !== 'ul' && topBlock.nodeName.toLowerCase() !== 'ol') {
         MoreEditor.util.unwrap(topBlock,document)
-        return MoreEditor.util.getTopBlockContainerWithoutMoreEditor(node)
-      } else {
-        return topBlock
+        topBlock =  MoreEditor.util.getTopBlockContainerWithoutMoreEditor(node)
+      }
+
+      if(topBlock.nodeName.toLowerCase() !== 'ol' && topBlock.nodeName.toLowerCase() !== 'ul') {
+          console.error('创建标签的过程中出现错误')
+      }
+
+      console.log(topBlock.querySelector('li').textContent, 'textContent')
+      if(topBlock.querySelector('li').textContent !== '') {
+        topBlock.querySelector('li').innerHTML = topBlock.querySelector('li').innerHTML.replace(/<br>/g, '')
       }
       
+      console.log(topBlock.querySelector('li').innerHTML, 'li innerHTML')
+      return topBlock
     },
     
     /* 取消列表 , 这时用户选区中包含 List Item */

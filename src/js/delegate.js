@@ -49,7 +49,7 @@
         if(this.closestBlock.nodeName.toLowerCase() === 'li') {
           this.hasListItem = true
         } else {
-          this.hasListIem = false
+          this.hasListItem = false
         }
 
       /* 没有选区或者选区不在 editableElement 内 */
