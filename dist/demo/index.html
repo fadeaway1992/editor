@@ -12,6 +12,9 @@
     <button class="ul">无序列表</button>
     <button class="ol">顺序列表</button>
     <button class="quote">quote</button>
+    <button class="bold">粗体</button>
+    <button class="italic">斜体</button>
+    <!-- <button class="strikeThrough">删除线</button> -->
   </div>
   <div class="editable" contenteditable="true"></div>
   <script src="../js/more-editor.js"></script>
@@ -37,6 +40,13 @@
 
   var quote = document.querySelector('.quote')
   quote.addEventListener('click', editor.API.quote.bind(editor.API))
+
+  var bold = document.querySelector('.bold')
+  bold.addEventListener('click', editor.API.bold.bind(editor.API))
+
+  var italic = document.querySelector('.italic')
+  italic.addEventListener('click', editor.API.italic.bind(editor.API))
+
 </script>
 
 </body>

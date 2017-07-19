@@ -5,6 +5,9 @@
     "browser": true,
     "node": true
   },
+  "globals": {
+    "MoreEditor": true
+  },
   "rules": {
     "semi": "off",
     "indent": "off",

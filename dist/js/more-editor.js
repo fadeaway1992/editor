@@ -544,17 +544,19 @@ MoreEditor.extensions = {};
   var Delegate = function (instance) {
     this.base = instance;
     this.options = this.base.options;
+    this.setAlready = {
+      h2: false,
+      h3: false,
+      bold: false,
+      italic: false,
+      strikeThrough: false
+    }
   };
 
   Delegate.prototype = {
     range: null,
 
     crossBlock: false,
-
-
-    h2: {
-      setAlready: false
-    },
 
 
     updateStatus: function() {
@@ -580,12 +582,40 @@ MoreEditor.extensions = {};
           this.crossBlock = false
         }
 
-        /* 判断是否有选中 列表 */
+        /* 判断是否有选中 列表   TODO: 这个地方有待细分 */ 
         if(this.closestBlock.nodeName.toLowerCase() === 'li') {
           this.hasListItem = true
         } else {
           this.hasListItem = false
         }
+
+        /* 判断是否选中标题 */
+        if(this.closestBlock.nodeName.toLowerCase() === 'h2'){
+          this.setAlready.h2 = true
+        } else {
+          this.setAlready.h2 = false
+        }
+
+        if(this.closestBlock.nodeName.toLowerCase() === 'h3'){
+          this.setAlready.h3 = true
+        } else {
+          this.setAlready.h3 = false
+        }
+
+        /* 判断是否选中粗体 以选区开始处为准*/
+        if(this.startElement.nodeName.toLowerCase() === 'b') {
+          this.setAlready.bold = true
+        } else {
+          this.setAlready.bold = false
+        }
+        
+        /* 判断是否选中斜体 以选区开始处为准 */
+        if(this.startElement.nodeName.toLowerCase() === 'i') {
+          this.setAlready.italic = true
+        } else {
+          this.setAlready.italic = false
+        }
+        
 
       /* 没有选区或者选区不在 editableElement 内 */
       } else {
@@ -602,6 +632,13 @@ MoreEditor.extensions = {};
       this.crossBlock = false
       this.h2.setAlready = false
       this.hasListItem = false
+      this.setAlready = {
+        h2: false,
+        h3: false,
+        bold: false,
+        italic: false,
+        strikeThrough: false
+      }
     }
   }
 
@@ -620,27 +657,62 @@ MoreEditor.extensions = {};
     /* 增加大标题 */
     h2: function() {
       this.base.delegate.updateStatus()
-      if (this.base.delegate.crossBlock || !this.base.delegate.range || this.base.delegate.range.collapsed) return
+
+      /* 基本判断 */
+      if (this.base.delegate.crossBlock || !this.base.delegate.range || this.base.delegate.range.collapsed || this.base.delegate.hasListItem) return
+
       MoreEditor.util.execFormatBlock(document, 'h2')
     },
 
     /* 添加小标题 */
     h3: function() {
       this.base.delegate.updateStatus()
-      if (this.base.delegate.crossBlock || !this.base.delegate.range || this.base.delegate.range.collapsed) return
+
+      /* 基本判断 */
+      if (this.base.delegate.crossBlock || !this.base.delegate.range || this.base.delegate.range.collapsed || this.base.delegate.hasListItem) return
+
       MoreEditor.util.execFormatBlock(document, 'h3')
     },
 
 
     /* 创建引用列表 */
     quote: function() {
+      this.base.delegate.updateStatus()
+      var delegate = this.base.delegate
+      var needSeperator
+       /* 如果选区中有列表就取消整个列表 */
+      if(delegate.hasListItem === true) {
+        this.unWrapWholeList()
+        return 
+      }
+
+      if(delegate.crossBlock || !delegate.range || delegate.closestBlock.nodeName.toLowerCase() !== 'p') return
+
+      if(delegate.topBlock.nextElementSibling && delegate.topBlock.nextElementSibling.nodeName.toLowerCase() === 'ul' && !delegate.topBlock.nextElementSibling.getAttribute('data-type')) {
+        var newLine = document.createElement('p')
+        newLine.innerHTML = '<br>'
+        newLine.classList.add('seperator')
+        delegate.topBlock.parentNode.insertBefore(newLine, delegate.topBlock.nextElementSibling)
+        needSeperator = true
+      }
+
+      if(delegate.topBlock.previousElementSibling && delegate.topBlock.previousElementSibling.nodeName.toLowerCase() === 'ul' && !delegate.topBlock.previousElementSibling.getAttribute('data-type')) {
+        var newLine = document.createElement('p')
+        newLine.innerHTML = '<br>'
+        newLine.classList.add('seperator')
+        delegate.topBlock.parentNode.insertBefore(newLine, delegate.topBlock)
+        needSeperator = true
+      }
       
       var list = this.createList()
       console.log(list, '这里应该是创建列表时返回的列表')
 
+      if(needSeperator) {
+        this.base.editableElement.removeChild(document.querySelector('.seperator'))
+      }
+
       // 执行了取消列表，不再继续
       if(list === 'stop') return
-
 
       // 给 ul 加上 blockquote 类
       list.classList.add('blockquote')
@@ -649,9 +721,42 @@ MoreEditor.extensions = {};
     },
 
 
-    /* 创建无需列表 */
+    /* 创建无序列表 */
     ul: function() {
-      this.createList()
+
+      this.base.delegate.updateStatus()
+      var delegate = this.base.delegate
+      var needSeperator
+
+      /* 如果选区中有列表就取消整个列表 */
+      if(delegate.hasListItem === true) {
+        this.unWrapWholeList()
+        return 
+      }
+
+      if(delegate.crossBlock || !delegate.range || delegate.closestBlock.nodeName.toLowerCase() !== 'p') return
+
+      if(delegate.topBlock.nextElementSibling && delegate.topBlock.nextElementSibling.nodeName.toLowerCase() === 'ul' && delegate.topBlock.nextElementSibling.getAttribute('data-type') === 'blockquote') {
+        var newLine = document.createElement('p')
+        newLine.innerHTML = '<br>'
+        newLine.classList.add('seperator')
+        delegate.topBlock.parentNode.insertBefore(newLine, delegate.topBlock.nextElementSibling)
+        needSeperator = true
+      }
+
+      if(delegate.topBlock.previousElementSibling && delegate.topBlock.previousElementSibling.nodeName.toLowerCase() === 'ul' && delegate.topBlock.previousElementSibling.getAttribute('data-type') === 'blockquote') {
+        var newLine = document.createElement('p')
+        newLine.innerHTML = '<br>'
+        newLine.classList.add('seperator')
+        delegate.topBlock.parentNode.insertBefore(newLine, delegate.topBlock)
+        needSeperator = true
+      }
+
+      var list = this.createList()
+
+      if(needSeperator) {
+        this.base.editableElement.removeChild(document.querySelector('.seperator'))
+      }
     },
 
 
@@ -670,7 +775,10 @@ MoreEditor.extensions = {};
       var delegate = this.base.delegate
       console.log(this.base.delegate, 'delegate')
 
-      /* 如果选区中有列表就取消整个列表 */
+      /* 
+        如果选区中有列表就取消整个列表 
+        TODO: 顺序列表和无序列表之间要可以切换
+      */
       if(delegate.hasListItem === true) {
         this.unWrapWholeList()
         return 'stop'
@@ -714,7 +822,54 @@ MoreEditor.extensions = {};
         MoreEditor.util.changeTag(listItems[i],'p')
       }
       MoreEditor.util.unwrap(topBlock, document)
+    },
 
+    /* 
+      TODO: 顺序列表和无序列表之间要可以切换。
+    */
+
+
+    /* 加粗／取消加粗 */
+    bold: function() {
+      this.base.delegate.updateStatus()
+      var delegate = this.base.delegate
+
+      /* 基本判断 命令是否可以执行 */
+      if (delegate.crossBlock || !delegate.range || delegate.range.collapsed) return
+
+      /* 标题不可加粗 */
+      if(delegate.setAlready.h2 || delegate.setAlready.h3) return
+
+      /* TODO: 斜体／粗体 切换 */
+      if(delegate.setAlready.italic) {
+        document.execCommand('italic', false)
+        document.execCommand('bold', false)
+        return
+      }
+
+      document.execCommand('bold', false)
+    },
+
+
+    /* 斜体／取消斜体 */
+    italic: function() {
+      this.base.delegate.updateStatus()
+      var delegate = this.base.delegate
+
+      /* 基本判断 命令是否可以执行 */
+      if (delegate.crossBlock || !delegate.range || delegate.range.collapsed) return
+
+      /* 标题不可加粗 */
+      if(delegate.setAlready.h2 || delegate.setAlready.h3) return
+
+      /* TODO: 斜体／粗体 切换 */
+      if(delegate.setAlready.bold) {
+        document.execCommand('bold', false)
+        document.execCommand('italic', false)
+        return
+      }
+
+      document.execCommand('italic', false)
     }
   }
 

@@ -9,27 +9,62 @@
     /* 增加大标题 */
     h2: function() {
       this.base.delegate.updateStatus()
-      if (this.base.delegate.crossBlock || !this.base.delegate.range || this.base.delegate.range.collapsed) return
+
+      /* 基本判断 */
+      if (this.base.delegate.crossBlock || !this.base.delegate.range || this.base.delegate.range.collapsed || this.base.delegate.hasListItem) return
+
       MoreEditor.util.execFormatBlock(document, 'h2')
     },
 
     /* 添加小标题 */
     h3: function() {
       this.base.delegate.updateStatus()
-      if (this.base.delegate.crossBlock || !this.base.delegate.range || this.base.delegate.range.collapsed) return
+
+      /* 基本判断 */
+      if (this.base.delegate.crossBlock || !this.base.delegate.range || this.base.delegate.range.collapsed || this.base.delegate.hasListItem) return
+
       MoreEditor.util.execFormatBlock(document, 'h3')
     },
 
 
     /* 创建引用列表 */
     quote: function() {
+      this.base.delegate.updateStatus()
+      var delegate = this.base.delegate
+      var needSeperator
+       /* 如果选区中有列表就取消整个列表 */
+      if(delegate.hasListItem === true) {
+        this.unWrapWholeList()
+        return 
+      }
+
+      if(delegate.crossBlock || !delegate.range || delegate.closestBlock.nodeName.toLowerCase() !== 'p') return
+
+      if(delegate.topBlock.nextElementSibling && delegate.topBlock.nextElementSibling.nodeName.toLowerCase() === 'ul' && !delegate.topBlock.nextElementSibling.getAttribute('data-type')) {
+        var newLine = document.createElement('p')
+        newLine.innerHTML = '<br>'
+        newLine.classList.add('seperator')
+        delegate.topBlock.parentNode.insertBefore(newLine, delegate.topBlock.nextElementSibling)
+        needSeperator = true
+      }
+
+      if(delegate.topBlock.previousElementSibling && delegate.topBlock.previousElementSibling.nodeName.toLowerCase() === 'ul' && !delegate.topBlock.previousElementSibling.getAttribute('data-type')) {
+        var newLine = document.createElement('p')
+        newLine.innerHTML = '<br>'
+        newLine.classList.add('seperator')
+        delegate.topBlock.parentNode.insertBefore(newLine, delegate.topBlock)
+        needSeperator = true
+      }
       
       var list = this.createList()
       console.log(list, '这里应该是创建列表时返回的列表')
 
+      if(needSeperator) {
+        this.base.editableElement.removeChild(document.querySelector('.seperator'))
+      }
+
       // 执行了取消列表，不再继续
       if(list === 'stop') return
-
 
       // 给 ul 加上 blockquote 类
       list.classList.add('blockquote')
@@ -38,9 +73,42 @@
     },
 
 
-    /* 创建无需列表 */
+    /* 创建无序列表 */
     ul: function() {
-      this.createList()
+
+      this.base.delegate.updateStatus()
+      var delegate = this.base.delegate
+      var needSeperator
+
+      /* 如果选区中有列表就取消整个列表 */
+      if(delegate.hasListItem === true) {
+        this.unWrapWholeList()
+        return 
+      }
+
+      if(delegate.crossBlock || !delegate.range || delegate.closestBlock.nodeName.toLowerCase() !== 'p') return
+
+      if(delegate.topBlock.nextElementSibling && delegate.topBlock.nextElementSibling.nodeName.toLowerCase() === 'ul' && delegate.topBlock.nextElementSibling.getAttribute('data-type') === 'blockquote') {
+        var newLine = document.createElement('p')
+        newLine.innerHTML = '<br>'
+        newLine.classList.add('seperator')
+        delegate.topBlock.parentNode.insertBefore(newLine, delegate.topBlock.nextElementSibling)
+        needSeperator = true
+      }
+
+      if(delegate.topBlock.previousElementSibling && delegate.topBlock.previousElementSibling.nodeName.toLowerCase() === 'ul' && delegate.topBlock.previousElementSibling.getAttribute('data-type') === 'blockquote') {
+        var newLine = document.createElement('p')
+        newLine.innerHTML = '<br>'
+        newLine.classList.add('seperator')
+        delegate.topBlock.parentNode.insertBefore(newLine, delegate.topBlock)
+        needSeperator = true
+      }
+
+      var list = this.createList()
+
+      if(needSeperator) {
+        this.base.editableElement.removeChild(document.querySelector('.seperator'))
+      }
     },
 
 
@@ -59,7 +127,10 @@
       var delegate = this.base.delegate
       console.log(this.base.delegate, 'delegate')
 
-      /* 如果选区中有列表就取消整个列表 */
+      /* 
+        如果选区中有列表就取消整个列表 
+        TODO: 顺序列表和无序列表之间要可以切换
+      */
       if(delegate.hasListItem === true) {
         this.unWrapWholeList()
         return 'stop'
@@ -103,7 +174,54 @@
         MoreEditor.util.changeTag(listItems[i],'p')
       }
       MoreEditor.util.unwrap(topBlock, document)
+    },
 
+    /* 
+      TODO: 顺序列表和无序列表之间要可以切换。
+    */
+
+
+    /* 加粗／取消加粗 */
+    bold: function() {
+      this.base.delegate.updateStatus()
+      var delegate = this.base.delegate
+
+      /* 基本判断 命令是否可以执行 */
+      if (delegate.crossBlock || !delegate.range || delegate.range.collapsed) return
+
+      /* 标题不可加粗 */
+      if(delegate.setAlready.h2 || delegate.setAlready.h3) return
+
+      /* TODO: 斜体／粗体 切换 */
+      if(delegate.setAlready.italic) {
+        document.execCommand('italic', false)
+        document.execCommand('bold', false)
+        return
+      }
+
+      document.execCommand('bold', false)
+    },
+
+
+    /* 斜体／取消斜体 */
+    italic: function() {
+      this.base.delegate.updateStatus()
+      var delegate = this.base.delegate
+
+      /* 基本判断 命令是否可以执行 */
+      if (delegate.crossBlock || !delegate.range || delegate.range.collapsed) return
+
+      /* 标题不可加粗 */
+      if(delegate.setAlready.h2 || delegate.setAlready.h3) return
+
+      /* TODO: 斜体／粗体 切换 */
+      if(delegate.setAlready.bold) {
+        document.execCommand('bold', false)
+        document.execCommand('italic', false)
+        return
+      }
+
+      document.execCommand('italic', false)
     }
   }
 
