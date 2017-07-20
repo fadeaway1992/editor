@@ -80,6 +80,13 @@
         } else {
           this.setAlready.italic = false
         }
+
+        /* 判断是否选中删除线 以选区开始处为准 */
+        if(this.startElement.nodeName.toLowerCase() === 'strike') {
+          this.setAlready.strike = true
+        } else {
+          this.setAlready.strike = false
+        }
         
 
       /* 没有选区或者选区不在 editableElement 内 */
@@ -101,7 +108,7 @@
         h3: false,
         bold: false,
         italic: false,
-        strikeThrough: false
+        strike: false
       }
     }
   }

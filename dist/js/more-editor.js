@@ -622,6 +622,13 @@ MoreEditor.extensions = {};
         } else {
           this.setAlready.italic = false
         }
+
+        /* 判断是否选中删除线 以选区开始处为准 */
+        if(this.startElement.nodeName.toLowerCase() === 'strike') {
+          this.setAlready.strike = true
+        } else {
+          this.setAlready.strike = false
+        }
         
 
       /* 没有选区或者选区不在 editableElement 内 */
@@ -643,7 +650,7 @@ MoreEditor.extensions = {};
         h3: false,
         bold: false,
         italic: false,
-        strikeThrough: false
+        strike: false
       }
     }
   }
@@ -846,13 +853,6 @@ MoreEditor.extensions = {};
       /* 标题不可加粗 */
       if(delegate.setAlready.h2 || delegate.setAlready.h3) return
 
-      /* TODO: 斜体／粗体 切换 */
-      if(delegate.setAlready.italic) {
-        document.execCommand('italic', false)
-        document.execCommand('bold', false)
-        return
-      }
-
       document.execCommand('bold', false)
     },
 
@@ -868,14 +868,21 @@ MoreEditor.extensions = {};
       /* 标题不可加粗 */
       if(delegate.setAlready.h2 || delegate.setAlready.h3) return
 
-      /* TODO: 斜体／粗体 切换 */
-      if(delegate.setAlready.bold) {
-        document.execCommand('bold', false)
-        document.execCommand('italic', false)
-        return
-      }
-
       document.execCommand('italic', false)
+    },
+
+    /* 斜体／取消斜体 */
+    strike: function() {
+      this.base.delegate.updateStatus()
+      var delegate = this.base.delegate
+
+      /* 基本判断 命令是否可以执行 */
+      if (delegate.crossBlock || !delegate.range || delegate.range.collapsed) return
+
+      /* 标题不可加粗 */
+      if(delegate.setAlready.h2 || delegate.setAlready.h3) return
+
+      document.execCommand('strikeThrough', false)
     }
   }
 
