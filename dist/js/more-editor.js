@@ -497,6 +497,13 @@ MoreEditor.extensions = {};
                 startNode = (node && node.nodeType === 3 ? node.parentNode : node);
 
             return startNode;
+        },
+
+        getSelectionEnd: function (ownerDocument) {
+            var node = ownerDocument.getSelection().focusNode,
+                endNode = (node && node.nodeType === 3 ? node.parentNode : node);
+
+            return endNode;
         }
     };
 
@@ -886,6 +893,7 @@ function handleBackAndEnterKeydown(event) {
     var node = MoreEditor.selection.getSelectionStart(this.options.ownerDocument)
     var topBlockContainer = MoreEditor.util.getTopBlockContainerWithoutMoreEditor(node)
     var cloestBlockContainer = MoreEditor.util.getClosestBlockContainer(node)
+    
     if(!range) {
         return
     }
@@ -895,34 +903,10 @@ function handleBackAndEnterKeydown(event) {
         console.log('按下了 back 或者 enter 键')
         console.log(range, 'range')
 
-        /* 处理在 chrome 中第一个元素为空列表时无法获取正确 range 的错误 */
+        /* 处理在 chrome 中有时无法获取正确 range 的错误 */
         if(node === this.editableElement) {
             console.log('获取 range 不正确')
-
-            // /* 唯一的一个子元素已经被删掉了 */
-            // if(!node.hasChildNodes()) {
-            //     return
-            // }
-
-            // /* 第一个空元素是列表 */
-            // if(node.firstChild.nodeName.toLowerCase() === 'ol' || node.firstChild.nodeName.toLowerCase() === 'ul') {
-            //     this.editableElement.removeChild(this.editableElement.firstChild)
-            //     event.preventDefault()
-            //     return
-            // }
-
-            // /* 第一个空元素是 p */
-            // if(node.firstChild.nodeName.toLowerCase() === 'p' && MoreEditor.util.isKey(event, MoreEditor.util.keyCode.ENTER)) {
-            //     var newLine = document.createElement('p')
-            //     newLine.innerHTML = '<br>'
-            //     this.editableElement.appendChild(newLine)
-            //     MoreEditor.selection.moveCursor(document, newLine, 0)
-            //     console.log('插入新行')
-            //     event.preventDefault()
-            //     return
-            // }
-            // return
-            
+            return
         }
 
         if(range.collapsed===true) {  // 只有光标没有选区
@@ -945,6 +929,10 @@ function handleBackAndEnterKeydown(event) {
                         }
                         MoreEditor.selection.moveCursor(document,newLine,0)
                         topBlockContainer.removeChild(cloestBlockContainer)
+                        if(!topBlockContainer.hasChildNodes()) {
+                            console.log(topBlockContainer, 'topBlockContainer')
+                            topBlockContainer.parentNode.removeChild(topBlockContainer)
+                        }
                         event.preventDefault()
                         return
                     }
@@ -1000,6 +988,18 @@ function handleBackAndEnterKeydown(event) {
 
         } else {
             console.log('有选区')
+            var endNode = MoreEditor.selection.getSelectionEnd(this.options.ownerDocument)
+            if(MoreEditor.util.isKey(event, MoreEditor.util.keyCode.ENTER) && MoreEditor.util.isElementAtEndofBlock(endNode) && MoreEditor.selection.getCaretOffsets(endNode).right === 0) {
+                console.log('删除并换行')
+                document.execCommand('delete', false)
+                
+                /* 如果选区开始是在列表中 并且删除后列表项内容不为空，我们让浏览器默认处理回车。否则我们自己再执行一次这个函数，把当前事件传进去，也就是手动处理回车。*/
+                if(cloestBlockContainer.nodeName.toLowerCase() === 'li' && !(MoreEditor.util.isElementAtBeginningOfBlock(node) && MoreEditor.selection.getCaretOffsets(node).left === 0)) return
+
+                handleBackAndEnterKeydown.call(this, event)
+                event.preventDefault()
+                return
+            }
         }
     } else {
         return

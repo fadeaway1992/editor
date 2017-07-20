@@ -90,6 +90,13 @@
                 startNode = (node && node.nodeType === 3 ? node.parentNode : node);
 
             return startNode;
+        },
+
+        getSelectionEnd: function (ownerDocument) {
+            var node = ownerDocument.getSelection().focusNode,
+                endNode = (node && node.nodeType === 3 ? node.parentNode : node);
+
+            return endNode;
         }
     };
 
