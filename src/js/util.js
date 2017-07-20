@@ -1,6 +1,4 @@
-/* eslint-disable no-undef */
 
-/*global NodeFilter*/
 
 (function (window) {
     'use strict';
@@ -379,4 +377,4 @@
 }(window));
 
 
-/* eslint-enable no-undef */
+

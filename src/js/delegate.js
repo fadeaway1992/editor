@@ -9,21 +9,14 @@
   var Delegate = function (instance) {
     this.base = instance;
     this.options = this.base.options;
-    this.setAlready = {
-      h2: false,
-      h3: false,
-      bold: false,
-      italic: false,
-      strikeThrough: false
-    }
+    this.setDefault()
   };
 
   Delegate.prototype = {
-    range: null,
 
-    crossBlock: false,
-
-
+    /* 
+      检查当前选区状态，并输出当前选区的数据
+    */
     updateStatus: function() {
       console.log('updateStatus')
       var selection = document.getSelection()
@@ -47,11 +40,25 @@
           this.crossBlock = false
         }
 
-        /* 判断是否有选中 列表   TODO: 这个地方有待细分 */ 
-        if(this.closestBlock.nodeName.toLowerCase() === 'li') {
-          this.hasListItem = true
+        /* 判断是否有选中有序列表 */ 
+        if(this.topBlock.nodeName.toLowerCase() === 'ol') {
+          this.setAlready.ol = true
         } else {
-          this.hasListItem = false
+          this.setAlready.ol = false
+        }
+
+        /* 判断是否有选中 无序列表／引用 */ 
+        if(this.topBlock.nodeName.toLowerCase() === 'ul') {
+          if(this.topBlock.getAttribute('data-type') === 'blockquote') {
+            this.setAlready.quote = true
+            this.setAlready.ul = false
+          } else {
+            this.setAlready.ul = true
+            this.setAlready.quote = false
+          }
+        } else {
+          this.setAlready.ul = false
+          this.setAlready.quote = false
         }
 
         /* 判断是否选中标题 */
@@ -102,13 +109,15 @@
       this.closestBlock = null
       this.topBlock = null
       this.crossBlock = false
-      this.hasListItem = false
       this.setAlready = {
         h2: false,
         h3: false,
         bold: false,
         italic: false,
-        strike: false
+        strike: false,
+        quote: false,
+        ul: false,
+        ol: false
       }
     }
   }

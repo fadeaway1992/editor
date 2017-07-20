@@ -22,9 +22,7 @@ var MoreEditor = function(elements, options) {
 MoreEditor.extensions = {};
 
 /* eslint-enable no-unused-vars, no-undef */
-/* eslint-disable no-undef */
 
-/*global NodeFilter*/
 
 (function (window) {
     'use strict';
@@ -403,7 +401,7 @@ MoreEditor.extensions = {};
 }(window));
 
 
-/* eslint-enable no-undef */
+
 
 /* eslint-disable no-undef */
 
@@ -551,21 +549,14 @@ MoreEditor.extensions = {};
   var Delegate = function (instance) {
     this.base = instance;
     this.options = this.base.options;
-    this.setAlready = {
-      h2: false,
-      h3: false,
-      bold: false,
-      italic: false,
-      strikeThrough: false
-    }
+    this.setDefault()
   };
 
   Delegate.prototype = {
-    range: null,
 
-    crossBlock: false,
-
-
+    /* 
+      检查当前选区状态，并输出当前选区的数据
+    */
     updateStatus: function() {
       console.log('updateStatus')
       var selection = document.getSelection()
@@ -589,11 +580,25 @@ MoreEditor.extensions = {};
           this.crossBlock = false
         }
 
-        /* 判断是否有选中 列表   TODO: 这个地方有待细分 */ 
-        if(this.closestBlock.nodeName.toLowerCase() === 'li') {
-          this.hasListItem = true
+        /* 判断是否有选中有序列表 */ 
+        if(this.topBlock.nodeName.toLowerCase() === 'ol') {
+          this.setAlready.ol = true
         } else {
-          this.hasListItem = false
+          this.setAlready.ol = false
+        }
+
+        /* 判断是否有选中 无序列表／引用 */ 
+        if(this.topBlock.nodeName.toLowerCase() === 'ul') {
+          if(this.topBlock.getAttribute('data-type') === 'blockquote') {
+            this.setAlready.quote = true
+            this.setAlready.ul = false
+          } else {
+            this.setAlready.ul = true
+            this.setAlready.quote = false
+          }
+        } else {
+          this.setAlready.ul = false
+          this.setAlready.quote = false
         }
 
         /* 判断是否选中标题 */
@@ -644,13 +649,15 @@ MoreEditor.extensions = {};
       this.closestBlock = null
       this.topBlock = null
       this.crossBlock = false
-      this.hasListItem = false
       this.setAlready = {
         h2: false,
         h3: false,
         bold: false,
         italic: false,
-        strike: false
+        strike: false,
+        quote: false,
+        ul: false,
+        ol: false
       }
     }
   }
@@ -672,7 +679,7 @@ MoreEditor.extensions = {};
       this.base.delegate.updateStatus()
 
       /* 基本判断 */
-      if (this.base.delegate.crossBlock || !this.base.delegate.range || this.base.delegate.range.collapsed || this.base.delegate.hasListItem) return
+      if (this.base.delegate.crossBlock || !this.base.delegate.range || this.base.delegate.closestBlock.nodeName.toLowerCase() === 'li') return
 
       MoreEditor.util.execFormatBlock(document, 'h2')
     },
@@ -682,7 +689,7 @@ MoreEditor.extensions = {};
       this.base.delegate.updateStatus()
 
       /* 基本判断 */
-      if (this.base.delegate.crossBlock || !this.base.delegate.range || this.base.delegate.range.collapsed || this.base.delegate.hasListItem) return
+      if (this.base.delegate.crossBlock || !this.base.delegate.range || this.base.delegate.closestBlock.nodeName.toLowerCase() === 'li') return
 
       MoreEditor.util.execFormatBlock(document, 'h3')
     },
@@ -690,17 +697,32 @@ MoreEditor.extensions = {};
 
     /* 创建引用列表 */
     quote: function() {
+
+      /* 刷新选区状态，获取选区信息 */
       this.base.delegate.updateStatus()
       var delegate = this.base.delegate
       var needSeperator
-       /* 如果选区中有列表就取消整个列表 */
-      if(delegate.hasListItem === true) {
+
+      /* 基本判断 */
+      if(delegate.crossBlock || !delegate.range) return
+
+       /* 如果选区中有引用就取消引用，转为纯文本 */
+      if(delegate.setAlready.quote === true) {
         this.unWrapWholeList()
         return 
       }
 
-      if(delegate.crossBlock || !delegate.range || delegate.closestBlock.nodeName.toLowerCase() !== 'p') return
+      /* 选区不在引用中，生成引用，判断选区是否是段落（选区在 列表／标题 中时不能执行命令） */
+      if(delegate.closestBlock.nodeName.toLowerCase() !== 'p') return
 
+        /* 
+          在谷歌浏览器中，生成的列表会和相邻的列表自动合并到一个浏览器中。
+          如果检测到相邻的元素也是列表，我们可以先在要生成的列表要相邻的列表之间插入一个块元素
+          生成新列表后再删除这个块元素之间
+          这样可以防止合并。
+        */
+
+      /* 防止生成的引用和下面的无序列表合并 */
       if(delegate.topBlock.nextElementSibling && delegate.topBlock.nextElementSibling.nodeName.toLowerCase() === 'ul' && !delegate.topBlock.nextElementSibling.getAttribute('data-type')) {
         var newLine = document.createElement('p')
         newLine.innerHTML = '<br>'
@@ -709,6 +731,7 @@ MoreEditor.extensions = {};
         needSeperator = true
       }
 
+      /* 防止生成的引用和上面的无序列表合并 */
       if(delegate.topBlock.previousElementSibling && delegate.topBlock.previousElementSibling.nodeName.toLowerCase() === 'ul' && !delegate.topBlock.previousElementSibling.getAttribute('data-type')) {
         var newLine = document.createElement('p')
         newLine.innerHTML = '<br>'
@@ -717,38 +740,48 @@ MoreEditor.extensions = {};
         needSeperator = true
       }
       
+      /* 执行创建列表的函数，返回列表的标签名 */
       var list = this.createList()
       console.log(list, '这里应该是创建列表时返回的列表')
 
+      /* 如果有插入了放合并的分隔符，需要在生成列表后删掉分隔符 */
       if(needSeperator) {
         this.base.editableElement.removeChild(document.querySelector('.seperator'))
       }
 
-      // 执行了取消列表，不再继续
-      if(list === 'stop') return
-
-      // 给 ul 加上 blockquote 类
+      // 给 引用 加上 blockquote 类
       list.classList.add('blockquote')
       list.setAttribute('data-type', 'blockquote')
-
     },
 
 
     /* 创建无序列表 */
     ul: function() {
 
+      /* 刷新选区状态，获取选区信息 */
       this.base.delegate.updateStatus()
       var delegate = this.base.delegate
       var needSeperator
 
-      /* 如果选区中有列表就取消整个列表 */
-      if(delegate.hasListItem === true) {
+      /* 基本判断 */
+      if(delegate.crossBlock || !delegate.range) return
+
+      /* 如果选中的是无序列表就取消整个列表 */
+      if(delegate.setAlready.ul === true) {
         this.unWrapWholeList()
-        return 
+        return
       }
 
-      if(delegate.crossBlock || !delegate.range || delegate.closestBlock.nodeName.toLowerCase() !== 'p') return
+      /* 如果选中的是顺序列表，将其转换为无序列表 */
+      if(delegate.setAlready.ol === true) {
+        MoreEditor.util.changeTag(delegate.topBlock, 'ul')
+        return
+      }
 
+      /* 只有选中的是段落的情况下才生成无序列表， 标题、引用都不能执行生成无序列表的命令 */
+      if(delegate.closestBlock.nodeName.toLowerCase() !== 'p') return
+
+      /* 防止生成的无序列表和毗邻的引用合并 */
       if(delegate.topBlock.nextElementSibling && delegate.topBlock.nextElementSibling.nodeName.toLowerCase() === 'ul' && delegate.topBlock.nextElementSibling.getAttribute('data-type') === 'blockquote') {
         var newLine = document.createElement('p')
         newLine.innerHTML = '<br>'
@@ -765,7 +798,9 @@ MoreEditor.extensions = {};
         needSeperator = true
       }
 
+      /* 如果程序没有在前面几步退出，而是成功走到了这里，说明当前的环境可以生成顺序列表 */
       var list = this.createList()
+      if(list.nodeName.toLowerCase() !== 'ul') console.log('%c你在生成无序列表的过程中出错啦！', 'color: red;')
 
       if(needSeperator) {
         this.base.editableElement.removeChild(document.querySelector('.seperator'))
@@ -775,29 +810,41 @@ MoreEditor.extensions = {};
 
     /* 创建顺序列表 */
     ol: function() {
-      this.createList(true)
+
+      /* 刷新选区状态，获取选区信息 */
+      this.base.delegate.updateStatus()
+      var delegate = this.base.delegate
+
+      /* 基本判断 */
+      if(delegate.crossBlock || !delegate.range) return
+
+      /* 如果选中的是顺序列表就取消整个列表 */
+      if(delegate.setAlready.ol === true) {
+        this.unWrapWholeList()
+        return
+      }
+
+      /* 如果选中的是无序列表，将其转换为顺序列表 */
+      if(delegate.setAlready.ul === true) {
+        MoreEditor.util.changeTag(delegate.topBlock, 'ol')
+        return
+      }
+
+      /* 只有选中的是段落的情况下才生成顺序列表， 标题、引用都不能执行生成顺序列表的命令 */
+      if(delegate.closestBlock.nodeName.toLowerCase() !== 'p') return
+
+      /* 如果程序没有在前面几步退出，而是成功走到了这里，说明当前的环境可以生成顺序列表 */
+      var list = this.createList(true)
+      if(list.nodeName.toLowerCase() !== 'ol') console.log('%c你在生成顺序列表的过程中出错啦！', 'color: red;')
     },
 
 
     /*  
     **  创建列表 
-    **  接收一个 ordered 参数,参数为 true 创建顺序列表，否则创建无序列表 
+    **  接收一个 ordered 参数,参数为 true 创建顺序列表，否则创建无序列表
+    **  返回创建的列表 
     */
     createList: function(ordered) {
-      this.base.delegate.updateStatus()
-      var delegate = this.base.delegate
-      console.log(this.base.delegate, 'delegate')
-
-      /* 
-        如果选区中有列表就取消整个列表 
-        TODO: 顺序列表和无序列表之间要可以切换
-      */
-      if(delegate.hasListItem === true) {
-        this.unWrapWholeList()
-        return 'stop'
-      }
-
-      if (delegate.crossBlock || !delegate.range || delegate.closestBlock.nodeName.toLowerCase() !== 'p') return 'stop'
       
       if(ordered) {
         document.execCommand('insertOrderedList',false)
@@ -805,7 +852,7 @@ MoreEditor.extensions = {};
         document.execCommand('insertUnorderedList',false)
       }
       
-      // 扒掉原来的标签
+      /* sometimes 我们在 p 标签中创建出来的列表会被包裹在 p 标签中，这时候我们要手动扒掉 p 标签。 */ 
       var node = MoreEditor.selection.getSelectionStart(document)
       var topBlock = MoreEditor.util.getTopBlockContainerWithoutMoreEditor(node)
 
@@ -818,13 +865,19 @@ MoreEditor.extensions = {};
           console.error('%c创建标签的过程中出现错误', 'color:red;')
       }
 
+      /* 防止生成的第一个列表项中有 br 标签 */
       if(topBlock.querySelector('li').textContent !== '') {
         topBlock.querySelector('li').innerHTML = topBlock.querySelector('li').innerHTML.replace(/<br>/g, '')
       }
+
+      /* 把光标手动移到第一个列表项中，因为有时候浏览器会出现光标显示但获取不到 range 的 bug */
       MoreEditor.selection.moveCursor(document, topBlock.firstChild, 0)
+
+      /* 返回创建的列表 */
       return topBlock
     },
     
+
     /* 取消列表 , 这时用户选区中包含 List Item */
     unWrapWholeList: function() {
       var delegate = this.base.delegate
@@ -836,10 +889,6 @@ MoreEditor.extensions = {};
       }
       MoreEditor.util.unwrap(topBlock, document)
     },
-
-    /* 
-      TODO: 顺序列表和无序列表之间要可以切换。
-    */
 
 
     /* 加粗／取消加粗 */
