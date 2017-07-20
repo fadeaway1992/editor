@@ -630,7 +630,6 @@ MoreEditor.extensions = {};
       this.closestBlock = null
       this.topBlock = null
       this.crossBlock = false
-      this.h2.setAlready = false
       this.hasListItem = false
       this.setAlready = {
         h2: false,
