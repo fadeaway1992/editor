@@ -375,6 +375,8 @@
         /* 取消装饰元素之间的嵌套 */
         preventNestedDecorate: function(root, selector1, selector2) {
 
+            var savedSelection = MoreEditor.selection.saveSelection(root) // 存储当前的选区
+
             var unwrapSelf = root.querySelectorAll(selector1)
             for(var i=0; i<unwrapSelf.length; i++) {
             this.unwrap(unwrapSelf[i], document)
@@ -382,8 +384,39 @@
 
             var unwrapParent = root.querySelectorAll(selector2)
             for(var i=0; i<unwrapParent.length; i++) {
-            this.unwrap(unwrapParent[i].parentNode, document)
+                MoreEditor.selection.selectNode(unwrapParent[i], document)
+                switch(unwrapParent[i].parentNode.nodeName.toLowerCase()) {  //  这里要考虑 a 标签
+                    case 'i':
+                        document.execCommand('italic',false)
+                        break
+                    case 'b':
+                        document.execCommand('bold',false)
+                        break
+                    case 'strike':
+                        document.execCommand('strikeThrough',false)
+                        break
+                    default: 
+                        console.log('出错了')
+                        break
+                }
             }
+
+            MoreEditor.selection.restoreSelection(root, savedSelection)
+        },
+
+        wrappedByDecoratedElement: function(container) {
+            if(container.nodeName.toLowerCase() === 'a') {
+                var tagName = container.parentNode.nodeName.toLowerCase()
+                if(tagName === 'i' || tagName === 'b' || tagName === 'strike') {
+                    return true
+                }
+            } else {
+                var tagName = container.nodeName.toLowerCase()
+                if(tagName === 'i' || tagName === 'b' || tagName === 'strike') {
+                    return true
+                }
+            }
+            return false
         }
     };
 

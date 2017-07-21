@@ -8,10 +8,11 @@
 
     /* 增加大标题 */
     h2: function() {
-      this.base.delegate.updateStatus()
+      var delegate = this.base.delegate
+      delegate.updateStatus()
 
       /* 基本判断 */
-      if (this.base.delegate.crossBlock || !this.base.delegate.range || this.base.delegate.closestBlock.nodeName.toLowerCase() === 'li') return
+      if (delegate.crossBlock || !delegate.range || delegate.closestBlock.nodeName.toLowerCase() === 'li') return
 
       MoreEditor.util.execFormatBlock(document, 'h2')
     },
@@ -240,6 +241,53 @@
         isCancle = true
       }
 
+      // var savedSelection = MoreEditor.selection.saveSelection(delegate.closestBlock) // 存储当前的选区
+
+      // /* 如果要执行的是加粗，判断 anchorNode 和 focusNode 是否在装饰标签内 */
+      // if(!isCancle) {
+
+      //   var savedSelection = MoreEditor.selection.saveSelection(delegate.closestBlock) // 存储当前的选区
+
+      //   /* 确定我们的选区不是全部在一个装饰标签内 */
+      //   if(!MoreEditor.util.wrappedByDecoratedElement(delegate.range.commonAncestorContainer)) {
+          
+      //     var decoratedElement = MoreEditor.util.traverseUp(delegate.startElement, function(element) {
+      //       return element.nodeName.toLowerCase() === 'i' || element.nodeName.toLowerCase() === 'strike'
+      //     })
+
+      //     /* 可以确定我们的 anchorNode 在 装饰标签内。并且这个装饰标签不包含 focusNode */
+      //     if(decoratedElement) {
+      //       var range = MoreEditor.selection.select(document, delegate.range.startContainer, delegate.range.startOffset, decoratedElement, decoratedElement.childNodes.length)
+      //       if (decoratedElement.nodeName.toLowerCase() === 'i') {
+      //         document.execCommand('italic',false)
+      //       } else if(decoratedElement.nodeName.toLowerCase() === 'strike') {
+      //         document.execCommand('strike',false)
+      //       } else {
+      //         console.log('%c出错了')
+      //       }
+      //     }
+
+      //     decoratedElement = MoreEditor.util.traverseUp(delegate.range.endContainer, function(element) {
+      //       return element.nodeName.toLowerCase() === 'i' || element.nodeName.toLowerCase() === 'strike'
+      //     })
+
+      //     /* 可以确定我们的 focusNode 在 装饰标签内。并且这个装饰标签不包含 anchorNode */
+      //     if(decoratedElement) {
+      //       var range = MoreEditor.selection.select(document, decoratedElement, 0, delegate.range.endContainer, delegate.range.endOffset)
+      //       if (decoratedElement.nodeName.toLowerCase() === 'i') {
+      //         document.execCommand('italic',false)
+      //       } else if(decoratedElement.nodeName.toLowerCase() === 'strike') {
+      //         document.execCommand('strike',false)
+      //       } else {
+      //         console.log('%c出错了')
+      //       }
+      //     }
+          
+      //   }
+
+      //   MoreEditor.selection.restoreSelection(delegate.closestBlock, savedSelection)
+      // }
+
       document.execCommand('bold', false)
 
       /* 如果上一步执行的是加粗操作而不是取消加粗，则需要检查 粗体／斜体／删除线 之间的嵌套 */
@@ -298,7 +346,7 @@
         MoreEditor.util.preventNestedDecorate(delegate.closestBlock, 'strike b, strike i', 'b strike, i strike') 
       }  
     }
-    
+
   }
 
   MoreEditor.API = API
