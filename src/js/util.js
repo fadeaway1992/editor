@@ -395,6 +395,22 @@
                     case 'strike':
                         document.execCommand('strikeThrough',false)
                         break
+                    case 'a' :
+                        switch (unwrapParent[i].parentNode.parentNode.nodeName.toLowerCase()) {
+                            case 'i':
+                                document.execCommand('italic',false)
+                                break
+                            case 'b':
+                                document.execCommand('bold',false)
+                                break
+                            case 'strike':
+                                document.execCommand('strikeThrough',false)
+                                break 
+                            default:
+                                console.log('出错了')
+                                break
+                        }
+                        break
                     default: 
                         console.log('出错了')
                         break
