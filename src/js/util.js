@@ -370,6 +370,20 @@
             newElement.innerHTML = element.innerHTML
             element.parentNode.replaceChild(newElement, element)
             return newElement
+        },
+
+        /* 取消装饰元素之间的嵌套 */
+        preventNestedDecorate: function(root, selector1, selector2) {
+
+            var unwrapSelf = root.querySelectorAll(selector1)
+            for(var i=0; i<unwrapSelf.length; i++) {
+            this.unwrap(unwrapSelf[i], document)
+            }
+
+            var unwrapParent = root.querySelectorAll(selector2)
+            for(var i=0; i<unwrapParent.length; i++) {
+            this.unwrap(unwrapParent[i].parentNode, document)
+            }
         }
     };
 

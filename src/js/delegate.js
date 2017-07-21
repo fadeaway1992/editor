@@ -75,21 +75,21 @@
         }
 
         /* 判断是否选中粗体 以选区开始处为准*/
-        if(this.startElement.nodeName.toLowerCase() === 'b') {
+        if(this.startElement.nodeName.toLowerCase() === 'b' || this.startElement.parentNode.nodeName === 'b') {
           this.setAlready.bold = true
         } else {
           this.setAlready.bold = false
         }
         
         /* 判断是否选中斜体 以选区开始处为准 */
-        if(this.startElement.nodeName.toLowerCase() === 'i') {
+        if(this.startElement.nodeName.toLowerCase() === 'i' || this.startElement.parentNode.nodeName === 'i') {
           this.setAlready.italic = true
         } else {
           this.setAlready.italic = false
         }
 
         /* 判断是否选中删除线 以选区开始处为准 */
-        if(this.startElement.nodeName.toLowerCase() === 'strike') {
+        if(this.startElement.nodeName.toLowerCase() === 'strike' || this.startElement.parentNode.nodeName === 'strike') {
           this.setAlready.strike = true
         } else {
           this.setAlready.strike = false

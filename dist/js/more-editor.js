@@ -394,6 +394,20 @@ MoreEditor.extensions = {};
             newElement.innerHTML = element.innerHTML
             element.parentNode.replaceChild(newElement, element)
             return newElement
+        },
+
+        /* 取消装饰元素之间的嵌套 */
+        preventNestedDecorate: function(root, selector1, selector2) {
+
+            var unwrapSelf = root.querySelectorAll(selector1)
+            for(var i=0; i<unwrapSelf.length; i++) {
+            this.unwrap(unwrapSelf[i], document)
+            }
+
+            var unwrapParent = root.querySelectorAll(selector2)
+            for(var i=0; i<unwrapParent.length; i++) {
+            this.unwrap(unwrapParent[i].parentNode, document)
+            }
         }
     };
 
@@ -502,6 +516,49 @@ MoreEditor.extensions = {};
                 endNode = (node && node.nodeType === 3 ? node.parentNode : node);
 
             return endNode;
+        },
+
+        saveSelection: function(containerEl) {
+            var range = window.getSelection().getRangeAt(0)
+            var preSelectionRange = range.cloneRange()
+            preSelectionRange.selectNodeContents(containerEl)
+            preSelectionRange.setEnd(range.startContainer, range.startOffset)
+            var start = preSelectionRange.toString().length
+
+            return {
+                start: start,   
+                end: start + range.toString().length
+            }
+        },
+
+        restoreSelection : function(containerEl, savedSel) {
+            var charIndex = 0, range = document.createRange()
+            range.setStart(containerEl, 0)
+            range.collapse(true)
+            var nodeStack = [containerEl], node, foundStart = false, stop = false
+
+            while (!stop && (node = nodeStack.pop())) {
+                if (node.nodeType == 3) {
+                    var nextCharIndex = charIndex + node.length
+                    if (!foundStart && savedSel.start >= charIndex && savedSel.start <= nextCharIndex) {
+                        range.setStart(node, savedSel.start - charIndex)
+                        foundStart = true
+                    }
+                    if (foundStart && savedSel.end >= charIndex && savedSel.end <= nextCharIndex) {
+                        range.setEnd(node, savedSel.end - charIndex)
+                        stop = true
+                    }
+                    charIndex = nextCharIndex
+                } else {
+                    var i = node.childNodes.length
+                    while (i--) {
+                        nodeStack.push(node.childNodes[i])
+                    }
+                }
+            }
+            var sel = document.getSelection()
+            sel.removeAllRanges()
+            sel.addRange(range)
         }
     };
 
@@ -615,21 +672,21 @@ MoreEditor.extensions = {};
         }
 
         /* 判断是否选中粗体 以选区开始处为准*/
-        if(this.startElement.nodeName.toLowerCase() === 'b') {
+        if(this.startElement.nodeName.toLowerCase() === 'b' || this.startElement.parentNode.nodeName === 'b') {
           this.setAlready.bold = true
         } else {
           this.setAlready.bold = false
         }
         
         /* 判断是否选中斜体 以选区开始处为准 */
-        if(this.startElement.nodeName.toLowerCase() === 'i') {
+        if(this.startElement.nodeName.toLowerCase() === 'i' || this.startElement.parentNode.nodeName === 'i') {
           this.setAlready.italic = true
         } else {
           this.setAlready.italic = false
         }
 
         /* 判断是否选中删除线 以选区开始处为准 */
-        if(this.startElement.nodeName.toLowerCase() === 'strike') {
+        if(this.startElement.nodeName.toLowerCase() === 'strike' || this.startElement.parentNode.nodeName === 'strike') {
           this.setAlready.strike = true
         } else {
           this.setAlready.strike = false
@@ -895,14 +952,25 @@ MoreEditor.extensions = {};
     bold: function() {
       this.base.delegate.updateStatus()
       var delegate = this.base.delegate
+      var isCancle
 
       /* 基本判断 命令是否可以执行 */
       if (delegate.crossBlock || !delegate.range || delegate.range.collapsed) return
 
       /* 标题不可加粗 */
       if(delegate.setAlready.h2 || delegate.setAlready.h3) return
+      
+      /* 判断将要执行的是加粗还是取消加粗 */
+      if(delegate.setAlready.bold) {
+        isCancle = true
+      }
 
       document.execCommand('bold', false)
+
+      /* 如果上一步执行的是加粗操作而不是取消加粗，则需要检查 粗体／斜体／删除线 之间的嵌套 */
+      if(!isCancle) {
+        MoreEditor.util.preventNestedDecorate(delegate.closestBlock, 'b i, b strike', 'i b, strike b')
+      }
     },
 
 
@@ -910,6 +978,7 @@ MoreEditor.extensions = {};
     italic: function() {
       this.base.delegate.updateStatus()
       var delegate = this.base.delegate
+      var isCancle
 
       /* 基本判断 命令是否可以执行 */
       if (delegate.crossBlock || !delegate.range || delegate.range.collapsed) return
@@ -917,13 +986,24 @@ MoreEditor.extensions = {};
       /* 标题不可加粗 */
       if(delegate.setAlready.h2 || delegate.setAlready.h3) return
 
+      /* 判断将要执行的是斜体还是取消斜体 */
+      if(delegate.setAlready.italic) {
+        isCancle = true
+      }
+
       document.execCommand('italic', false)
+
+      /* 如果上一步执行的是斜体操作而不是取消斜体，则需要检查 粗体／斜体／删除线 之间的嵌套 */
+      if(!isCancle) {
+        MoreEditor.util.preventNestedDecorate(delegate.closestBlock, 'i b, i strike', 'b i, strike i') 
+      }  
     },
 
     /* 斜体／取消斜体 */
     strike: function() {
       this.base.delegate.updateStatus()
       var delegate = this.base.delegate
+      var isCancle
 
       /* 基本判断 命令是否可以执行 */
       if (delegate.crossBlock || !delegate.range || delegate.range.collapsed) return
@@ -931,8 +1011,19 @@ MoreEditor.extensions = {};
       /* 标题不可加粗 */
       if(delegate.setAlready.h2 || delegate.setAlready.h3) return
 
+      /* 判断将要执行的是斜体还是取消斜体 */
+      if(delegate.setAlready.strike) {
+        isCancle = true
+      }
+
       document.execCommand('strikeThrough', false)
+
+      /* 检查 粗体／斜体／删除线 之间的嵌套 */
+      if(!isCancle) {
+        MoreEditor.util.preventNestedDecorate(delegate.closestBlock, 'strike b, strike i', 'b strike, i strike') 
+      }  
     }
+    
   }
 
   MoreEditor.API = API

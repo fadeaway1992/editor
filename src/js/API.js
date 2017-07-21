@@ -227,14 +227,25 @@
     bold: function() {
       this.base.delegate.updateStatus()
       var delegate = this.base.delegate
+      var isCancle
 
       /* 基本判断 命令是否可以执行 */
       if (delegate.crossBlock || !delegate.range || delegate.range.collapsed) return
 
       /* 标题不可加粗 */
       if(delegate.setAlready.h2 || delegate.setAlready.h3) return
+      
+      /* 判断将要执行的是加粗还是取消加粗 */
+      if(delegate.setAlready.bold) {
+        isCancle = true
+      }
 
       document.execCommand('bold', false)
+
+      /* 如果上一步执行的是加粗操作而不是取消加粗，则需要检查 粗体／斜体／删除线 之间的嵌套 */
+      if(!isCancle) {
+        MoreEditor.util.preventNestedDecorate(delegate.closestBlock, 'b i, b strike', 'i b, strike b')
+      }
     },
 
 
@@ -242,6 +253,7 @@
     italic: function() {
       this.base.delegate.updateStatus()
       var delegate = this.base.delegate
+      var isCancle
 
       /* 基本判断 命令是否可以执行 */
       if (delegate.crossBlock || !delegate.range || delegate.range.collapsed) return
@@ -249,13 +261,24 @@
       /* 标题不可加粗 */
       if(delegate.setAlready.h2 || delegate.setAlready.h3) return
 
+      /* 判断将要执行的是斜体还是取消斜体 */
+      if(delegate.setAlready.italic) {
+        isCancle = true
+      }
+
       document.execCommand('italic', false)
+
+      /* 如果上一步执行的是斜体操作而不是取消斜体，则需要检查 粗体／斜体／删除线 之间的嵌套 */
+      if(!isCancle) {
+        MoreEditor.util.preventNestedDecorate(delegate.closestBlock, 'i b, i strike', 'b i, strike i') 
+      }  
     },
 
     /* 斜体／取消斜体 */
     strike: function() {
       this.base.delegate.updateStatus()
       var delegate = this.base.delegate
+      var isCancle
 
       /* 基本判断 命令是否可以执行 */
       if (delegate.crossBlock || !delegate.range || delegate.range.collapsed) return
@@ -263,8 +286,19 @@
       /* 标题不可加粗 */
       if(delegate.setAlready.h2 || delegate.setAlready.h3) return
 
+      /* 判断将要执行的是斜体还是取消斜体 */
+      if(delegate.setAlready.strike) {
+        isCancle = true
+      }
+
       document.execCommand('strikeThrough', false)
+
+      /* 检查 粗体／斜体／删除线 之间的嵌套 */
+      if(!isCancle) {
+        MoreEditor.util.preventNestedDecorate(delegate.closestBlock, 'strike b, strike i', 'b strike, i strike') 
+      }  
     }
+    
   }
 
   MoreEditor.API = API

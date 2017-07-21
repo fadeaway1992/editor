@@ -14,7 +14,9 @@
     <button class="quote">quote</button>
     <button class="bold">粗体</button>
     <button class="italic">斜体</button>
-     <button class="strike">删除线</button> 
+    <button class="strike">删除线</button>
+    <!-- <button class="save">save</button>
+    <button class="restore">restore</button> -->
   </div>
   <div class="editable" contenteditable="true"></div>
   <script src="../js/more-editor.js"></script>
@@ -49,6 +51,22 @@
 
   var strike = document.querySelector('.strike')
   strike.addEventListener('click', editor.API.strike.bind(editor.API))
+
+  // var editable = document.querySelector('.editable'),
+  //     savedSelection,
+  //     saveButton = document.querySelector('.save'),
+  //     restoreButton = document.querySelector('.restore')
+
+  // saveButton.addEventListener('click', function() {
+  //   savedSelection = editor.API.saveSelection(editable)
+  // })
+
+  // restoreButton.addEventListener('click', function() {
+  //   editor.API.restoreSelection(editable, savedSelection)
+  // })
+
+
+
 
 </script>
 
