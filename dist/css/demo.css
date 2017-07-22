@@ -3,7 +3,9 @@
   outline: none;
   -webkit-border-radius: 4px;
           border-radius: 4px;
-  min-height: 500px; }
+  min-height: 500px;
+  font-family: -apple-system,BlinkMacSystemFont,Helvetica Neue,Helvetica,Roboto,Arial,PingFang SC,Hiragino Sans GB,Microsoft Yahei,Microsoft Jhenghei,sans-serif;
+  font-size: 14px; }
 
 .toolbar {
   text-align: center;
@@ -14,13 +16,22 @@
             border-radius: 5px;
     border: 1px solid lightgray;
     background: white;
-    width: 70px; }
+    width: 70px;
+    cursor: pointer; }
   .toolbar .h2-disabled {
     opacity: .5; }
+  .toolbar div {
+    margin-top: 10px; }
+    .toolbar div input {
+      padding: 4px 0;
+      margin-right: 2px;
+      outline: none;
+      -webkit-border-radius: 5px;
+              border-radius: 5px;
+      border: 1px solid lightgray; }
 
 .blockquote {
   border-left: 4px solid blue;
   list-style: none;
-  font-style: italic;
   padding-left: 10px;
   margin: 20px 0 20px 10px; }

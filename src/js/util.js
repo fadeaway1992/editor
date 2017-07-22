@@ -252,7 +252,7 @@
         },
 
         execFormatBlock: function (doc, tagName) {
-            console.log('execFormatBlock 函数执行')
+
             // Get the top level block element that contains the selection
             var blockContainer = Util.getTopBlockContainer(MoreEditor.selection.getSelectionStart(doc)),
                 childNodes;

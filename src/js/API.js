@@ -11,8 +11,8 @@
       var delegate = this.base.delegate
       delegate.updateStatus()
 
-      /* 基本判断 */
-      if (delegate.crossBlock || !delegate.range || delegate.closestBlock.nodeName.toLowerCase() !== 'p') return
+      /* 基本判断 */  // 只有 段落 和 小标题  可以执行大标题命令哦！
+      if (delegate.crossBlock || !delegate.range || delegate.closestBlock.nodeName.toLowerCase() === 'li') return
 
       MoreEditor.util.execFormatBlock(document, 'h2')
     },
@@ -22,7 +22,7 @@
       this.base.delegate.updateStatus()
 
       /* 基本判断 */
-      if (this.base.delegate.crossBlock || !this.base.delegate.range || this.base.delegate.closestBlock.nodeName.toLowerCase() !== 'p') return
+      if (this.base.delegate.crossBlock || !this.base.delegate.range || this.base.delegate.closestBlock.nodeName.toLowerCase() === 'li') return
 
       MoreEditor.util.execFormatBlock(document, 'h3')
     },

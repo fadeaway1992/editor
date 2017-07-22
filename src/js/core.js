@@ -18,7 +18,6 @@ function handleBackAndEnterKeydown(event) {
     /* 按下的是 enter 或者 backspace */
     if(MoreEditor.util.isKey(event, [MoreEditor.util.keyCode.BACKSPACE, MoreEditor.util.keyCode.ENTER])) {
         console.log('按下了 back 或者 enter 键')
-        console.log(range, 'range')
 
         /* 处理在 chrome 中有时无法获取正确 range 的错误 */
         if(node === this.editableElement) {

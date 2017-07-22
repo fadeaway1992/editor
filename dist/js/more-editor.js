@@ -276,7 +276,7 @@ MoreEditor.extensions = {};
         },
 
         execFormatBlock: function (doc, tagName) {
-            console.log('execFormatBlock 函数执行')
+
             // Get the top level block element that contains the selection
             var blockContainer = Util.getTopBlockContainer(MoreEditor.selection.getSelectionStart(doc)),
                 childNodes;
@@ -785,8 +785,8 @@ MoreEditor.extensions = {};
       var delegate = this.base.delegate
       delegate.updateStatus()
 
-      /* 基本判断 */
-      if (delegate.crossBlock || !delegate.range || delegate.closestBlock.nodeName.toLowerCase() !== 'p') return
+      /* 基本判断 */  // 只有 段落 和 小标题  可以执行大标题命令哦！
+      if (delegate.crossBlock || !delegate.range || delegate.closestBlock.nodeName.toLowerCase() === 'li') return
 
       MoreEditor.util.execFormatBlock(document, 'h2')
     },
@@ -796,7 +796,7 @@ MoreEditor.extensions = {};
       this.base.delegate.updateStatus()
 
       /* 基本判断 */
-      if (this.base.delegate.crossBlock || !this.base.delegate.range || this.base.delegate.closestBlock.nodeName.toLowerCase() !== 'p') return
+      if (this.base.delegate.crossBlock || !this.base.delegate.range || this.base.delegate.closestBlock.nodeName.toLowerCase() === 'li') return
 
       MoreEditor.util.execFormatBlock(document, 'h3')
     },
@@ -1098,7 +1098,6 @@ function handleBackAndEnterKeydown(event) {
     /* 按下的是 enter 或者 backspace */
     if(MoreEditor.util.isKey(event, [MoreEditor.util.keyCode.BACKSPACE, MoreEditor.util.keyCode.ENTER])) {
         console.log('按下了 back 或者 enter 键')
-        console.log(range, 'range')
 
         /* 处理在 chrome 中有时无法获取正确 range 的错误 */
         if(node === this.editableElement) {

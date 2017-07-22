@@ -7,7 +7,7 @@
 </head>
 <body>
   <div class="toolbar">
-    <button class="h2">H2</button>
+    <button class="h2" >H2</button>
     <button class="h3">H3</button>
     <button class="ul">无序列表</button>
     <button class="ol">顺序列表</button>
@@ -15,11 +15,17 @@
     <button class="bold">粗体</button>
     <button class="italic">斜体</button>
     <button class="strike">删除线</button>
-    <!-- <button class="save">save</button>
-    <button class="restore">restore</button> -->
+    <button class="center">居中</button>
+    <div>
+      <input type="input" placeholder="请输入链接地址"><button class="link">Link</button>
+    </div>
   </div>
   <div class="editable" contenteditable="true"></div>
+
+  <!-- 引入 more-editor -->
   <script src="../js/more-editor.js"></script>
+
+  <!-- 创建 editor 实例  -->
   <script>
     var editor = new MoreEditor('.editable', {
       imageUploadAddress: 'zi.com'
@@ -27,7 +33,9 @@
     console.log(editor)
 </script>
 
+<!-- 给按钮绑定编辑器事件 -->
 <script>
+
   var h2 = document.querySelector('.h2')
   h2.addEventListener('click', editor.API.h2.bind(editor.API))
 
@@ -51,22 +59,6 @@
 
   var strike = document.querySelector('.strike')
   strike.addEventListener('click', editor.API.strike.bind(editor.API))
-
-  // var editable = document.querySelector('.editable'),
-  //     savedSelection,
-  //     saveButton = document.querySelector('.save'),
-  //     restoreButton = document.querySelector('.restore')
-
-  // saveButton.addEventListener('click', function() {
-  //   savedSelection = editor.API.saveSelection(editable)
-  // })
-
-  // restoreButton.addEventListener('click', function() {
-  //   editor.API.restoreSelection(editable, savedSelection)
-  // })
-
-
-
 
 </script>
 
