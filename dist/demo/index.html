@@ -17,7 +17,7 @@
     <button class="strike">删除线</button>
     <button class="center">居中</button>
     <div>
-      <input type="input" placeholder="请输入链接地址"><button class="link">Link</button>
+      <input class="url" type="input" placeholder="请输入链接地址"><button class="link">Link</button>
     </div>
   </div>
   <div class="editable" contenteditable="true"></div>
@@ -59,6 +59,19 @@
 
   var strike = document.querySelector('.strike')
   strike.addEventListener('click', editor.API.strike.bind(editor.API))
+
+  var url = document.querySelector('.url')
+  url.addEventListener('focus', editor.API.exportSelection.bind(editor.API))
+  url.addEventListener('blur', editor.API.importSelection.bind(editor.API))
+
+  var link = document.querySelector('.link')
+  link.addEventListener('click', function() {
+    editor.API.createLink.call(editor.API, url.value)
+    url.value = ''
+  })
+
+  
+
 
 </script>
 

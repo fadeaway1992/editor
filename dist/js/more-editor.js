@@ -1132,7 +1132,7 @@ MoreEditor.extensions = {};
 
         /* 重叠部分装饰效果已经取消了，现在可以执行链接操作 */
         MoreEditor.selection.restoreSelection(delegate.closestBlock, origSelection)  // 恢复要执行链接的选区
-        document.execCommand('createLink', false, url)
+        document.execCommand('createLink', false, url.trim())
 
         /* 恢复原重叠部分的装饰效果 */
         if(anchorDecorateCommand) {
@@ -1149,9 +1149,18 @@ MoreEditor.extensions = {};
 
       } else {
 
-        document.execCommand('createLink', false, url)
+        document.execCommand('createLink', false, url.trim())
         return
       }
+    },
+
+    exportSelection: function() {
+      this.base.delegate.updateStatus()
+      this.savedSelection = MoreEditor.selection.saveSelection(this.base.editableElement)
+    },
+
+    importSelection: function() {
+      MoreEditor.selection.restoreSelection(this.base.editableElement, this.savedSelection)
     }
   }
 
