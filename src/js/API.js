@@ -298,8 +298,96 @@
       if(!isCancle) {
         MoreEditor.util.preventNestedDecorate(delegate.closestBlock, 'strike b, strike i', 'b strike, i strike') 
       }  
-    }
+    },
 
+    /* 创建链接 */
+    createLink: function(url) {
+      var delegate = this.base.delegate
+      delegate.updateStatus()
+
+      /* 基本判断 */
+      if(delegate.crossBlock || !delegate.range) return
+      
+      /* 确定我们的选区不是全部在一个装饰标签内 */ 
+      if(!MoreEditor.util.wrappedByDecoratedElement(delegate.range.commonAncestorContainer)) {
+
+        var anchorDecorateCommand, focusDecoratedCommand
+        var origSelection = MoreEditor.selection.saveSelection(delegate.closestBlock)  //  存储当前选区(要执行创建链接的选区)
+        var anchorOverlap, focusOverlap
+          
+        var anchorDecoratedElement = MoreEditor.util.traverseUp(delegate.startElement, function(element) {
+              return (element.nodeName.toLowerCase() === 'i' || element.nodeName.toLowerCase() === 'b' || element.nodeName.toLowerCase() === 'strike')
+        })
+
+        var focusDecoratedElement = MoreEditor.util.traverseUp(delegate.range.endContainer, function(element) {
+              return (element.nodeName.toLowerCase() === 'i' || element.nodeName.toLowerCase() === 'b' || element.nodeName.toLowerCase() === 'strike')
+        })
+
+        /* 可以确定我们的 anchorNode 在 装饰标签内。并且这个装饰标签不包含 focusNode */
+        if(anchorDecoratedElement) {
+          
+          MoreEditor.selection.select(document, delegate.range.startContainer, delegate.range.startOffset, anchorDecoratedElement, anchorDecoratedElement.childNodes.length) // 选中重叠部分
+          anchorOverlap = MoreEditor.selection.saveSelection(delegate.closestBlock)  //  存储当前选区（装饰标签与选区重叠的部分）
+          
+          /* 对装饰标签与选区交叉的部分取消装饰效果 */
+          if (anchorDecoratedElement.nodeName.toLowerCase() === 'i') {
+            document.execCommand('italic', false)
+            anchorDecorateCommand = 'italic'
+          } else if(anchorDecoratedElement.nodeName.toLowerCase() === 'strike') {
+            document.execCommand('strikeThrough', false)
+            anchorDecorateCommand = 'strikeThrough'
+          } else if(anchorDecoratedElement.nodeName.toLowerCase() === 'b') {
+            document.execCommand('bold', false)
+            anchorDecorateCommand = 'bold'
+          } else {
+            console.log('%c出错了')
+          }
+        }
+
+        /* 可以确定我们的 focusNode 在 装饰标签内。并且这个装饰标签不包含 anchorNode */
+        if(focusDecoratedElement) {
+          
+          MoreEditor.selection.select(document, focusDecoratedElement, 0, delegate.range.endContainer, delegate.range.endOffset) // 选中重叠部分
+          focusOverlap = MoreEditor.selection.saveSelection(delegate.closestBlock)  //  存储当前选区（装饰标签与选区重叠的部分）
+          
+          /* 对装饰标签与选区交叉的部分取消装饰效果 */
+          if (focusDecoratedElement.nodeName.toLowerCase() === 'i') {
+            document.execCommand('italic', false)
+            focusDecoratedCommand = 'italic'
+          } else if(focusDecoratedElement.nodeName.toLowerCase() === 'strike') {
+            document.execCommand('strikeThrough', false)
+            focusDecoratedCommand = 'strikeThrough'
+          } else if(focusDecoratedElement.nodeName.toLowerCase() === 'b') {
+            document.execCommand('bold', false)
+            focusDecoratedCommand = 'bold'
+          } else {
+            console.log('%c出错了')
+          }
+        }
+
+        /* 重叠部分装饰效果已经取消了，现在可以执行链接操作 */
+        MoreEditor.selection.restoreSelection(delegate.closestBlock, origSelection)  // 恢复要执行链接的选区
+        document.execCommand('createLink', false, url)
+
+        /* 恢复原重叠部分的装饰效果 */
+        if(anchorDecorateCommand) {
+          MoreEditor.selection.restoreSelection(delegate.closestBlock, anchorOverlap) // 恢复开始处重叠部分的选区
+          document.execCommand(anchorDecorateCommand, false)
+        }
+        if(focusDecoratedCommand) {
+          MoreEditor.selection.restoreSelection(delegate.closestBlock, focusOverlap) // 恢复开始处重叠部分的选区
+          document.execCommand(focusDecoratedCommand, false)
+        }
+
+        MoreEditor.selection.restoreSelection(delegate.closestBlock, origSelection)  // 恢复最开始的选区并退出
+        return
+
+      } else {
+
+        document.execCommand('createLink', false, url)
+        return
+      }
+    }
   }
 
   MoreEditor.API = API

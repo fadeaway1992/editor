@@ -421,18 +421,9 @@
         },
 
         wrappedByDecoratedElement: function(container) {
-            if(container.nodeName.toLowerCase() === 'a') {
-                var tagName = container.parentNode.nodeName.toLowerCase()
-                if(tagName === 'i' || tagName === 'b' || tagName === 'strike') {
-                    return true
-                }
-            } else {
-                var tagName = container.nodeName.toLowerCase()
-                if(tagName === 'i' || tagName === 'b' || tagName === 'strike') {
-                    return true
-                }
-            }
-            return false
+            return this.traverseUp(container, function(node) {
+                return (node.nodeName.toLowerCase() === 'b' || node.nodeName.toLowerCase() === 'i' || node.nodeName.toLowerCase() === 'strike')
+            })
         }
     };
 
