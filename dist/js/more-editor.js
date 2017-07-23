@@ -731,7 +731,63 @@ MoreEditor.extensions = {};
         } else {
           this.setAlready.strike = false
         }
-        
+
+        /* 判断 h2 h3 是否可用 */
+        if (this.crossBlock || this.closestBlock.nodeName.toLowerCase() === 'li') {
+          this.available.h2 = false
+          this.available.h3 = false
+        } else {
+          this.available.h2 = true
+          this.available.h3 = true
+        }
+
+        /* 判断 bold italic strike 是否可用 */
+        if(this.crossBlock || this.range.collapsed) {
+          this.available.bold = false
+          this.available.italic = false
+          this.available.strike = false
+        } else {
+          this.available.bold = true
+          this.available.italic = true
+          this.available.strike = true
+        }
+
+        /* 判断 ul ol quote 是否可用 */
+        if (!this.crossBlock) {
+          if(this.closestBlock.nodeName.toLowerCase() === 'p') {
+            this.available.ul = true
+            this.available.ol = true
+            this.available.quote = true
+          } else if(this.closestBlock.nodeName.toLowerCase() === 'li') {
+            if(this.topBlock.getAttribute('data-type') === 'blockquote') {
+              this.available.quote = true
+              this.available.ul = false
+              this.available.ol = false
+            } else {
+              this.available.quote = false
+              this.available.ul = true
+              this.available.ol = true
+            }
+          } else {
+            this.available.ul = false
+            this.available.ol = false
+            this.available.quote = false
+          }
+        }
+
+        // /* 判断 createLink 是否可用 */
+        // if(this.crossBlock || this.range.collapsed) {
+        //   this.available.createLink = false
+        // } else {
+        //   this.available.createLink = true
+        // }
+
+        /* 判断居中是否可用 */
+        if(this.crossBlock) {
+          this.available.center = false
+        } else {
+          this.available.center = true
+        }
 
       /* 没有选区或者选区不在 editableElement 内 */
       } else {
@@ -755,6 +811,18 @@ MoreEditor.extensions = {};
         quote: false,
         ul: false,
         ol: false
+      }
+      this.available = {
+        h2: false,
+        h3: false,
+        bold: false,
+        italic: false,
+        strike: false,
+        quote: false,
+        ul: false,
+        ol: false,
+        // createLink: false,
+        center: false
       }
     }
   }
@@ -1067,6 +1135,10 @@ MoreEditor.extensions = {};
 
     /* 创建链接 */
     createLink: function(url) {
+      if(!url) {
+        return
+      }
+
       var delegate = this.base.delegate
       delegate.updateStatus()
 
@@ -1075,6 +1147,7 @@ MoreEditor.extensions = {};
       
       /* 确定我们的选区不是全部在一个装饰标签内 */ 
       if(!MoreEditor.util.wrappedByDecoratedElement(delegate.range.commonAncestorContainer)) {
+        console.log('确定不全在一个标签内')
 
         var anchorDecorateCommand, focusDecoratedCommand
         var origSelection = MoreEditor.selection.saveSelection(delegate.closestBlock)  //  存储当前选区(要执行创建链接的选区)
@@ -1087,6 +1160,8 @@ MoreEditor.extensions = {};
         var focusDecoratedElement = MoreEditor.util.traverseUp(delegate.range.endContainer, function(element) {
               return (element.nodeName.toLowerCase() === 'i' || element.nodeName.toLowerCase() === 'b' || element.nodeName.toLowerCase() === 'strike')
         })
+
+        /* 这个地方要做一个判断：anchorNode 是否在左边， focusNode是否在右边，否则会出现错误 */
 
         /* 可以确定我们的 anchorNode 在 装饰标签内。并且这个装饰标签不包含 focusNode */
         if(anchorDecoratedElement) {
@@ -1154,8 +1229,20 @@ MoreEditor.extensions = {};
       }
     },
 
+    /* 居中 */
+    center: function() {
+      var delegate = this.base.delegate
+      delegate.updateStatus()
+
+      /* 基本判断 */
+      if(delegate.crossBlock || !delegate.range) return
+
+      delegate.topBlock.classList.toggle('center')
+    },
+
     exportSelection: function() {
       this.base.delegate.updateStatus()
+      console.log(this.base.delegate.range, '输出的选区')
       this.savedSelection = MoreEditor.selection.saveSelection(this.base.editableElement)
     },
 
@@ -1352,6 +1439,7 @@ function handleKeydown(event) {
 
 function handleKeyup(event) {
     keepAtleastOneParagraph.call(this, event)
+    this.delegate.updateStatus.call(this.delegate)
 }
 
 
@@ -1368,7 +1456,9 @@ function initExtensions() {
 
 function attachHandlers() {
     this.on(this.editableElement, 'keydown', handleKeydown.bind(this))
-    this.on(this.editableElement, 'keyup', handleKeyup.bind(this))
+    this.on(document.body, 'keyup', handleKeyup.bind(this), true)
+    this.on(document.body, 'mouseup', this.delegate.updateStatus.bind(this.delegate), true)
+    this.on(this.editableElement, 'blur', this.delegate.updateStatus.bind(this.delegate))
 }
 
 

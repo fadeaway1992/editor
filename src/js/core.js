@@ -184,6 +184,7 @@ function handleKeydown(event) {
 
 function handleKeyup(event) {
     keepAtleastOneParagraph.call(this, event)
+    this.delegate.updateStatus.call(this.delegate)
 }
 
 
@@ -200,7 +201,9 @@ function initExtensions() {
 
 function attachHandlers() {
     this.on(this.editableElement, 'keydown', handleKeydown.bind(this))
-    this.on(this.editableElement, 'keyup', handleKeyup.bind(this))
+    this.on(document.body, 'keyup', handleKeyup.bind(this), true)
+    this.on(document.body, 'mouseup', this.delegate.updateStatus.bind(this.delegate), true)
+    this.on(this.editableElement, 'blur', this.delegate.updateStatus.bind(this.delegate))
 }
 
 

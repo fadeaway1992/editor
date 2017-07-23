@@ -302,6 +302,10 @@
 
     /* 创建链接 */
     createLink: function(url) {
+      if(!url) {
+        return
+      }
+
       var delegate = this.base.delegate
       delegate.updateStatus()
 
@@ -310,6 +314,7 @@
       
       /* 确定我们的选区不是全部在一个装饰标签内 */ 
       if(!MoreEditor.util.wrappedByDecoratedElement(delegate.range.commonAncestorContainer)) {
+        console.log('确定不全在一个标签内')
 
         var anchorDecorateCommand, focusDecoratedCommand
         var origSelection = MoreEditor.selection.saveSelection(delegate.closestBlock)  //  存储当前选区(要执行创建链接的选区)
@@ -322,6 +327,8 @@
         var focusDecoratedElement = MoreEditor.util.traverseUp(delegate.range.endContainer, function(element) {
               return (element.nodeName.toLowerCase() === 'i' || element.nodeName.toLowerCase() === 'b' || element.nodeName.toLowerCase() === 'strike')
         })
+
+        /* 这个地方要做一个判断：anchorNode 是否在左边， focusNode是否在右边，否则会出现错误 */
 
         /* 可以确定我们的 anchorNode 在 装饰标签内。并且这个装饰标签不包含 focusNode */
         if(anchorDecoratedElement) {
@@ -389,8 +396,20 @@
       }
     },
 
+    /* 居中 */
+    center: function() {
+      var delegate = this.base.delegate
+      delegate.updateStatus()
+
+      /* 基本判断 */
+      if(delegate.crossBlock || !delegate.range) return
+
+      delegate.topBlock.classList.toggle('center')
+    },
+
     exportSelection: function() {
       this.base.delegate.updateStatus()
+      console.log(this.base.delegate.range, '输出的选区')
       this.savedSelection = MoreEditor.selection.saveSelection(this.base.editableElement)
     },
 

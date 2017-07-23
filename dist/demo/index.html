@@ -4,10 +4,11 @@
   <meta charset="UTF-8">
   <title>more-editor</title>
   <link rel="stylesheet" href="../css/demo.css">
+  <link rel="stylesheet" href="../css/more-editor.css">
 </head>
 <body>
   <div class="toolbar">
-    <button class="h2" >H2</button>
+    <button class="h2">H2</button>
     <button class="h3">H3</button>
     <button class="ul">无序列表</button>
     <button class="ol">顺序列表</button>
@@ -35,6 +36,7 @@
 
 <!-- 给按钮绑定编辑器事件 -->
 <script>
+  var editable = document.querySelector('.editable')
 
   var h2 = document.querySelector('.h2')
   h2.addEventListener('click', editor.API.h2.bind(editor.API))
@@ -61,8 +63,8 @@
   strike.addEventListener('click', editor.API.strike.bind(editor.API))
 
   var url = document.querySelector('.url')
-  url.addEventListener('focus', editor.API.exportSelection.bind(editor.API))
   url.addEventListener('blur', editor.API.importSelection.bind(editor.API))
+  url.addEventListener('mousedown', editor.API.exportSelection.bind(editor.API))
 
   var link = document.querySelector('.link')
   link.addEventListener('click', function() {
@@ -70,8 +72,60 @@
     url.value = ''
   })
 
-  
+  var center = document.querySelector('.center')
+  center.addEventListener('click', editor.API.center.bind(editor.API))
 
+  /* 检测按钮是否可用 */
+  document.body.onkeyup = function() {
+
+    if(editor.delegate.available.h2) {
+      h2.removeAttribute('disabled')
+      h3.removeAttribute('disabled')
+    } else {
+      h2.setAttribute('disabled', 'disabled')
+      h3.setAttribute('disabled', 'disabled')
+    }
+
+    if(editor.delegate.available.bold) {
+      bold.removeAttribute('disabled')
+      italic.removeAttribute('disabled')
+      strike.removeAttribute('disabled')
+    } else {
+      bold.setAttribute('disabled', 'disabled')
+      italic.setAttribute('disabled', 'disabled')
+      strike.setAttribute('disabled', 'disabled')
+    }
+
+    if(editor.delegate.available.ul) {
+      ul.removeAttribute('disabled')
+      ol.removeAttribute('disabled')
+    } else {
+      ul.setAttribute('disabled', 'disabled')
+      ol.setAttribute('disabled', 'disabled')
+    }
+
+    if(editor.delegate.available.quote) {
+      quote.removeAttribute('disabled')
+    } else {
+      quote.setAttribute('disabled', 'disabled')
+    }
+
+    // if(editor.delegate.available.createLink) {
+    //   url.removeAttribute('disabled')
+    //   link.removeAttribute('disabled')
+    // } else {
+    //   url.setAttribute('disabled', 'disabled')
+    //   link.setAttribute('disabled', 'disabled')
+    // }
+
+    if(editor.delegate.available.center) {
+      center.removeAttribute('disabled')
+    } else {
+      center.setAttribute('disabled', 'disabled')
+    }
+  }
+
+  document.body.onmouseup = document.body.onkeyup
 
 </script>
 
