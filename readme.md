@@ -1,6 +1,34 @@
 # more-editor
  v 1.0
 
+ ## 开始使用
+
+ ### 调试
+ 在根目录下运行 ```gulp``` 、 ```npm run test``` 、或者手动打开 ```dist/demo/index.html```。
+
+ ### 使用
+ 1. 在你的编辑器页面引入  ```dist/js/more-editor.js```
+ 2. 在你的编辑页面引入    ```dist/css/more-editor.css```
+ 3. 初始化编辑器：
+ ```
+ var editor = new MoreEditor('.editable', {
+      imageUploadAddress: 'zi.com',  // 图片上传到服务器的地址
+      buttons: {
+        h2: '.h2',  // 大标题按钮的选择器
+        h3: '.h3',  // 小标题按钮的选择器
+        ul: '.ul',  // 无序列表按钮的选择器
+        ol: '.ol',  // 顺序列表按钮的选择器按钮
+        quote: '.quote',  // 引用按钮的选择器
+        bold: '.bold',  // 加粗按钮的选择器
+        italic: '.italic',  // 斜体按钮的选择器
+        strike: '.strike',  // 删除线按钮的选择器
+        url: '.url',  // 链接地址输入框的选择器
+        link: '.link',  // 生成链接按钮选择器
+        center: '.center'  // 居中按钮选择器
+      }
+    })
+ ```
+
 ## 功能逻辑
 
 ## 1. 功能概述

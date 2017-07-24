@@ -190,6 +190,9 @@ function handleKeyup(event) {
     updateButtonStatus.call(this)
 }
 
+/* 
+    每次 keyup, mouseup 以及编辑器 blur 时都会执行下面的函数检测当前选区的变化，相应的调整哪些按钮可用，哪些按钮不可用。
+*/
 function updateButtonStatus() {
     this.delegate.updateStatus()
     var available = this.delegate.available
