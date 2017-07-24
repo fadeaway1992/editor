@@ -92,6 +92,9 @@ function handleBackAndEnterKeydown(event) {
                     topBlockContainer.parentNode.appendChild(newLine)
                     console.log('插入新行')
                 }
+                if(topBlockContainer.classList.contains('text-center')){
+                    newLine.classList.add('text-center')
+                }
                 MoreEditor.selection.moveCursor(document, newLine, 0)
                 event.preventDefault()
                 return
