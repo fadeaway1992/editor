@@ -184,7 +184,50 @@ function handleKeydown(event) {
 
 function handleKeyup(event) {
     keepAtleastOneParagraph.call(this, event)
-    this.delegate.updateStatus.call(this.delegate)
+    updateButtonStatus.call(this)
+}
+
+function updateButtonStatus() {
+    this.delegate.updateStatus()
+    var available = this.delegate.available
+
+    if(available.h) {
+      this.buttons.h3.removeAttribute('disabled')
+      this.buttons.h2.removeAttribute('disabled')
+    } else {
+      this.buttons.h2.setAttribute('disabled', 'disabled')
+      this.buttons.h3.setAttribute('disabled', 'disabled')
+    }
+
+    if(available.decorate) {
+      this.buttons.bold.removeAttribute('disabled')
+      this.buttons.italic.removeAttribute('disabled')
+      this.buttons.strike.removeAttribute('disabled')
+    } else {
+      this.buttons.bold.setAttribute('disabled', 'disabled')
+      this.buttons.italic.setAttribute('disabled', 'disabled')
+      this.buttons.strike.setAttribute('disabled', 'disabled')
+    }
+
+    if(available.list) {
+      this.buttons.ul.removeAttribute('disabled')
+      this.buttons.ol.removeAttribute('disabled')
+    } else {
+      this.buttons.ul.setAttribute('disabled', 'disabled')
+      this.buttons.ol.setAttribute('disabled', 'disabled')
+    }
+
+    if(available.quote) {
+      this.buttons.quote.removeAttribute('disabled')
+    } else {
+      this.buttons.quote.setAttribute('disabled', 'disabled')
+    }
+
+    if(available.center) {
+      this.buttons.center.removeAttribute('disabled')
+    } else {
+      this.buttons.center.setAttribute('disabled', 'disabled')
+    }
 }
 
 
@@ -201,9 +244,9 @@ function initExtensions() {
 
 function attachHandlers() {
     this.on(this.editableElement, 'keydown', handleKeydown.bind(this))
-    this.on(document.body, 'keyup', handleKeyup.bind(this), true)
-    this.on(document.body, 'mouseup', this.delegate.updateStatus.bind(this.delegate), true)
-    this.on(this.editableElement, 'blur', this.delegate.updateStatus.bind(this.delegate))
+    this.on(document.body, 'keyup', handleKeyup.bind(this))
+    this.on(document.body, 'mouseup', updateButtonStatus.bind(this))
+    this.on(this.editableElement, 'blur', updateButtonStatus.bind(this))
 }
 
 
@@ -215,6 +258,7 @@ MoreEditor.prototype = {
         this.initElement(element)
         this.setup()
     },
+
     initElement: function(element) {
         var editableElement = document.querySelector(element)
         this.editableElement = editableElement
@@ -224,6 +268,37 @@ MoreEditor.prototype = {
         editableElement.setAttribute('data-more-editor-element', true)
         editableElement.classList.add('more-editor-element')
         editableElement.innerHTML = '<p><br></p>'
+    },
+
+    activateButtons: function() {
+        this.buttons = {}
+        this.buttons.h2 = document.querySelector(this.options.buttons.h2)
+        this.buttons.h3 = document.querySelector(this.options.buttons.h3)
+        this.buttons.ul = document.querySelector(this.options.buttons.ul)
+        this.buttons.ol = document.querySelector(this.options.buttons.ol)
+        this.buttons.quote = document.querySelector(this.options.buttons.quote)
+        this.buttons.bold = document.querySelector(this.options.buttons.bold)
+        this.buttons.italic = document.querySelector(this.options.buttons.italic)
+        this.buttons.strike = document.querySelector(this.options.buttons.strike)
+        this.buttons.url = document.querySelector(this.options.buttons.url)
+        this.buttons.link = document.querySelector(this.options.buttons.link)
+        this.buttons.center = document.querySelector(this.options.buttons.center)
+
+        this.buttons.h2.addEventListener('click', this.API.h2.bind(this.API))
+        this.buttons.h3.addEventListener('click', this.API.h3.bind(this.API))
+        this.buttons.ul.addEventListener('click', this.API.ul.bind(this.API))
+        this.buttons.ol.addEventListener('click', this.API.ol.bind(this.API))
+        this.buttons.quote.addEventListener('click', this.API.quote.bind(this.API))
+        this.buttons.bold.addEventListener('click', this.API.bold.bind(this.API))
+        this.buttons.italic.addEventListener('click', this.API.italic.bind(this.API))
+        this.buttons.strike.addEventListener('click', this.API.strike.bind(this.API))
+        this.buttons.center.addEventListener('click', this.API.center.bind(this.API))
+
+        var _this = this
+        this.buttons.link.addEventListener('click', function() {
+            _this.API.createLink(_this.buttons.url.value)
+            _this.buttons.url.value = ''
+        })
     },
     /* 
         setup 方法：
@@ -235,6 +310,7 @@ MoreEditor.prototype = {
         this.events = new MoreEditor.Events(this)
         this.delegate = new MoreEditor.Delegate(this)
         this.API = new MoreEditor.API(this)
+        this.activateButtons()
         initExtensions.call(this)
         attachHandlers.call(this)
     },

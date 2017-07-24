@@ -29,7 +29,20 @@
   <!-- 创建 editor 实例  -->
   <script>
     var editor = new MoreEditor('.editable', {
-      imageUploadAddress: 'zi.com'
+      imageUploadAddress: 'zi.com',
+      buttons: {
+        h2: '.h2',
+        h3: '.h3',
+        ul: '.ul',
+        ol: '.ol',
+        quote: '.quote',
+        bold: '.bold',
+        italic: '.italic',
+        strike: '.strike',
+        url: '.url',
+        link: '.link',
+        center: '.center'
+      }
     })
     console.log(editor)
 </script>
@@ -38,94 +51,10 @@
 <script>
   var editable = document.querySelector('.editable')
 
-  var h2 = document.querySelector('.h2')
-  h2.addEventListener('click', editor.API.h2.bind(editor.API))
-
-  var h3 = document.querySelector('.h3')
-  h3.addEventListener('click', editor.API.h3.bind(editor.API))
-
-  var ul = document.querySelector('.ul')
-  ul.addEventListener('click', editor.API.ul.bind(editor.API))
-
-  var ol = document.querySelector('.ol')
-  ol.addEventListener('click', editor.API.ol.bind(editor.API))
-
-  var quote = document.querySelector('.quote')
-  quote.addEventListener('click', editor.API.quote.bind(editor.API))
-
-  var bold = document.querySelector('.bold')
-  bold.addEventListener('click', editor.API.bold.bind(editor.API))
-
-  var italic = document.querySelector('.italic')
-  italic.addEventListener('click', editor.API.italic.bind(editor.API))
-
-  var strike = document.querySelector('.strike')
-  strike.addEventListener('click', editor.API.strike.bind(editor.API))
-
   var url = document.querySelector('.url')
   url.addEventListener('blur', editor.API.importSelection.bind(editor.API))
   url.addEventListener('mousedown', editor.API.exportSelection.bind(editor.API))
 
-  var link = document.querySelector('.link')
-  link.addEventListener('click', function() {
-    editor.API.createLink.call(editor.API, url.value)
-    url.value = ''
-  })
-
-  var center = document.querySelector('.center')
-  center.addEventListener('click', editor.API.center.bind(editor.API))
-
-  /* 检测按钮是否可用 */
-  document.body.onkeyup = function() {
-
-    if(editor.delegate.available.h2) {
-      h2.removeAttribute('disabled')
-      h3.removeAttribute('disabled')
-    } else {
-      h2.setAttribute('disabled', 'disabled')
-      h3.setAttribute('disabled', 'disabled')
-    }
-
-    if(editor.delegate.available.bold) {
-      bold.removeAttribute('disabled')
-      italic.removeAttribute('disabled')
-      strike.removeAttribute('disabled')
-    } else {
-      bold.setAttribute('disabled', 'disabled')
-      italic.setAttribute('disabled', 'disabled')
-      strike.setAttribute('disabled', 'disabled')
-    }
-
-    if(editor.delegate.available.ul) {
-      ul.removeAttribute('disabled')
-      ol.removeAttribute('disabled')
-    } else {
-      ul.setAttribute('disabled', 'disabled')
-      ol.setAttribute('disabled', 'disabled')
-    }
-
-    if(editor.delegate.available.quote) {
-      quote.removeAttribute('disabled')
-    } else {
-      quote.setAttribute('disabled', 'disabled')
-    }
-
-    // if(editor.delegate.available.createLink) {
-    //   url.removeAttribute('disabled')
-    //   link.removeAttribute('disabled')
-    // } else {
-    //   url.setAttribute('disabled', 'disabled')
-    //   link.setAttribute('disabled', 'disabled')
-    // }
-
-    if(editor.delegate.available.center) {
-      center.removeAttribute('disabled')
-    } else {
-      center.setAttribute('disabled', 'disabled')
-    }
-  }
-
-  document.body.onmouseup = document.body.onkeyup
 
 </script>
 

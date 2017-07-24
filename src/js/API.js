@@ -404,17 +404,29 @@
       /* 基本判断 */
       if(delegate.crossBlock || !delegate.range) return
 
-      delegate.topBlock.classList.toggle('center')
+      if(delegate.closestBlock.nodeName.toLowerCase() === 'li') {
+        return delegate.topBlock.classList.toggle('block-center')
+      }
+
+      delegate.topBlock.classList.toggle('text-center')
     },
 
+    /* 
+      创建链接时，我们首先选中一段文字，然后点击输入链接地址的输入框，这时候选区就消失了🤷‍。
+      当我们输入完链接地址，再点击生成链接按钮的时候，程序会去编辑器中寻找我们的选区，给我们选中的选区加链接。
+      然而因为刚才点击输入框的时候选区消失了，所以这时候我们的选区时不存在的。
+      所以我们要在点击输入框之前先把选区存储起来，等输入完链接地址，点击生成链接按钮的时候再恢复存储起来的选区。
+    */
     exportSelection: function() {
       this.base.delegate.updateStatus()
       console.log(this.base.delegate.range, '输出的选区')
-      this.savedSelection = MoreEditor.selection.saveSelection(this.base.editableElement)
+      this.savedSelectionContainer = this.base.delegate.closestBlock
+      this.savedSelection = MoreEditor.selection.saveSelection(this.savedSelectionContainer)
     },
 
     importSelection: function() {
-      MoreEditor.selection.restoreSelection(this.base.editableElement, this.savedSelection)
+      MoreEditor.selection.restoreSelection(this.savedSelectionContainer, this.savedSelection)
+      console.log(document.getSelection().getRangeAt(0), '恢复的选区')
     }
   }
 

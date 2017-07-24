@@ -97,53 +97,36 @@
 
         /* 判断 h2 h3 是否可用 */
         if (this.crossBlock || this.closestBlock.nodeName.toLowerCase() === 'li') {
-          this.available.h2 = false
-          this.available.h3 = false
+          this.available.h = false
         } else {
-          this.available.h2 = true
-          this.available.h3 = true
+          this.available.h = true
         }
 
         /* 判断 bold italic strike 是否可用 */
         if(this.crossBlock || this.range.collapsed) {
-          this.available.bold = false
-          this.available.italic = false
-          this.available.strike = false
+          this.available.decorate = false
         } else {
-          this.available.bold = true
-          this.available.italic = true
-          this.available.strike = true
+          this.available.decorate = true
         }
 
         /* 判断 ul ol quote 是否可用 */
         if (!this.crossBlock) {
           if(this.closestBlock.nodeName.toLowerCase() === 'p') {
-            this.available.ul = true
-            this.available.ol = true
+            this.available.list = true
             this.available.quote = true
           } else if(this.closestBlock.nodeName.toLowerCase() === 'li') {
             if(this.topBlock.getAttribute('data-type') === 'blockquote') {
               this.available.quote = true
-              this.available.ul = false
-              this.available.ol = false
+              this.available.list = false
             } else {
               this.available.quote = false
-              this.available.ul = true
-              this.available.ol = true
+              this.available.list = true
             }
           } else {
-            this.available.ul = false
-            this.available.ol = false
+            this.available.list = false
             this.available.quote = false
           }
         }
-
-        // /* 判断 createLink 是否可用 */
-        // if(this.crossBlock || this.range.collapsed) {
-        //   this.available.createLink = false
-        // } else {
-        //   this.available.createLink = true
-        // }
 
         /* 判断居中是否可用 */
         if(this.crossBlock) {
@@ -176,15 +159,10 @@
         ol: false
       }
       this.available = {
-        h2: false,
-        h3: false,
-        bold: false,
-        italic: false,
-        strike: false,
+        h: false,
+        decorate: false,
         quote: false,
-        ul: false,
-        ol: false,
-        // createLink: false,
+        list: false,
         center: false
       }
     }

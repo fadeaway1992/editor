@@ -734,53 +734,36 @@ MoreEditor.extensions = {};
 
         /* 判断 h2 h3 是否可用 */
         if (this.crossBlock || this.closestBlock.nodeName.toLowerCase() === 'li') {
-          this.available.h2 = false
-          this.available.h3 = false
+          this.available.h = false
         } else {
-          this.available.h2 = true
-          this.available.h3 = true
+          this.available.h = true
         }
 
         /* 判断 bold italic strike 是否可用 */
         if(this.crossBlock || this.range.collapsed) {
-          this.available.bold = false
-          this.available.italic = false
-          this.available.strike = false
+          this.available.decorate = false
         } else {
-          this.available.bold = true
-          this.available.italic = true
-          this.available.strike = true
+          this.available.decorate = true
         }
 
         /* 判断 ul ol quote 是否可用 */
         if (!this.crossBlock) {
           if(this.closestBlock.nodeName.toLowerCase() === 'p') {
-            this.available.ul = true
-            this.available.ol = true
+            this.available.list = true
             this.available.quote = true
           } else if(this.closestBlock.nodeName.toLowerCase() === 'li') {
             if(this.topBlock.getAttribute('data-type') === 'blockquote') {
               this.available.quote = true
-              this.available.ul = false
-              this.available.ol = false
+              this.available.list = false
             } else {
               this.available.quote = false
-              this.available.ul = true
-              this.available.ol = true
+              this.available.list = true
             }
           } else {
-            this.available.ul = false
-            this.available.ol = false
+            this.available.list = false
             this.available.quote = false
           }
         }
-
-        // /* 判断 createLink 是否可用 */
-        // if(this.crossBlock || this.range.collapsed) {
-        //   this.available.createLink = false
-        // } else {
-        //   this.available.createLink = true
-        // }
 
         /* 判断居中是否可用 */
         if(this.crossBlock) {
@@ -813,15 +796,10 @@ MoreEditor.extensions = {};
         ol: false
       }
       this.available = {
-        h2: false,
-        h3: false,
-        bold: false,
-        italic: false,
-        strike: false,
+        h: false,
+        decorate: false,
         quote: false,
-        ul: false,
-        ol: false,
-        // createLink: false,
+        list: false,
         center: false
       }
     }
@@ -1237,17 +1215,29 @@ MoreEditor.extensions = {};
       /* 基本判断 */
       if(delegate.crossBlock || !delegate.range) return
 
-      delegate.topBlock.classList.toggle('center')
+      if(delegate.closestBlock.nodeName.toLowerCase() === 'li') {
+        return delegate.topBlock.classList.toggle('block-center')
+      }
+
+      delegate.topBlock.classList.toggle('text-center')
     },
 
+    /* 
+      创建链接时，我们首先选中一段文字，然后点击输入链接地址的输入框，这时候选区就消失了🤷‍。
+      当我们输入完链接地址，再点击生成链接按钮的时候，程序会去编辑器中寻找我们的选区，给我们选中的选区加链接。
+      然而因为刚才点击输入框的时候选区消失了，所以这时候我们的选区时不存在的。
+      所以我们要在点击输入框之前先把选区存储起来，等输入完链接地址，点击生成链接按钮的时候再恢复存储起来的选区。
+    */
     exportSelection: function() {
       this.base.delegate.updateStatus()
       console.log(this.base.delegate.range, '输出的选区')
-      this.savedSelection = MoreEditor.selection.saveSelection(this.base.editableElement)
+      this.savedSelectionContainer = this.base.delegate.closestBlock
+      this.savedSelection = MoreEditor.selection.saveSelection(this.savedSelectionContainer)
     },
 
     importSelection: function() {
-      MoreEditor.selection.restoreSelection(this.base.editableElement, this.savedSelection)
+      MoreEditor.selection.restoreSelection(this.savedSelectionContainer, this.savedSelection)
+      console.log(document.getSelection().getRangeAt(0), '恢复的选区')
     }
   }
 
@@ -1439,7 +1429,50 @@ function handleKeydown(event) {
 
 function handleKeyup(event) {
     keepAtleastOneParagraph.call(this, event)
-    this.delegate.updateStatus.call(this.delegate)
+    updateButtonStatus.call(this)
+}
+
+function updateButtonStatus() {
+    this.delegate.updateStatus()
+    var available = this.delegate.available
+
+    if(available.h) {
+      this.buttons.h3.removeAttribute('disabled')
+      this.buttons.h2.removeAttribute('disabled')
+    } else {
+      this.buttons.h2.setAttribute('disabled', 'disabled')
+      this.buttons.h3.setAttribute('disabled', 'disabled')
+    }
+
+    if(available.decorate) {
+      this.buttons.bold.removeAttribute('disabled')
+      this.buttons.italic.removeAttribute('disabled')
+      this.buttons.strike.removeAttribute('disabled')
+    } else {
+      this.buttons.bold.setAttribute('disabled', 'disabled')
+      this.buttons.italic.setAttribute('disabled', 'disabled')
+      this.buttons.strike.setAttribute('disabled', 'disabled')
+    }
+
+    if(available.list) {
+      this.buttons.ul.removeAttribute('disabled')
+      this.buttons.ol.removeAttribute('disabled')
+    } else {
+      this.buttons.ul.setAttribute('disabled', 'disabled')
+      this.buttons.ol.setAttribute('disabled', 'disabled')
+    }
+
+    if(available.quote) {
+      this.buttons.quote.removeAttribute('disabled')
+    } else {
+      this.buttons.quote.setAttribute('disabled', 'disabled')
+    }
+
+    if(available.center) {
+      this.buttons.center.removeAttribute('disabled')
+    } else {
+      this.buttons.center.setAttribute('disabled', 'disabled')
+    }
 }
 
 
@@ -1456,9 +1489,9 @@ function initExtensions() {
 
 function attachHandlers() {
     this.on(this.editableElement, 'keydown', handleKeydown.bind(this))
-    this.on(document.body, 'keyup', handleKeyup.bind(this), true)
-    this.on(document.body, 'mouseup', this.delegate.updateStatus.bind(this.delegate), true)
-    this.on(this.editableElement, 'blur', this.delegate.updateStatus.bind(this.delegate))
+    this.on(document.body, 'keyup', handleKeyup.bind(this))
+    this.on(document.body, 'mouseup', updateButtonStatus.bind(this))
+    this.on(this.editableElement, 'blur', updateButtonStatus.bind(this))
 }
 
 
@@ -1470,6 +1503,7 @@ MoreEditor.prototype = {
         this.initElement(element)
         this.setup()
     },
+
     initElement: function(element) {
         var editableElement = document.querySelector(element)
         this.editableElement = editableElement
@@ -1479,6 +1513,37 @@ MoreEditor.prototype = {
         editableElement.setAttribute('data-more-editor-element', true)
         editableElement.classList.add('more-editor-element')
         editableElement.innerHTML = '<p><br></p>'
+    },
+
+    activateButtons: function() {
+        this.buttons = {}
+        this.buttons.h2 = document.querySelector(this.options.buttons.h2)
+        this.buttons.h3 = document.querySelector(this.options.buttons.h3)
+        this.buttons.ul = document.querySelector(this.options.buttons.ul)
+        this.buttons.ol = document.querySelector(this.options.buttons.ol)
+        this.buttons.quote = document.querySelector(this.options.buttons.quote)
+        this.buttons.bold = document.querySelector(this.options.buttons.bold)
+        this.buttons.italic = document.querySelector(this.options.buttons.italic)
+        this.buttons.strike = document.querySelector(this.options.buttons.strike)
+        this.buttons.url = document.querySelector(this.options.buttons.url)
+        this.buttons.link = document.querySelector(this.options.buttons.link)
+        this.buttons.center = document.querySelector(this.options.buttons.center)
+
+        this.buttons.h2.addEventListener('click', this.API.h2.bind(this.API))
+        this.buttons.h3.addEventListener('click', this.API.h3.bind(this.API))
+        this.buttons.ul.addEventListener('click', this.API.ul.bind(this.API))
+        this.buttons.ol.addEventListener('click', this.API.ol.bind(this.API))
+        this.buttons.quote.addEventListener('click', this.API.quote.bind(this.API))
+        this.buttons.bold.addEventListener('click', this.API.bold.bind(this.API))
+        this.buttons.italic.addEventListener('click', this.API.italic.bind(this.API))
+        this.buttons.strike.addEventListener('click', this.API.strike.bind(this.API))
+        this.buttons.center.addEventListener('click', this.API.center.bind(this.API))
+
+        var _this = this
+        this.buttons.link.addEventListener('click', function() {
+            _this.API.createLink(_this.buttons.url.value)
+            _this.buttons.url.value = ''
+        })
     },
     /* 
         setup 方法：
@@ -1490,6 +1555,7 @@ MoreEditor.prototype = {
         this.events = new MoreEditor.Events(this)
         this.delegate = new MoreEditor.Delegate(this)
         this.API = new MoreEditor.API(this)
+        this.activateButtons()
         initExtensions.call(this)
         attachHandlers.call(this)
     },

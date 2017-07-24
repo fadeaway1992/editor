@@ -17,7 +17,8 @@
     border: 1px solid lightgray;
     background: white;
     width: 70px;
-    cursor: pointer; }
+    cursor: pointer;
+    outline: none; }
   .toolbar .h2-disabled {
     opacity: .5; }
   .toolbar div {
