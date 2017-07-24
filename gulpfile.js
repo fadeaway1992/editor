@@ -2,7 +2,7 @@ var gulp = require('gulp')
 var autoprefixer = require('gulp-autoprefixer')
 var sass = require('gulp-sass')
 var concat = require('gulp-concat')
-var browserSync = require('browser-sync').create();
+var browserSync = require('browser-sync').create()
 
 var concatArr = [
     'src/js/start.js',
@@ -12,6 +12,7 @@ var concatArr = [
     'src/js/events.js',
     'src/js/delegate.js',
     'src/js/API.js',
+    'src/js/fileDragging.js',
     'src/js/core.js',
     'src/js/end.js'
 ]

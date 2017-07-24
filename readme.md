@@ -11,7 +11,7 @@
  2. 在你的编辑页面引入    ```dist/css/more-editor.css```
  3. 初始化编辑器：
  ```
- var editor = new MoreEditor('.editable', {
+ var editor = new MoreEditor('.editable', {  // 第一个参数是你的编辑器元素的选择器
       imageUploadAddress: 'zi.com',  // 图片上传到服务器的地址
       buttons: {
         h2: '.h2',  // 大标题按钮的选择器

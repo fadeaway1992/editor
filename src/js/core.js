@@ -246,6 +246,7 @@ var initialOptions = {
 
 function initExtensions() {
     this.extensions = {}
+    this.extensions.fileDragging = new MoreEditor.extensions.fileDragging(this)
 }
 
 function attachHandlers() {

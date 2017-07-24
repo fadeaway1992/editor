@@ -1,7 +1,7 @@
 {
   "name": "more-editor",
   "version": "0.0.0",
-  "description": "web editor developed for 'zi.com' and 'duodian.com'",
+  "description": "web editor built for 'zi.com' and 'duodian.com'",
   "main": "dist/js/more-editor.js",
   "scripts": {
     "test": "open demo/index.html"

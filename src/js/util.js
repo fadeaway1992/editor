@@ -215,6 +215,15 @@
             });
         },
 
+        /* 将 newNode 插入到 node 后面 */
+        after:function(node,newNode) {
+            if(node.nextSibling) {
+                node.parentNode.insertBefore(newNode,node.nextSibling)
+            } else {
+                node.parentNode.appendChild(newNode)
+            }
+        },
+
         /* Finds highest level ancestor element which is a block container element
          * If element is within editor element but not within any other block element,
          * the editor element is returned
