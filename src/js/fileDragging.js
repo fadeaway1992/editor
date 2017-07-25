@@ -53,18 +53,29 @@
       event.stopPropagation()
       
       if(event.dataTransfer.files[0].type.match('image')) {
+        var file = event.dataTransfer.files[0]
+
+        /* 判断图片大小是否超限 */
+        var maxFileSize = 10 * 1024 * 1024
+        if(file.size > maxFileSize) {
+          this.sizeAlert()
+          line.parentNode.removeChild(line)
+          return
+        }
+        
         var imageWrapper = document.createElement('div')
         imageWrapper.innerHTML = imageWrapperHTML
-        var file = event.dataTransfer.files[0]
+        
         var fileReader = new FileReader()
         fileReader.readAsDataURL(file)
+
         fileReader.addEventListener('load', function (e) {
           var addImageElement = new Image
           addImageElement.onload = function() {
             if(this.width<768) {
-              this.style = "width:"+ this.width +'px'
+              this.style.width = this.width +'px'
             } else {
-              this.style = "width:768px;"
+              this.style.width = "768px"
             }
           }
           addImageElement.classList.add('insert-image')
@@ -78,6 +89,11 @@
           }
         }.bind(this))
       }
+    },
+
+    sizeAlert: function() {
+      var sizeAlert = document.querySelector(this.base.options.sizeAlert)
+      sizeAlert.style.display = "block"
     }
 
   }

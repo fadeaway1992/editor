@@ -30,6 +30,7 @@
   <script>
     var editor = new MoreEditor('.editable', {
       imageUploadAddress: 'zi.com',
+      sizeAlert:'.size-alert',
       buttons: {
         h2: '.h2',
         h3: '.h3',
@@ -57,7 +58,7 @@
 
 
 </script>
-
+<div class="size-alert" style="display:none;"><p>上传的图片大小不能超过 10Mb </p><button onclick = "this.parentNode.style.display = 'none'">确定</button></div>
 </body>
 </html>
 

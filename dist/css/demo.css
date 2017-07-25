@@ -41,3 +41,20 @@
   list-style: none;
   padding-left: 10px;
   margin: 20px 0 20px 10px; }
+
+.size-alert {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  -webkit-transform: translate(-50%, -50%);
+      -ms-transform: translate(-50%, -50%);
+          transform: translate(-50%, -50%);
+  z-index: 100;
+  width: 200px;
+  height: 100px;
+  padding: 5px;
+  background: lightcoral; }
+  .size-alert button {
+    float: right;
+    margin-right: 10px;
+    margin-top: 20px; }
