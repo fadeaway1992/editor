@@ -17,14 +17,13 @@
 .more-editor-inserted-image {
   position: relative;
   overflow: hidden;
-  margin: 0 auto;
-  max-width: 50%;
+  display: block;
   margin-top: 1em;
   margin-bottom: 1em;
 }
 
 .insert-image{
-  width: 100%;
+ margin: 2px;
 }
 
 .insert-image-active {
@@ -33,9 +32,9 @@
 
 .image-placeholder {
   position: absolute;
-  top: 0px;
-  left: 0px;
-  //z-index: -10;
+  top: 2px;
+  left: 2px;
+  z-index: -10;
   outline: none;
   list-style: none;
   border: 1px solid black;

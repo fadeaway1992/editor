@@ -48,25 +48,34 @@
     },
 
     handleDrop: function(event) {
-      
+
       event.preventDefault()
       event.stopPropagation()
       
       if(event.dataTransfer.files[0].type.match('image')) {
+        var imageWrapper = document.createElement('div')
+        imageWrapper.innerHTML = imageWrapperHTML
         var file = event.dataTransfer.files[0]
         var fileReader = new FileReader()
         fileReader.readAsDataURL(file)
         fileReader.addEventListener('load', function (e) {
-          var addImageElement = document.createElement('img')
+          var addImageElement = new Image
+          addImageElement.onload = function() {
+            if(this.width<768) {
+              this.style = "width:"+ this.width +'px'
+            } else {
+              this.style = "width:768px;"
+            }
+          }
           addImageElement.classList.add('insert-image')
           addImageElement.src = e.target.result
-          var imageWrapper = document.createElement('div')
-          imageWrapper.innerHTML = imageWrapperHTML
           var imagePlaceHolder = imageWrapper.querySelector('li')
           MoreEditor.util.after(imagePlaceHolder, addImageElement)
-          MoreEditor.util.after(line, imageWrapper)
-          MoreEditor.util.unwrap(imageWrapper, document)
-          line.parentNode.removeChild(line)
+          if(line.parentNode) {
+            MoreEditor.util.after(line, imageWrapper)
+            MoreEditor.util.unwrap(imageWrapper, document)
+            line.parentNode.removeChild(line)
+          }
         }.bind(this))
       }
     }

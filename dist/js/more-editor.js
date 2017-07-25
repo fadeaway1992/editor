@@ -1308,25 +1308,34 @@ MoreEditor.extensions = {};
     },
 
     handleDrop: function(event) {
-      
+
       event.preventDefault()
       event.stopPropagation()
       
       if(event.dataTransfer.files[0].type.match('image')) {
+        var imageWrapper = document.createElement('div')
+        imageWrapper.innerHTML = imageWrapperHTML
         var file = event.dataTransfer.files[0]
         var fileReader = new FileReader()
         fileReader.readAsDataURL(file)
         fileReader.addEventListener('load', function (e) {
-          var addImageElement = document.createElement('img')
+          var addImageElement = new Image
+          addImageElement.onload = function() {
+            if(this.width<768) {
+              this.style = "width:"+ this.width +'px'
+            } else {
+              this.style = "width:768px;"
+            }
+          }
           addImageElement.classList.add('insert-image')
           addImageElement.src = e.target.result
-          var imageWrapper = document.createElement('div')
-          imageWrapper.innerHTML = imageWrapperHTML
           var imagePlaceHolder = imageWrapper.querySelector('li')
           MoreEditor.util.after(imagePlaceHolder, addImageElement)
-          MoreEditor.util.after(line, imageWrapper)
-          MoreEditor.util.unwrap(imageWrapper, document)
-          line.parentNode.removeChild(line)
+          if(line.parentNode) {
+            MoreEditor.util.after(line, imageWrapper)
+            MoreEditor.util.unwrap(imageWrapper, document)
+            line.parentNode.removeChild(line)
+          }
         }.bind(this))
       }
     }
@@ -1367,6 +1376,49 @@ function handleBackAndEnterKeydown(event) {
 
             /* 如果是在列表元素中 */
             if(cloestBlockContainer.nodeName.toLowerCase() === 'li') {
+
+                /* 选中了图片 */
+                if(cloestBlockContainer.getAttribute('data-type') === 'image-placeholder') {
+                    
+                    /* 选中图片按下 enter 键 */
+                    if(MoreEditor.util.isKey(event, MoreEditor.util.keyCode.ENTER)) {
+
+                        /* 图片是编辑器中的第一个元素，在选中图片等时候按下了 enter 键 */
+                        if(!topBlockContainer.previousElementSibling) {
+                            
+                            /* 在前面新增一行 */
+                            var newLine = document.createElement('p')
+                            newLine.innerHTML = '<br>'
+                            topBlockContainer.parentNode.insertBefore(newLine, topBlockContainer)
+                            MoreEditor.selection.moveCursor(document, newLine, 0)
+
+                        } else {
+
+                            /* 图片不是编辑器中的第一个元素，按下 enter 键在图片后面新增一行 */
+                            var newLine = document.createElement('p')
+                            newLine.innerHTML = '<br>'
+                            MoreEditor.util.after(topBlockContainer,newLine)
+                            MoreEditor.selection.moveCursor(document, newLine, 0)
+
+                        }
+
+                        event.preventDefault()
+                        return
+                    }
+
+                    /* 选中图片按下 backspace 键 */
+                    if(MoreEditor.util.isKey(event, MoreEditor.util.keyCode.BACKSPACE)) {
+
+                        /* 把图片换成 p */
+                        var newLine = document.createElement('p')
+                        newLine.innerHTML = '<br>'
+                        topBlockContainer.parentNode.replaceChild(newLine, topBlockContainer)
+                        MoreEditor.selection.moveCursor(document, newLine, 0)
+                        event.preventDefault()
+                        return
+
+                    }
+                }
 
                 /* 空列表中按下 enter */
                 if(!cloestBlockContainer.textContent && MoreEditor.util.isKey(event, MoreEditor.util.keyCode.ENTER)) {
@@ -1526,6 +1578,7 @@ function handleKeydown(event) {
 function handleKeyup(event) {
     keepAtleastOneParagraph.call(this, event)
     updateButtonStatus.call(this)
+    checkoutIfFocusedImage.call(this)
 }
 
 /* 
@@ -1574,6 +1627,50 @@ function updateButtonStatus() {
     }
 }
 
+function handleClick(event) {
+    checkIfClickedAnImage.call(this,event)
+}
+
+function checkIfClickedAnImage(event) {
+    if(event.target.nodeName.toLowerCase() === 'img') {
+        var clickedImage = event.target
+        if(clickedImage.previousElementSibling.getAttribute('data-type') === 'image-placeholder') {
+            var imageHolder = clickedImage.previousElementSibling
+            MoreEditor.selection.select(document,imageHolder, 0)
+            checkoutIfFocusedImage.call(this)
+            return
+        }
+    } else {
+        checkoutIfFocusedImage.call(this)
+    }
+}
+
+function checkoutIfFocusedImage() {
+    var selection = document.getSelection()
+    var range
+    if(selection.rangeCount>0) {
+        range = selection.getRangeAt(0)
+    }
+    if(MoreEditor.util.getClosestBlockContainer(range.startContainer).getAttribute('data-type') === 'image-placeholder') {
+        console.log('我进去了图片中')
+        var images = document.querySelectorAll('.insert-image')
+        if(images) {
+            for(var i=0; i<images.length; i++) {
+                images[i].classList.remove('insert-image-active')
+            }
+        }
+        var topBlock = MoreEditor.util.getTopBlockContainerWithoutMoreEditor(range.startContainer)
+        topBlock.querySelector('.insert-image').classList.add('insert-image-active')
+    } else {
+        var images = document.querySelectorAll('.insert-image')
+        if(images) {
+            for(var i=0; i<images.length; i++) {
+                images[i].classList.remove('insert-image-active')
+            }
+        }
+    }
+}
+
 
 /* MoreEditor 实例初始化时增添的一些属性 */
 var initialOptions = {
@@ -1592,6 +1689,7 @@ function attachHandlers() {
     this.on(document.body, 'keyup', handleKeyup.bind(this))
     this.on(document.body, 'mouseup', updateButtonStatus.bind(this))
     this.on(this.editableElement, 'blur', updateButtonStatus.bind(this))
+    this.on(this.editableElement, 'click', handleClick.bind(this))
 }
 
 
