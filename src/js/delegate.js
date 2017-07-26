@@ -118,6 +118,9 @@
             if(this.topBlock.getAttribute('data-type') === 'blockquote') {
               this.available.quote = true
               this.available.list = false
+            } else if(this.closestBlock.getAttribute('data-type') === 'image-placeholder') {
+              this.available.quote = false
+              this.available.list = false
             } else {
               this.available.quote = false
               this.available.list = true
@@ -129,10 +132,17 @@
         }
 
         /* 判断居中是否可用 */
-        if(this.crossBlock) {
+        if(this.crossBlock || this.closestBlock.getAttribute('data-type') === 'image-placeholder') {
           this.available.center = false
         } else {
           this.available.center = true
+        }
+
+        /* 判断 上传图片 是否可用 */
+        if(this.crossBlock) {
+          this.available.image = false
+        } else {
+          this.available.image = true
         }
 
       /* 没有选区或者选区不在 editableElement 内 */
@@ -163,7 +173,8 @@
         decorate: false,
         quote: false,
         list: false,
-        center: false
+        center: false,
+        image: false,
       }
     }
   }

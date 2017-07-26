@@ -764,6 +764,9 @@ MoreEditor.extensions = {};
             if(this.topBlock.getAttribute('data-type') === 'blockquote') {
               this.available.quote = true
               this.available.list = false
+            } else if(this.closestBlock.getAttribute('data-type') === 'image-placeholder') {
+              this.available.quote = false
+              this.available.list = false
             } else {
               this.available.quote = false
               this.available.list = true
@@ -775,10 +778,17 @@ MoreEditor.extensions = {};
         }
 
         /* 判断居中是否可用 */
-        if(this.crossBlock) {
+        if(this.crossBlock || this.closestBlock.getAttribute('data-type') === 'image-placeholder') {
           this.available.center = false
         } else {
           this.available.center = true
+        }
+
+        /* 判断 上传图片 是否可用 */
+        if(this.crossBlock) {
+          this.available.image = false
+        } else {
+          this.available.image = true
         }
 
       /* 没有选区或者选区不在 editableElement 内 */
@@ -809,7 +819,8 @@ MoreEditor.extensions = {};
         decorate: false,
         quote: false,
         list: false,
-        center: false
+        center: false,
+        image: false,
       }
     }
   }
@@ -1264,7 +1275,7 @@ MoreEditor.extensions = {};
       }
 
       /* 判断图片大小是否超限 */
-      var maxFileSize = 10
+      var maxFileSize = 10 * 1024 * 1024
       if(file.size > maxFileSize) {
         this.base.extensions.fileDragging.sizeAlert()
         return
@@ -1292,7 +1303,7 @@ MoreEditor.extensions = {};
         addImageElement.classList.add('insert-image')
         addImageElement.src = e.target.result
 
-        var imageWrapperHTML = '<div data-type="more-editor-inserted-image" class="more-editor-inserted-image" contenteditable="false"><li data-type="image-placeholder" class="image-placeholder" contenteditable="true"></li></div>'
+        var imageWrapperHTML = '<figure data-type="more-editor-inserted-image" class="more-editor-inserted-image" contenteditable="false"><li data-type="image-placeholder" class="image-placeholder" contenteditable="true"></li></figure>'
         var imageWrapper = document.createElement('div')
         imageWrapper.innerHTML = imageWrapperHTML
         var imagePlaceHolder = imageWrapper.querySelector('li')
@@ -1324,7 +1335,7 @@ MoreEditor.extensions = {};
 (function() {
   var lastTarget = null
   var line = null
-  var imageWrapperHTML = '<div data-type="more-editor-inserted-image" class="more-editor-inserted-image" contenteditable="false"><li data-type="image-placeholder" class="image-placeholder" contenteditable="true"></li></div>'
+  var imageWrapperHTML = '<figure data-type="more-editor-inserted-image" class="more-editor-inserted-image" contenteditable="false"><li data-type="image-placeholder" class="image-placeholder" contenteditable="true"></li></figure>'
 
   var fileDragging = function(instance) {
     this.base = instance
@@ -1409,7 +1420,7 @@ MoreEditor.extensions = {};
             line.parentNode.removeChild(line)
           }
         }.bind(this))
-        
+
         fileReader.readAsDataURL(file)
       }
     },
@@ -1463,7 +1474,7 @@ function handleBackAndEnterKeydown(event) {
                     if(MoreEditor.util.isKey(event, MoreEditor.util.keyCode.ENTER)) {
 
                         /* 图片是编辑器中的第一个元素，在选中图片等时候按下了 enter 键 */
-                        if(!topBlockContainer.previousElementSibling) {
+                        if(!topBlockContainer.previousElementSibling && topBlockContainer.nextElementSibling) {
                             
                             /* 在前面新增一行 */
                             var newLine = document.createElement('p')
@@ -1704,6 +1715,12 @@ function updateButtonStatus() {
     } else {
       this.buttons.center.setAttribute('disabled', 'disabled')
     }
+
+    if(available.image) {
+      this.buttons.imageButton.removeAttribute('disabled')
+    } else {
+      this.buttons.imageButton.setAttribute('disabled', 'disabled')  
+    }
 }
 
 function handleClick(event) {
@@ -1805,7 +1822,8 @@ MoreEditor.prototype = {
         this.buttons.url = document.querySelector(this.options.buttons.url)
         this.buttons.link = document.querySelector(this.options.buttons.link)
         this.buttons.center = document.querySelector(this.options.buttons.center)
-        this.buttons.image = document.querySelector(this.options.buttons.image)
+        this.buttons.imageInput = document.querySelector(this.options.buttons.imageInput)
+        this.buttons.imageButton = document.querySelector(this.options.buttons.imageButton)
 
         this.buttons.h2.addEventListener('click', this.API.h2.bind(this.API))
         this.buttons.h3.addEventListener('click', this.API.h3.bind(this.API))
@@ -1816,7 +1834,7 @@ MoreEditor.prototype = {
         this.buttons.italic.addEventListener('click', this.API.italic.bind(this.API))
         this.buttons.strike.addEventListener('click', this.API.strike.bind(this.API))
         this.buttons.center.addEventListener('click', this.API.center.bind(this.API))
-        this.buttons.image.addEventListener('change', this.API.insertImage.bind(this.API))
+        this.buttons.imageInput.addEventListener('change', this.API.insertImage.bind(this.API))
 
         var _this = this
         this.buttons.link.addEventListener('click', function() {

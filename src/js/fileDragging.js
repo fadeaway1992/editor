@@ -5,7 +5,7 @@
 (function() {
   var lastTarget = null
   var line = null
-  var imageWrapperHTML = '<div data-type="more-editor-inserted-image" class="more-editor-inserted-image" contenteditable="false"><li data-type="image-placeholder" class="image-placeholder" contenteditable="true"></li></div>'
+  var imageWrapperHTML = '<figure data-type="more-editor-inserted-image" class="more-editor-inserted-image" contenteditable="false"><li data-type="image-placeholder" class="image-placeholder" contenteditable="true"></li></figure>'
 
   var fileDragging = function(instance) {
     this.base = instance
@@ -90,7 +90,7 @@
             line.parentNode.removeChild(line)
           }
         }.bind(this))
-        
+
         fileReader.readAsDataURL(file)
       }
     },
