@@ -3,7 +3,6 @@
   fileDragging 
 */
 (function() {
-  var lastTarget = null
   var line = null
   var imageWrapperHTML = '<figure data-type="more-editor-inserted-image" class="more-editor-inserted-image" contenteditable="false"><li data-type="image-placeholder" class="image-placeholder" contenteditable="true"></li></figure>'
 
@@ -34,17 +33,29 @@
     },
 
     handleDragEnter: function(event) {
+      console.log(event.clientY,'dragEnter 事件发生')
       if(!MoreEditor.util.isDescendant(this.base.editableElement, event.target, true)) {
         if(line.parentNode) {
           line.parentNode.removeChild(line)
+          return
         }
+        return
       }
-      var target = MoreEditor.util.getTopBlockContainerWithoutMoreEditor(event.target)
+      var target = MoreEditor.util.getTopBlockContainer(event.target)
       if(!target) return
-      if(lastTarget != target) {
-        MoreEditor.util.after(target, line)
-        lastTarget = target
+
+      /* 拖拽到无内容区域的时候在编辑器最后添加 line */
+      if (MoreEditor.util.isMoreEditorElement(target)) {
+        var bottom = this.base.editableElement.lastChild.getClientRects()[0].bottom
+        if (event.clientY < bottom) return
+        this.base.editableElement.appendChild(line)
+        return
       }
+
+        MoreEditor.util.after(target, line)
+        console.log(target, 'target')
+        console.log('在 target 后面插入 line')
+
     },
 
     handleDrop: function(event) {
