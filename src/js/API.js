@@ -433,6 +433,65 @@
     importSelection: function() {
       MoreEditor.selection.restoreSelection(this.savedSelectionContainer, this.savedSelection)
       console.log(document.getSelection().getRangeAt(0), '恢复的选区')
+    },
+
+    /* 插入图片 */
+    insertImage: function(event) {
+      console.log(event.target.files, 'insertImage files')
+      var file = event.target.files[0]
+      if(!file) {
+        return
+      }
+
+      /* 判断图片大小是否超限 */
+      var maxFileSize = 10
+      if(file.size > maxFileSize) {
+        this.base.extensions.fileDragging.sizeAlert()
+        return
+      }
+
+      var delegate = this.base.delegate
+      delegate.updateStatus()
+
+      /* 基本判断 */
+      if(!delegate.range || delegate.crossBlock ) {return}
+
+      var fileReader = new FileReader()
+      
+      fileReader.addEventListener('load', function (e) {
+        var addImageElement = new Image
+
+        addImageElement.onload = function() {
+          if(this.width<768) {
+            this.style.width = this.width +'px'
+          } else {
+            this.style.width = "768px"
+          }
+        }
+
+        addImageElement.classList.add('insert-image')
+        addImageElement.src = e.target.result
+
+        var imageWrapperHTML = '<div data-type="more-editor-inserted-image" class="more-editor-inserted-image" contenteditable="false"><li data-type="image-placeholder" class="image-placeholder" contenteditable="true"></li></div>'
+        var imageWrapper = document.createElement('div')
+        imageWrapper.innerHTML = imageWrapperHTML
+        var imagePlaceHolder = imageWrapper.querySelector('li')
+        MoreEditor.util.after(imagePlaceHolder, addImageElement)
+
+         
+        /* 当前选区存在内容的情况下在后面插入图片 */
+        if(delegate.topBlock.textContent) {
+          MoreEditor.util.after(delegate.topBlock, imageWrapper)
+          MoreEditor.util.unwrap(imageWrapper, document)
+          return
+        } else {
+          this.base.editableElement.replaceChild(imageWrapper, delegate.topBlock)
+          MoreEditor.util.unwrap(imageWrapper, document)
+          return
+        }
+      }.bind(this))
+
+      fileReader.readAsDataURL(file) 
     }
   }
 

@@ -65,9 +65,10 @@
         
         var imageWrapper = document.createElement('div')
         imageWrapper.innerHTML = imageWrapperHTML
+        console.log(imageWrapper, 'imageWrapper in filedragging')
         
         var fileReader = new FileReader()
-        fileReader.readAsDataURL(file)
+        
 
         fileReader.addEventListener('load', function (e) {
           var addImageElement = new Image
@@ -81,6 +82,7 @@
           addImageElement.classList.add('insert-image')
           addImageElement.src = e.target.result
           var imagePlaceHolder = imageWrapper.querySelector('li')
+          console.log(imagePlaceHolder, 'imagePlaceholder in filedragging')
           MoreEditor.util.after(imagePlaceHolder, addImageElement)
           if(line.parentNode) {
             MoreEditor.util.after(line, imageWrapper)
@@ -88,6 +90,8 @@
             line.parentNode.removeChild(line)
           }
         }.bind(this))
+        
+        fileReader.readAsDataURL(file)
       }
     },
 

@@ -379,6 +379,7 @@ MoreEditor.prototype = {
         this.buttons.url = document.querySelector(this.options.buttons.url)
         this.buttons.link = document.querySelector(this.options.buttons.link)
         this.buttons.center = document.querySelector(this.options.buttons.center)
+        this.buttons.image = document.querySelector(this.options.buttons.image)
 
         this.buttons.h2.addEventListener('click', this.API.h2.bind(this.API))
         this.buttons.h3.addEventListener('click', this.API.h3.bind(this.API))
@@ -389,6 +390,7 @@ MoreEditor.prototype = {
         this.buttons.italic.addEventListener('click', this.API.italic.bind(this.API))
         this.buttons.strike.addEventListener('click', this.API.strike.bind(this.API))
         this.buttons.center.addEventListener('click', this.API.center.bind(this.API))
+        this.buttons.image.addEventListener('change', this.API.insertImage.bind(this.API))
 
         var _this = this
         this.buttons.link.addEventListener('click', function() {

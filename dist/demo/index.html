@@ -19,6 +19,8 @@
     <button class="center">居中</button>
     <div>
       <input class="url" type="input" placeholder="请输入链接地址"><button class="link">Link</button>
+      <input type="file" accept="image/*" class="file-upload" style="display:none;">
+      <button class=".insert-image" onclick="document.querySelector('.file-upload').click()">上传图片</button>
     </div>
   </div>
   <div class="editable" contenteditable="true"></div>
@@ -42,7 +44,8 @@
         strike: '.strike',
         url: '.url',
         link: '.link',
-        center: '.center'
+        center: '.center',
+        image: '.file-upload'
       }
     })
     console.log(editor)
