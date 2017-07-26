@@ -144,8 +144,16 @@ function handleBackAndEnterKeydown(event) {
             }
 
             /*  在当前块元素的第一个字符按下 backspace 键 */
-            if(MoreEditor.util.isKey(event, MoreEditor.util.keyCode.BACKSPACE) && MoreEditor.util.isElementAtBeginningOfBlock(node) && MoreEditor.selection.getCaretOffsets(node).left === 0 ) {
+            if(MoreEditor.util.isKey(event, MoreEditor.util.keyCode.BACKSPACE) && MoreEditor.util.isElementAtBeginningOfBlock(node) && MoreEditor.selection.getCaretOffsets(node).left === 0) {
 
+                /* 前面是图片 */
+                if((topBlockContainer.nodeName.toLowerCase() === 'p' || topBlockContainer.nodeName.toLowerCase().indexOf('h') !== -1) && topBlockContainer.previousElementSibling && topBlockContainer.previousElementSibling.nodeName.toLowerCase() == 'figure') {
+                    console.log('enenen?')
+                    var imageHolder = topBlockContainer.previousElementSibling.querySelector('li')
+                    MoreEditor.selection.moveCursor(document, imageHolder, 0)
+                    event.preventDefault()
+                    return
+                }
             }
 
         } else {
