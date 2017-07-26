@@ -231,15 +231,27 @@ function checkCaretPosition (event) {
     }
 }
 
+function keepImagePlaceHolderEmpty (event) {
+    var range = document.getSelection().getRangeAt(0)
+    if (!range) return
+    var cloestBlockContainer = MoreEditor.util.getClosestBlockContainer(range.startContainer)
+    if(cloestBlockContainer.getAttribute('data-type') === 'image-placeholder') {
+        cloestBlockContainer.innerHTML = ''
+    }
+    
+}
+
 function handleKeydown(event) {
     handleBackAndEnterKeydown.call(this, event)
     checkCaretPosition.call(this, event)
+   
 }
 
 function handleKeyup(event) {
     keepAtleastOneParagraph.call(this, event)
     updateButtonStatus.call(this)
     checkoutIfFocusedImage.call(this)
+    keepImagePlaceHolderEmpty.call(this.event)
 }
 
 /* 
@@ -301,8 +313,8 @@ function handleClick(event) {
 function checkIfClickedAnImage(event) {
     if(event.target.nodeName.toLowerCase() === 'img') {
         var clickedImage = event.target
-        if(clickedImage.previousElementSibling.getAttribute('data-type') === 'image-placeholder') {
-            var imageHolder = clickedImage.previousElementSibling
+        if(clickedImage.parentNode.previousElementSibling.getAttribute('data-type') === 'image-placeholder') {
+            var imageHolder = clickedImage.parentNode.previousElementSibling
             MoreEditor.selection.select(document,imageHolder, 0)
             checkoutIfFocusedImage.call(this)
             return
@@ -318,6 +330,7 @@ function checkoutIfFocusedImage() {
     if(selection.rangeCount>0) {
         range = selection.getRangeAt(0)
     }
+    if(!range) return
     if(MoreEditor.util.getClosestBlockContainer(range.startContainer).getAttribute('data-type') === 'image-placeholder') {
         console.log('我进去了图片中')
         var images = document.querySelectorAll('.insert-image')
@@ -327,7 +340,10 @@ function checkoutIfFocusedImage() {
             }
         }
         var topBlock = MoreEditor.util.getTopBlockContainerWithoutMoreEditor(range.startContainer)
-        topBlock.querySelector('.insert-image').classList.add('insert-image-active')
+        var image = topBlock.querySelector('.insert-image')
+        image.classList.add('insert-image-active')
+        image.parentNode.appendChild(this.buttons.imageOptions)
+        this.buttons.imageOptions.style.display = 'block'
     } else {
         var images = document.querySelectorAll('.insert-image')
         if(images) {
@@ -335,6 +351,7 @@ function checkoutIfFocusedImage() {
                 images[i].classList.remove('insert-image-active')
             }
         }
+        this.buttons.imageOptions.style.display = 'none'
     }
 }
 
@@ -395,6 +412,9 @@ MoreEditor.prototype = {
         this.buttons.center = document.querySelector(this.options.buttons.center)
         this.buttons.imageInput = document.querySelector(this.options.buttons.imageInput)
         this.buttons.imageButton = document.querySelector(this.options.buttons.imageButton)
+        this.buttons.imageOptions = document.querySelector(this.options.buttons.imageOptions)
+        this.buttons.imageReChoose = document.querySelector(this.options.buttons.imageRechoose)
+        console.log(this.buttons.imageReChoose, 'imageReChoose')
 
         this.buttons.h2.addEventListener('click', this.API.h2.bind(this.API))
         this.buttons.h3.addEventListener('click', this.API.h3.bind(this.API))
@@ -406,6 +426,7 @@ MoreEditor.prototype = {
         this.buttons.strike.addEventListener('click', this.API.strike.bind(this.API))
         this.buttons.center.addEventListener('click', this.API.center.bind(this.API))
         this.buttons.imageInput.addEventListener('change', this.API.insertImage.bind(this.API))
+        this.buttons.imageReChoose.addEventListener('click', function() {this.buttons.imageInput.click()}.bind(this))
 
         var _this = this
         this.buttons.link.addEventListener('click', function() {

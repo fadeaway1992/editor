@@ -20,49 +20,61 @@
     <div>
       <input class="url" type="input" placeholder="请输入链接地址"><button class="link">Link</button>
       <input type="file" accept="image/*" class="file-upload" style="display:none;">
-      <button class="insert-image" onclick="document.querySelector('.file-upload').click()">上传图片</button>
+      <button class="upload-image" onclick="document.querySelector('.file-upload').click()">上传图片</button>
     </div>
   </div>
   <div class="editable" contenteditable="true"></div>
-
   <!-- 引入 more-editor -->
   <script src="../js/more-editor.js"></script>
 
   <!-- 创建 editor 实例  -->
   <script>
-    var editor = new MoreEditor('.editable', {
-      imageUploadAddress: 'zi.com',
-      sizeAlert:'.size-alert',
-      buttons: {
-        h2: '.h2',
-        h3: '.h3',
-        ul: '.ul',
-        ol: '.ol',
-        quote: '.quote',
-        bold: '.bold',
-        italic: '.italic',
-        strike: '.strike',
-        url: '.url',
-        link: '.link',
-        center: '.center',
-        imageInput: '.file-upload',
-        imageButton: '.insert-image'
-      }
-    })
-    console.log(editor)
+    window.onload = function() {
+
+      var editor = new MoreEditor('.editable', {
+        imageUpload: function(image){
+          console.log(image, '这是我要上传的图片，请在这个函数中把这个文件上传到服务器，并返回给我一个线上地址。')
+        },
+        sizeAlert:'.size-alert',
+        buttons: {
+          h2: '.h2',
+          h3: '.h3',
+          ul: '.ul',
+          ol: '.ol',
+          quote: '.quote',
+          bold: '.bold',
+          italic: '.italic',
+          strike: '.strike',
+          url: '.url',
+          link: '.link',
+          center: '.center',
+          imageInput: '.file-upload',
+          imageButton: '.upload-image',
+          imageOptions: '.image-options',
+          imageRechoose: '.rechoose'
+        }
+      })
+      console.log(editor)
+
+      var editable = document.querySelector('.editable')
+
+      var url = document.querySelector('.url')
+      url.addEventListener('blur', editor.API.importSelection.bind(editor.API))
+      url.addEventListener('mousedown', editor.API.exportSelection.bind(editor.API))
+
+    }
+    
 </script>
 
 <!-- 给按钮绑定编辑器事件 -->
 <script>
-  var editable = document.querySelector('.editable')
-
-  var url = document.querySelector('.url')
-  url.addEventListener('blur', editor.API.importSelection.bind(editor.API))
-  url.addEventListener('mousedown', editor.API.exportSelection.bind(editor.API))
+  
 
 
 </script>
 <div class="size-alert" style="display:none;"><p>上传的图片大小不能超过 10Mb </p><button onclick = "this.parentNode.style.display = 'none'">确定</button></div>
+<div class="image-options" style="display:none;"><button class="rechoose">替换</button><button class="figure-caption">注释</button><button class="delete">移除</button></div>
+
 </body>
 </html>
 

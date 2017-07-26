@@ -4,7 +4,7 @@
 */
 (function() {
   var line = null
-  var imageWrapperHTML = '<figure data-type="more-editor-inserted-image" class="more-editor-inserted-image" contenteditable="false"><li data-type="image-placeholder" class="image-placeholder" contenteditable="true"></li></figure>'
+  var imageWrapperHTML = '<figure data-type="more-editor-inserted-image" class="more-editor-inserted-image" contenteditable="false"><li data-type="image-placeholder" class="image-placeholder" contenteditable="true"></li><div class="image-wrapper"></div></figure>'
 
   var fileDragging = function(instance) {
     this.base = instance
@@ -33,7 +33,6 @@
     },
 
     handleDragEnter: function(event) {
-      console.log(event.clientY,'dragEnter 事件发生')
       if(!MoreEditor.util.isDescendant(this.base.editableElement, event.target, true)) {
         if(line.parentNode) {
           line.parentNode.removeChild(line)
@@ -53,8 +52,6 @@
       }
 
         MoreEditor.util.after(target, line)
-        console.log(target, 'target')
-        console.log('在 target 后面插入 line')
 
     },
 
@@ -76,7 +73,6 @@
         
         var imageWrapper = document.createElement('div')
         imageWrapper.innerHTML = imageWrapperHTML
-        console.log(imageWrapper, 'imageWrapper in filedragging')
         
         var fileReader = new FileReader()
         
@@ -92,9 +88,8 @@
           }
           addImageElement.classList.add('insert-image')
           addImageElement.src = e.target.result
-          var imagePlaceHolder = imageWrapper.querySelector('li')
-          console.log(imagePlaceHolder, 'imagePlaceholder in filedragging')
-          MoreEditor.util.after(imagePlaceHolder, addImageElement)
+          var imageParent = imageWrapper.querySelector('.image-wrapper')
+          imageParent.appendChild(addImageElement)
           if(line.parentNode) {
             MoreEditor.util.after(line, imageWrapper)
             MoreEditor.util.unwrap(imageWrapper, document)

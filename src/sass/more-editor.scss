@@ -16,7 +16,6 @@
 
 .more-editor-inserted-image {
   position: relative;
-  overflow: hidden;
   display: block;
   margin-top: 1em;
   margin-bottom: 1em;
@@ -26,6 +25,7 @@
 
 .insert-image{
  margin: 2px;
+ display: block;
 }
 
 .insert-image-active {
@@ -40,4 +40,9 @@
   outline: none;
   list-style: none;
   border: 1px solid black;
+}
+
+.image-wrapper {
+  display: inline-block;
+  position: relative;
 }

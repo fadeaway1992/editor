@@ -1303,19 +1303,21 @@ MoreEditor.extensions = {};
         addImageElement.classList.add('insert-image')
         addImageElement.src = e.target.result
 
-        var imageWrapperHTML = '<figure data-type="more-editor-inserted-image" class="more-editor-inserted-image" contenteditable="false"><li data-type="image-placeholder" class="image-placeholder" contenteditable="true"></li></figure>'
+        var imageWrapperHTML = '<figure data-type="more-editor-inserted-image" class="more-editor-inserted-image" contenteditable="false"><li data-type="image-placeholder" class="image-placeholder" contenteditable="true"></li><div class="image-wrapper"></div></figure>'
         var imageWrapper = document.createElement('div')
         imageWrapper.innerHTML = imageWrapperHTML
-        var imagePlaceHolder = imageWrapper.querySelector('li')
-        MoreEditor.util.after(imagePlaceHolder, addImageElement)
+        var imageParent = imageWrapper.querySelector('.image-wrapper')
+        imageParent.appendChild(addImageElement)
 
-         
         /* 当前选区存在内容的情况下在后面插入图片 */
-        if(delegate.topBlock.textContent) {
+        if(delegate.topBlock.textContent && delegate.topBlock.nodeName.toLowerCase() !== 'figure') {
+          console.log('在后面插入')
+          console.log(delegate.topBlock.nodeName.toLowerCase)
           MoreEditor.util.after(delegate.topBlock, imageWrapper)
           MoreEditor.util.unwrap(imageWrapper, document)
           return
         } else {
+          console.log('替换')
           this.base.editableElement.replaceChild(imageWrapper, delegate.topBlock)
           MoreEditor.util.unwrap(imageWrapper, document)
           return
@@ -1334,7 +1336,7 @@ MoreEditor.extensions = {};
 */
 (function() {
   var line = null
-  var imageWrapperHTML = '<figure data-type="more-editor-inserted-image" class="more-editor-inserted-image" contenteditable="false"><li data-type="image-placeholder" class="image-placeholder" contenteditable="true"></li></figure>'
+  var imageWrapperHTML = '<figure data-type="more-editor-inserted-image" class="more-editor-inserted-image" contenteditable="false"><li data-type="image-placeholder" class="image-placeholder" contenteditable="true"></li><div class="image-wrapper"></div></figure>'
 
   var fileDragging = function(instance) {
     this.base = instance
@@ -1363,7 +1365,6 @@ MoreEditor.extensions = {};
     },
 
     handleDragEnter: function(event) {
-      console.log(event.clientY,'dragEnter 事件发生')
       if(!MoreEditor.util.isDescendant(this.base.editableElement, event.target, true)) {
         if(line.parentNode) {
           line.parentNode.removeChild(line)
@@ -1383,8 +1384,6 @@ MoreEditor.extensions = {};
       }
 
         MoreEditor.util.after(target, line)
-        console.log(target, 'target')
-        console.log('在 target 后面插入 line')
 
     },
 
@@ -1406,7 +1405,6 @@ MoreEditor.extensions = {};
         
         var imageWrapper = document.createElement('div')
         imageWrapper.innerHTML = imageWrapperHTML
-        console.log(imageWrapper, 'imageWrapper in filedragging')
         
         var fileReader = new FileReader()
         
@@ -1422,9 +1420,8 @@ MoreEditor.extensions = {};
           }
           addImageElement.classList.add('insert-image')
           addImageElement.src = e.target.result
-          var imagePlaceHolder = imageWrapper.querySelector('li')
-          console.log(imagePlaceHolder, 'imagePlaceholder in filedragging')
-          MoreEditor.util.after(imagePlaceHolder, addImageElement)
+          var imageParent = imageWrapper.querySelector('.image-wrapper')
+          imageParent.appendChild(addImageElement)
           if(line.parentNode) {
             MoreEditor.util.after(line, imageWrapper)
             MoreEditor.util.unwrap(imageWrapper, document)
@@ -1679,15 +1676,27 @@ function checkCaretPosition (event) {
     }
 }
 
+function keepImagePlaceHolderEmpty (event) {
+    var range = document.getSelection().getRangeAt(0)
+    if (!range) return
+    var cloestBlockContainer = MoreEditor.util.getClosestBlockContainer(range.startContainer)
+    if(cloestBlockContainer.getAttribute('data-type') === 'image-placeholder') {
+        cloestBlockContainer.innerHTML = ''
+    }
+    
+}
+
 function handleKeydown(event) {
     handleBackAndEnterKeydown.call(this, event)
     checkCaretPosition.call(this, event)
+   
 }
 
 function handleKeyup(event) {
     keepAtleastOneParagraph.call(this, event)
     updateButtonStatus.call(this)
     checkoutIfFocusedImage.call(this)
+    keepImagePlaceHolderEmpty.call(this.event)
 }
 
 /* 
@@ -1749,8 +1758,8 @@ function handleClick(event) {
 function checkIfClickedAnImage(event) {
     if(event.target.nodeName.toLowerCase() === 'img') {
         var clickedImage = event.target
-        if(clickedImage.previousElementSibling.getAttribute('data-type') === 'image-placeholder') {
-            var imageHolder = clickedImage.previousElementSibling
+        if(clickedImage.parentNode.previousElementSibling.getAttribute('data-type') === 'image-placeholder') {
+            var imageHolder = clickedImage.parentNode.previousElementSibling
             MoreEditor.selection.select(document,imageHolder, 0)
             checkoutIfFocusedImage.call(this)
             return
@@ -1766,6 +1775,7 @@ function checkoutIfFocusedImage() {
     if(selection.rangeCount>0) {
         range = selection.getRangeAt(0)
     }
+    if(!range) return
     if(MoreEditor.util.getClosestBlockContainer(range.startContainer).getAttribute('data-type') === 'image-placeholder') {
         console.log('我进去了图片中')
         var images = document.querySelectorAll('.insert-image')
@@ -1775,7 +1785,10 @@ function checkoutIfFocusedImage() {
             }
         }
         var topBlock = MoreEditor.util.getTopBlockContainerWithoutMoreEditor(range.startContainer)
-        topBlock.querySelector('.insert-image').classList.add('insert-image-active')
+        var image = topBlock.querySelector('.insert-image')
+        image.classList.add('insert-image-active')
+        image.parentNode.appendChild(this.buttons.imageOptions)
+        this.buttons.imageOptions.style.display = 'block'
     } else {
         var images = document.querySelectorAll('.insert-image')
         if(images) {
@@ -1783,6 +1796,7 @@ function checkoutIfFocusedImage() {
                 images[i].classList.remove('insert-image-active')
             }
         }
+        this.buttons.imageOptions.style.display = 'none'
     }
 }
 
@@ -1843,6 +1857,9 @@ MoreEditor.prototype = {
         this.buttons.center = document.querySelector(this.options.buttons.center)
         this.buttons.imageInput = document.querySelector(this.options.buttons.imageInput)
         this.buttons.imageButton = document.querySelector(this.options.buttons.imageButton)
+        this.buttons.imageOptions = document.querySelector(this.options.buttons.imageOptions)
+        this.buttons.imageReChoose = document.querySelector(this.options.buttons.imageRechoose)
+        console.log(this.buttons.imageReChoose, 'imageReChoose')
 
         this.buttons.h2.addEventListener('click', this.API.h2.bind(this.API))
         this.buttons.h3.addEventListener('click', this.API.h3.bind(this.API))
@@ -1854,6 +1871,7 @@ MoreEditor.prototype = {
         this.buttons.strike.addEventListener('click', this.API.strike.bind(this.API))
         this.buttons.center.addEventListener('click', this.API.center.bind(this.API))
         this.buttons.imageInput.addEventListener('change', this.API.insertImage.bind(this.API))
+        this.buttons.imageReChoose.addEventListener('click', function() {this.buttons.imageInput.click()}.bind(this))
 
         var _this = this
         this.buttons.link.addEventListener('click', function() {

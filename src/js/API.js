@@ -472,19 +472,21 @@
         addImageElement.classList.add('insert-image')
         addImageElement.src = e.target.result
 
-        var imageWrapperHTML = '<figure data-type="more-editor-inserted-image" class="more-editor-inserted-image" contenteditable="false"><li data-type="image-placeholder" class="image-placeholder" contenteditable="true"></li></figure>'
+        var imageWrapperHTML = '<figure data-type="more-editor-inserted-image" class="more-editor-inserted-image" contenteditable="false"><li data-type="image-placeholder" class="image-placeholder" contenteditable="true"></li><div class="image-wrapper"></div></figure>'
         var imageWrapper = document.createElement('div')
         imageWrapper.innerHTML = imageWrapperHTML
-        var imagePlaceHolder = imageWrapper.querySelector('li')
-        MoreEditor.util.after(imagePlaceHolder, addImageElement)
+        var imageParent = imageWrapper.querySelector('.image-wrapper')
+        imageParent.appendChild(addImageElement)
 
-         
         /* 当前选区存在内容的情况下在后面插入图片 */
-        if(delegate.topBlock.textContent) {
+        if(delegate.topBlock.textContent && delegate.topBlock.nodeName.toLowerCase() !== 'figure') {
+          console.log('在后面插入')
+          console.log(delegate.topBlock.nodeName.toLowerCase)
           MoreEditor.util.after(delegate.topBlock, imageWrapper)
           MoreEditor.util.unwrap(imageWrapper, document)
           return
         } else {
+          console.log('替换')
           this.base.editableElement.replaceChild(imageWrapper, delegate.topBlock)
           MoreEditor.util.unwrap(imageWrapper, document)
           return
