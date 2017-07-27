@@ -65,6 +65,11 @@ function handleBackAndEnterKeydown(event) {
                         /* 把图片换成 p */
                         var newLine = document.createElement('p')
                         newLine.innerHTML = '<br>'
+
+                        /* 先把图片中的 图片选项 移出去，这样后期添加 撤销／重做 的时候，程序会记录我们删除的内容，这个内容中不能包括 图片选项 */
+                        this.buttons.imageOptions.style.display = 'none'
+                        document.body.appendChild(this.buttons.imageOptions)
+
                         topBlockContainer.parentNode.replaceChild(newLine, topBlockContainer)
                         MoreEditor.selection.moveCursor(document, newLine, 0)
                         event.preventDefault()
@@ -310,8 +315,12 @@ function handleClick(event) {
     checkIfClickedAnImage.call(this,event)
 }
 
+/* 判断点击的是不是图片，如果是图片，检查这个图片是否已经激活，如果已经激活，什么都不做。如果没有激活，把光标移到 imagePlaceHolder 中，执行相关的操作。如果点击的不是图片，执行相关的操作。 */
 function checkIfClickedAnImage(event) {
     if(event.target.nodeName.toLowerCase() === 'img') {
+        if(event.target.classList.contains('insert-image-active')) {
+            return
+        }
         var clickedImage = event.target
         if(clickedImage.parentNode.previousElementSibling.getAttribute('data-type') === 'image-placeholder') {
             var imageHolder = clickedImage.parentNode.previousElementSibling
@@ -324,6 +333,12 @@ function checkIfClickedAnImage(event) {
     }
 }
 
+/*
+    检查光标是否在图片中  
+    当 keyup 时，或者鼠标点击图片聚焦在 imagePlaceholder 时会执行。
+    先判断当前光标是否在 imagePlaceHolder 中，如果是，并且当前的图片没有添加 active 类， 检查有没有已经激活的图片，清除它们的 active 类。给当前图片添加 active 类，把图片选项按钮放到这个图片中。 如果当前光标在图片中，而图片已经激活则什么都不做。
+    否则，当前光标不在 imagePlaceHolder 中，检查文档中有无 active 的图片，去掉 active 类，并隐藏 图片选项按钮。
+*/
 function checkoutIfFocusedImage() {
     var selection = document.getSelection()
     var range
@@ -333,25 +348,26 @@ function checkoutIfFocusedImage() {
     if(!range) return
     if(MoreEditor.util.getClosestBlockContainer(range.startContainer).getAttribute('data-type') === 'image-placeholder') {
         console.log('我进去了图片中')
-        var images = document.querySelectorAll('.insert-image')
-        if(images) {
-            for(var i=0; i<images.length; i++) {
-                images[i].classList.remove('insert-image-active')
-            }
-        }
         var topBlock = MoreEditor.util.getTopBlockContainerWithoutMoreEditor(range.startContainer)
         var image = topBlock.querySelector('.insert-image')
+        if(image.classList.contains('insert-image-active')) {
+            return
+        }
+        var activeImage = document.querySelector('.insert-image-active')
+        if(activeImage) {
+            activeImage.classList.remove('insert-image-active')
+        }
+        
         image.classList.add('insert-image-active')
         image.parentNode.appendChild(this.buttons.imageOptions)
         this.buttons.imageOptions.style.display = 'block'
     } else {
-        var images = document.querySelectorAll('.insert-image')
-        if(images) {
-            for(var i=0; i<images.length; i++) {
-                images[i].classList.remove('insert-image-active')
-            }
+        var activeImage = document.querySelector('.insert-image-active')
+        if(activeImage) {
+            activeImage.classList.remove('insert-image-active')
+            this.buttons.imageOptions.style.display = 'none'
         }
-        this.buttons.imageOptions.style.display = 'none'
+        return
     }
 }
 
@@ -414,7 +430,6 @@ MoreEditor.prototype = {
         this.buttons.imageButton = document.querySelector(this.options.buttons.imageButton)
         this.buttons.imageOptions = document.querySelector(this.options.buttons.imageOptions)
         this.buttons.imageReChoose = document.querySelector(this.options.buttons.imageRechoose)
-        console.log(this.buttons.imageReChoose, 'imageReChoose')
 
         this.buttons.h2.addEventListener('click', this.API.h2.bind(this.API))
         this.buttons.h3.addEventListener('click', this.API.h3.bind(this.API))
