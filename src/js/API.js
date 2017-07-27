@@ -507,6 +507,10 @@
       var newLine = document.createElement('p')
       newLine.innerHTML = '<br>'
 
+      /* 先把图片中的 图片选项 移出去，这样后期添加 撤销／重做 的时候，程序会记录我们删除的内容，这个内容中不能包括 图片选项 */
+      this.base.buttons.imageOptions.style.display = 'none'
+      document.body.appendChild(this.base.buttons.imageOptions)
+
       this.base.editableElement.insertBefore(newLine, imagefigure)
       this.base.editableElement.removeChild(imagefigure)
       MoreEditor.selection.moveCursor(document, newLine, 0)
@@ -532,6 +536,7 @@
       figCaption.setAttribute('contenteditable', 'true')
       figCaption.style.width = currentImage.offsetWidth + 'px'
       imagefigure.appendChild(figCaption)
+      MoreEditor.selection.moveCursor(document, figCaption, 0)
     }
   }
 

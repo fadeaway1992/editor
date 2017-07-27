@@ -1338,6 +1338,10 @@ MoreEditor.extensions = {};
       var newLine = document.createElement('p')
       newLine.innerHTML = '<br>'
 
+      /* 先把图片中的 图片选项 移出去，这样后期添加 撤销／重做 的时候，程序会记录我们删除的内容，这个内容中不能包括 图片选项 */
+      this.base.buttons.imageOptions.style.display = 'none'
+      document.body.appendChild(this.base.buttons.imageOptions)
+
       this.base.editableElement.insertBefore(newLine, imagefigure)
       this.base.editableElement.removeChild(imagefigure)
       MoreEditor.selection.moveCursor(document, newLine, 0)
@@ -1363,6 +1367,7 @@ MoreEditor.extensions = {};
       figCaption.setAttribute('contenteditable', 'true')
       figCaption.style.width = currentImage.offsetWidth + 'px'
       imagefigure.appendChild(figCaption)
+      MoreEditor.selection.moveCursor(document, figCaption, 0)
     }
   }
 
@@ -1613,6 +1618,15 @@ function handleBackAndEnterKeydown(event) {
 
             /*  在当前块元素的最后一个字符按下 enter 键  非列表元素中 */
             if(MoreEditor.util.isKey(event, MoreEditor.util.keyCode.ENTER) && MoreEditor.util.isElementAtEndofBlock(node) && MoreEditor.selection.getCaretOffsets(node).right === 0 ) {
+
+                /* figcaption 中最后一个字符按下 enter : 选中图片  */
+                if(cloestBlockContainer.nodeName.toLowerCase() === 'figcaption') {
+                    var imagePlaceHolder = cloestBlockContainer.parentNode.querySelector('.image-placeholder')
+                    MoreEditor.selection.moveCursor(document, imagePlaceHolder, 0)
+                    checkoutIfFocusedImage.call(this)
+                    event.preventDefault()
+                    return
+                }
 
                 var newLine = document.createElement('p')
                 newLine.innerHTML = '<br>'

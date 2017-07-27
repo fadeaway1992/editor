@@ -131,6 +131,15 @@ function handleBackAndEnterKeydown(event) {
             /*  在当前块元素的最后一个字符按下 enter 键  非列表元素中 */
             if(MoreEditor.util.isKey(event, MoreEditor.util.keyCode.ENTER) && MoreEditor.util.isElementAtEndofBlock(node) && MoreEditor.selection.getCaretOffsets(node).right === 0 ) {
 
+                /* figcaption 中最后一个字符按下 enter : 选中图片  */
+                if(cloestBlockContainer.nodeName.toLowerCase() === 'figcaption') {
+                    var imagePlaceHolder = cloestBlockContainer.parentNode.querySelector('.image-placeholder')
+                    MoreEditor.selection.moveCursor(document, imagePlaceHolder, 0)
+                    checkoutIfFocusedImage.call(this)
+                    event.preventDefault()
+                    return
+                }
+
                 var newLine = document.createElement('p')
                 newLine.innerHTML = '<br>'
                 if(topBlockContainer.nextElementSibling) {
