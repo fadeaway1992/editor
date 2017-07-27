@@ -1341,6 +1341,28 @@ MoreEditor.extensions = {};
       this.base.editableElement.insertBefore(newLine, imagefigure)
       this.base.editableElement.removeChild(imagefigure)
       MoreEditor.selection.moveCursor(document, newLine, 0)
+    },
+
+    /* 为图片添加注释 */
+    figCaption: function() {
+      var currentImage = document.querySelector('.insert-image-active')
+      if(!currentImage){console.log('出错了！')}
+
+      var imagefigure = currentImage.parentNode.parentNode
+      if(imagefigure.nodeName.toLocaleLowerCase() !== 'figure') {console.log('出错了')}
+
+      /* 判断当前图片是否已经存在 figurecaption */
+      if(imagefigure.querySelector('figcaption')) {
+        var oldCaption = imagefigure.querySelector('figcaption')
+        oldCaption.parentNode.removeChild(oldCaption)
+        return
+      }
+
+      var figCaption = document.createElement('figcaption')
+      figCaption.innerHTML = '<br>'
+      figCaption.setAttribute('contenteditable', 'true')
+      figCaption.style.width = currentImage.offsetWidth + 'px'
+      imagefigure.appendChild(figCaption)
     }
   }
 
@@ -1893,6 +1915,8 @@ MoreEditor.prototype = {
         this.buttons.imageOptions = document.querySelector(this.options.buttons.imageOptions)
         this.buttons.imageReChoose = document.querySelector(this.options.buttons.imageRechoose)
         this.buttons.imageRemove = document.querySelector(this.options.buttons.imageRemove)
+        this.buttons.figCaption = document.querySelector(this.options.buttons.figCaption)
+
 
         this.buttons.h2.addEventListener('click', this.API.h2.bind(this.API))
         this.buttons.h3.addEventListener('click', this.API.h3.bind(this.API))
@@ -1906,6 +1930,7 @@ MoreEditor.prototype = {
         this.buttons.imageInput.addEventListener('change', this.API.insertImage.bind(this.API))
         this.buttons.imageReChoose.addEventListener('click', function() {this.buttons.imageInput.click()}.bind(this))
         this.buttons.imageRemove.addEventListener('click', this.API.removeImage.bind(this.API))
+        this.buttons.figCaption.addEventListener('click', this.API.figCaption.bind(this.API))
 
         var _this = this
         this.buttons.link.addEventListener('click', function() {

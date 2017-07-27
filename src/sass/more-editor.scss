@@ -46,3 +46,14 @@
   display: inline-block;
   position: relative;
 }
+
+figcaption {
+  font-style: italic;
+  color: #c0c0c0;
+  background: #f5f5f5;
+  padding: 0.4em 1em;
+  box-sizing: border-box;
+  margin: 0 2px;
+  outline: none;
+  text-align: center;
+}

@@ -510,6 +510,28 @@
       this.base.editableElement.insertBefore(newLine, imagefigure)
       this.base.editableElement.removeChild(imagefigure)
       MoreEditor.selection.moveCursor(document, newLine, 0)
+    },
+
+    /* 为图片添加注释 */
+    figCaption: function() {
+      var currentImage = document.querySelector('.insert-image-active')
+      if(!currentImage){console.log('出错了！')}
+
+      var imagefigure = currentImage.parentNode.parentNode
+      if(imagefigure.nodeName.toLocaleLowerCase() !== 'figure') {console.log('出错了')}
+
+      /* 判断当前图片是否已经存在 figurecaption */
+      if(imagefigure.querySelector('figcaption')) {
+        var oldCaption = imagefigure.querySelector('figcaption')
+        oldCaption.parentNode.removeChild(oldCaption)
+        return
+      }
+
+      var figCaption = document.createElement('figcaption')
+      figCaption.innerHTML = '<br>'
+      figCaption.setAttribute('contenteditable', 'true')
+      figCaption.style.width = currentImage.offsetWidth + 'px'
+      imagefigure.appendChild(figCaption)
     }
   }
 
