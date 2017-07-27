@@ -675,6 +675,10 @@ MoreEditor.extensions = {};
       /* 选区存在并且选区在 editableElement 中 */
       if(range && MoreEditor.util.isRangeInsideMoreEditor(this.base.editableElement, range)) {   
         this.range = range
+        this.collapsed = range.collapsed
+        this.startContainer = range.startContainer
+        this.endContainer = range.endContainer
+        this.commonAncestorContainer = range.commonAncestorContainer
         this.startElement = MoreEditor.selection.getSelectionStart(document)
         this.closestBlock = MoreEditor.util.getClosestBlockContainer(this.startElement)
         this.topBlock = MoreEditor.util.getTopBlockContainerWithoutMoreEditor(this.startElement)
@@ -803,6 +807,10 @@ MoreEditor.extensions = {};
 
     setDefault: function() {
       this.range = null
+      this.collapsed = null
+      this.startContainer = null
+      this.endContainer = null
+      this.commonAncestorContainer = null
       this.startElement = null
       this.closestBlock = null
       this.topBlock = null
@@ -1063,6 +1071,7 @@ MoreEditor.extensions = {};
       this.base.delegate.updateStatus()
       var delegate = this.base.delegate
       var isCancle
+     
 
       /* 基本判断 命令是否可以执行 */
       if (delegate.crossBlock || !delegate.range || (delegate.range.collapsed  && this.base.options.decorateOnlyWhenTextSelected)) return
@@ -1078,7 +1087,7 @@ MoreEditor.extensions = {};
       document.execCommand('bold', false)
 
       // 如果只有一个光标没有选中文字，则执行的是开启粗体输入或者关闭粗体输入，这时候不需要去执行下面的 preventNestedDecorate
-      if(delegate.range.collapsed) {
+      if(delegate.collapsed) {
         this.base.buttons.bold.classList.toggle('button-active')
         return
       }
@@ -1097,7 +1106,7 @@ MoreEditor.extensions = {};
       var isCancle
 
       /* 基本判断 命令是否可以执行 */
-      if (delegate.crossBlock || !delegate.range || delegate.range.collapsed) return
+      if (delegate.crossBlock || !delegate.range || (delegate.range.collapsed  && this.base.options.decorateOnlyWhenTextSelected)) return
 
       /* 标题不可加粗 */
       if(delegate.setAlready.h2 || delegate.setAlready.h3) return
@@ -1108,6 +1117,12 @@ MoreEditor.extensions = {};
       }
 
       document.execCommand('italic', false)
+
+      // 如果只有一个光标没有选中文字，则执行的是开启斜体输入或者关闭斜体输入，这时候不需要去执行下面的 preventNestedDecorate
+      if(delegate.collapsed) {
+        this.base.buttons.italic.classList.toggle('button-active')
+        return
+      }
 
       /* 如果上一步执行的是斜体操作而不是取消斜体，则需要检查 粗体／斜体／删除线 之间的嵌套 */
       if(!isCancle) {
@@ -1763,7 +1778,7 @@ function handleKeydown(event) {
 
 function handleKeyup(event) {
     keepAtleastOneParagraph.call(this, event)
-    updateButtonStatus.call(this)
+    updateButtonStatus.call(this, event)
     checkoutIfFocusedImage.call(this)
     keepImagePlaceHolderEmpty.call(this.event)
 }
@@ -1777,7 +1792,13 @@ function handleMousedown(event) {
 /* 
     每次 keyup, mouseup 以及编辑器 blur 时都会执行下面的函数检测当前选区的变化，相应的调整哪些按钮可用，哪些按钮不可用。
 */
-function updateButtonStatus() {
+function updateButtonStatus(event) {
+
+    /* 在按钮上 mouseup 时不执行 */
+    if(event.target.nodeName.toLowerCase() === 'button') {
+        return
+    }
+
     this.delegate.updateStatus()
     var available = this.delegate.available
     var setAlready = this.delegate.setAlready
@@ -1789,6 +1810,14 @@ function updateButtonStatus() {
         this.buttons.bold.classList.remove('button-active')
     }
 
+    if(setAlready.italic) {
+        this.buttons.italic.classList.add('button-active')
+    } else {
+        this.buttons.italic.classList.remove('button-active')
+    }
+
+
+    /* disable 当前不能使用的按钮 */
     if(available.h) {
       this.buttons.h3.removeAttribute('disabled')
       this.buttons.h2.removeAttribute('disabled')
@@ -1894,6 +1923,14 @@ function checkoutIfFocusedImage() {
     }
 }
 
+// /* 初始化开关状态 记录输入状态：粗体输入，斜体输入 */
+// function initStatus() {
+//     this.status = {
+//         bold: false,
+//         italic: false
+//     }
+// }
+
 
 /* MoreEditor 实例初始化时增添的一些属性 */
 var initialOptions = {
@@ -1989,6 +2026,7 @@ MoreEditor.prototype = {
         this.delegate = new MoreEditor.Delegate(this)
         this.API = new MoreEditor.API(this)
         this.activateButtons()
+        // initStatus.call(this)
         initExtensions.call(this)
         attachHandlers.call(this)
     },

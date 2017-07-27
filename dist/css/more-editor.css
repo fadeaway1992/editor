@@ -61,4 +61,5 @@ figcaption {
   text-align: center; }
 
 .button-active {
-  background-color: #1e90ff !important; }
+  background-color: #1e90ff !important;
+  color: #fff; }

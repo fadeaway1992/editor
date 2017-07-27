@@ -29,6 +29,10 @@
       /* 选区存在并且选区在 editableElement 中 */
       if(range && MoreEditor.util.isRangeInsideMoreEditor(this.base.editableElement, range)) {   
         this.range = range
+        this.collapsed = range.collapsed
+        this.startContainer = range.startContainer
+        this.endContainer = range.endContainer
+        this.commonAncestorContainer = range.commonAncestorContainer
         this.startElement = MoreEditor.selection.getSelectionStart(document)
         this.closestBlock = MoreEditor.util.getClosestBlockContainer(this.startElement)
         this.topBlock = MoreEditor.util.getTopBlockContainerWithoutMoreEditor(this.startElement)
@@ -157,6 +161,10 @@
 
     setDefault: function() {
       this.range = null
+      this.collapsed = null
+      this.startContainer = null
+      this.endContainer = null
+      this.commonAncestorContainer = null
       this.startElement = null
       this.closestBlock = null
       this.topBlock = null

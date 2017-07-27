@@ -229,6 +229,7 @@
       this.base.delegate.updateStatus()
       var delegate = this.base.delegate
       var isCancle
+     
 
       /* 基本判断 命令是否可以执行 */
       if (delegate.crossBlock || !delegate.range || (delegate.range.collapsed  && this.base.options.decorateOnlyWhenTextSelected)) return
@@ -244,7 +245,7 @@
       document.execCommand('bold', false)
 
       // 如果只有一个光标没有选中文字，则执行的是开启粗体输入或者关闭粗体输入，这时候不需要去执行下面的 preventNestedDecorate
-      if(delegate.range.collapsed) {
+      if(delegate.collapsed) {
         this.base.buttons.bold.classList.toggle('button-active')
         return
       }
@@ -263,7 +264,7 @@
       var isCancle
 
       /* 基本判断 命令是否可以执行 */
-      if (delegate.crossBlock || !delegate.range || delegate.range.collapsed) return
+      if (delegate.crossBlock || !delegate.range || (delegate.range.collapsed  && this.base.options.decorateOnlyWhenTextSelected)) return
 
       /* 标题不可加粗 */
       if(delegate.setAlready.h2 || delegate.setAlready.h3) return
@@ -274,6 +275,12 @@
       }
 
       document.execCommand('italic', false)
+
+      // 如果只有一个光标没有选中文字，则执行的是开启斜体输入或者关闭斜体输入，这时候不需要去执行下面的 preventNestedDecorate
+      if(delegate.collapsed) {
+        this.base.buttons.italic.classList.toggle('button-active')
+        return
+      }
 
       /* 如果上一步执行的是斜体操作而不是取消斜体，则需要检查 粗体／斜体／删除线 之间的嵌套 */
       if(!isCancle) {
