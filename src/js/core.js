@@ -150,7 +150,7 @@ function handleBackAndEnterKeydown(event) {
 
             /*  在当前块元素的第一个字符按下 backspace 键 */
             if(MoreEditor.util.isKey(event, MoreEditor.util.keyCode.BACKSPACE) && MoreEditor.util.isElementAtBeginningOfBlock(node) && MoreEditor.selection.getCaretOffsets(node).left === 0) {
-
+                console.log('hahahah')
                 /* 前面是图片 */
                 if((topBlockContainer.nodeName.toLowerCase() === 'p' || topBlockContainer.nodeName.toLowerCase().indexOf('h') !== -1) && topBlockContainer.previousElementSibling && topBlockContainer.previousElementSibling.nodeName.toLowerCase() == 'figure') {
                     console.log('enenen?')
@@ -159,6 +159,7 @@ function handleBackAndEnterKeydown(event) {
                     event.preventDefault()
                     return
                 }
+                return
             }
 
         } else {
@@ -430,6 +431,7 @@ MoreEditor.prototype = {
         this.buttons.imageButton = document.querySelector(this.options.buttons.imageButton)
         this.buttons.imageOptions = document.querySelector(this.options.buttons.imageOptions)
         this.buttons.imageReChoose = document.querySelector(this.options.buttons.imageRechoose)
+        this.buttons.imageRemove = document.querySelector(this.options.buttons.imageRemove)
 
         this.buttons.h2.addEventListener('click', this.API.h2.bind(this.API))
         this.buttons.h3.addEventListener('click', this.API.h3.bind(this.API))
@@ -442,6 +444,7 @@ MoreEditor.prototype = {
         this.buttons.center.addEventListener('click', this.API.center.bind(this.API))
         this.buttons.imageInput.addEventListener('change', this.API.insertImage.bind(this.API))
         this.buttons.imageReChoose.addEventListener('click', function() {this.buttons.imageInput.click()}.bind(this))
+        this.buttons.imageRemove.addEventListener('click', this.API.removeImage.bind(this.API))
 
         var _this = this
         this.buttons.link.addEventListener('click', function() {

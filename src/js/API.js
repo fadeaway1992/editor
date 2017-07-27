@@ -494,6 +494,22 @@
       }.bind(this))
 
       fileReader.readAsDataURL(file) 
+    },
+    
+    /* 点击按钮删除选中的图片 */
+    removeImage: function() {
+      var currentImage = document.querySelector('.insert-image-active')
+      if(!currentImage){console.log('出错了！')}
+
+      var imagefigure = currentImage.parentNode.parentNode
+      if(imagefigure.nodeName.toLocaleLowerCase() !== 'figure') {console.log('出错了')}
+      
+      var newLine = document.createElement('p')
+      newLine.innerHTML = '<br>'
+
+      this.base.editableElement.insertBefore(newLine, imagefigure)
+      this.base.editableElement.removeChild(imagefigure)
+      MoreEditor.selection.moveCursor(document, newLine, 0)
     }
   }
 
