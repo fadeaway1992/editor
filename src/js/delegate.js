@@ -96,14 +96,14 @@
         }
 
         /* 判断 h2 h3 是否可用 */
-        if (this.crossBlock || this.closestBlock.nodeName.toLowerCase() === 'li') {
+        if (this.crossBlock || this.closestBlock.nodeName.toLowerCase() === 'li' || this.closestBlock.nodeName.toLowerCase() === 'figcaption') {
           this.available.h = false
         } else {
           this.available.h = true
         }
 
         /* 判断 bold italic strike 是否可用 */
-        if(this.crossBlock || this.range.collapsed) {
+        if(this.crossBlock || (this.range.collapsed  && this.base.options.decorateOnlyWhenTextSelected) || this.closestBlock.getAttribute('data-type') === 'image-placeholder' || this.closestBlock.nodeName.toLowerCase() === 'figcaption') {
           this.available.decorate = false
         } else {
           this.available.decorate = true
@@ -125,6 +125,9 @@
               this.available.quote = false
               this.available.list = true
             }
+          } else if(this.closestBlock.nodeName.toLowerCase() === 'figcaption') {
+            this.available.list = false
+            this.available.quote = false
           } else {
             this.available.list = false
             this.available.quote = false
@@ -132,14 +135,14 @@
         }
 
         /* 判断居中是否可用 */
-        if(this.crossBlock || this.closestBlock.getAttribute('data-type') === 'image-placeholder') {
+        if(this.crossBlock || this.closestBlock.getAttribute('data-type') === 'image-placeholder' || this.closestBlock.nodeName.toLowerCase() === 'figcaption') {
           this.available.center = false
         } else {
           this.available.center = true
         }
 
         /* 判断 上传图片 是否可用 */
-        if(this.crossBlock) {
+        if(this.crossBlock || this.closestBlock.nodeName.toLowerCase() === 'figcaption') {
           this.available.image = false
         } else {
           this.available.image = true

@@ -742,14 +742,14 @@ MoreEditor.extensions = {};
         }
 
         /* 判断 h2 h3 是否可用 */
-        if (this.crossBlock || this.closestBlock.nodeName.toLowerCase() === 'li') {
+        if (this.crossBlock || this.closestBlock.nodeName.toLowerCase() === 'li' || this.closestBlock.nodeName.toLowerCase() === 'figcaption') {
           this.available.h = false
         } else {
           this.available.h = true
         }
 
         /* 判断 bold italic strike 是否可用 */
-        if(this.crossBlock || this.range.collapsed) {
+        if(this.crossBlock || (this.range.collapsed  && this.base.options.decorateOnlyWhenTextSelected) || this.closestBlock.getAttribute('data-type') === 'image-placeholder' || this.closestBlock.nodeName.toLowerCase() === 'figcaption') {
           this.available.decorate = false
         } else {
           this.available.decorate = true
@@ -771,6 +771,9 @@ MoreEditor.extensions = {};
               this.available.quote = false
               this.available.list = true
             }
+          } else if(this.closestBlock.nodeName.toLowerCase() === 'figcaption') {
+            this.available.list = false
+            this.available.quote = false
           } else {
             this.available.list = false
             this.available.quote = false
@@ -778,14 +781,14 @@ MoreEditor.extensions = {};
         }
 
         /* 判断居中是否可用 */
-        if(this.crossBlock || this.closestBlock.getAttribute('data-type') === 'image-placeholder') {
+        if(this.crossBlock || this.closestBlock.getAttribute('data-type') === 'image-placeholder' || this.closestBlock.nodeName.toLowerCase() === 'figcaption') {
           this.available.center = false
         } else {
           this.available.center = true
         }
 
         /* 判断 上传图片 是否可用 */
-        if(this.crossBlock) {
+        if(this.crossBlock || this.closestBlock.nodeName.toLowerCase() === 'figcaption') {
           this.available.image = false
         } else {
           this.available.image = true
@@ -1062,7 +1065,7 @@ MoreEditor.extensions = {};
       var isCancle
 
       /* 基本判断 命令是否可以执行 */
-      if (delegate.crossBlock || !delegate.range || delegate.range.collapsed) return
+      if (delegate.crossBlock || !delegate.range || (delegate.range.collapsed  && this.base.options.decorateOnlyWhenTextSelected)) return
 
       /* 标题不可加粗 */
       if(delegate.setAlready.h2 || delegate.setAlready.h3) return
@@ -1073,6 +1076,12 @@ MoreEditor.extensions = {};
       }
 
       document.execCommand('bold', false)
+
+      // 如果只有一个光标没有选中文字，则执行的是开启粗体输入或者关闭粗体输入，这时候不需要去执行下面的 preventNestedDecorate
+      if(delegate.range.collapsed) {
+        this.base.buttons.bold.classList.toggle('button-active')
+        return
+      }
 
       /* 如果上一步执行的是加粗操作而不是取消加粗，则需要检查 粗体／斜体／删除线 之间的嵌套 */
       if(!isCancle) {
@@ -1368,6 +1377,8 @@ MoreEditor.extensions = {};
       figCaption.style.width = currentImage.offsetWidth + 'px'
       imagefigure.appendChild(figCaption)
       MoreEditor.selection.moveCursor(document, figCaption, 0)
+      updateButtonStatus.call(this.base)
+      return
     }
   }
 
@@ -1757,12 +1768,26 @@ function handleKeyup(event) {
     keepImagePlaceHolderEmpty.call(this.event)
 }
 
+function handleMousedown(event) {
+    if(event.target.nodeName.toLowerCase() === 'button') {
+        event.preventDefault()
+    }
+}
+
 /* 
     每次 keyup, mouseup 以及编辑器 blur 时都会执行下面的函数检测当前选区的变化，相应的调整哪些按钮可用，哪些按钮不可用。
 */
 function updateButtonStatus() {
     this.delegate.updateStatus()
     var available = this.delegate.available
+    var setAlready = this.delegate.setAlready
+
+    /* 高亮已经设置的按钮 */
+    if(setAlready.bold) {
+        this.buttons.bold.classList.add('button-active')
+    } else {
+        this.buttons.bold.classList.remove('button-active')
+    }
 
     if(available.h) {
       this.buttons.h3.removeAttribute('disabled')
@@ -1888,6 +1913,7 @@ function attachHandlers() {
     this.on(document.body, 'mouseup', updateButtonStatus.bind(this))
     this.on(this.editableElement, 'blur', updateButtonStatus.bind(this))
     this.on(this.editableElement, 'click', handleClick.bind(this))
+    this.on(document.body, 'mousedown', handleMousedown.bind(this))
 }
 
 

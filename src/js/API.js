@@ -231,7 +231,7 @@
       var isCancle
 
       /* 基本判断 命令是否可以执行 */
-      if (delegate.crossBlock || !delegate.range || delegate.range.collapsed) return
+      if (delegate.crossBlock || !delegate.range || (delegate.range.collapsed  && this.base.options.decorateOnlyWhenTextSelected)) return
 
       /* 标题不可加粗 */
       if(delegate.setAlready.h2 || delegate.setAlready.h3) return
@@ -242,6 +242,12 @@
       }
 
       document.execCommand('bold', false)
+
+      // 如果只有一个光标没有选中文字，则执行的是开启粗体输入或者关闭粗体输入，这时候不需要去执行下面的 preventNestedDecorate
+      if(delegate.range.collapsed) {
+        this.base.buttons.bold.classList.toggle('button-active')
+        return
+      }
 
       /* 如果上一步执行的是加粗操作而不是取消加粗，则需要检查 粗体／斜体／删除线 之间的嵌套 */
       if(!isCancle) {
@@ -537,6 +543,8 @@
       figCaption.style.width = currentImage.offsetWidth + 'px'
       imagefigure.appendChild(figCaption)
       MoreEditor.selection.moveCursor(document, figCaption, 0)
+      updateButtonStatus.call(this.base)
+      return
     }
   }
 

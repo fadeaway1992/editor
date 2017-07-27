@@ -269,12 +269,26 @@ function handleKeyup(event) {
     keepImagePlaceHolderEmpty.call(this.event)
 }
 
+function handleMousedown(event) {
+    if(event.target.nodeName.toLowerCase() === 'button') {
+        event.preventDefault()
+    }
+}
+
 /* 
     每次 keyup, mouseup 以及编辑器 blur 时都会执行下面的函数检测当前选区的变化，相应的调整哪些按钮可用，哪些按钮不可用。
 */
 function updateButtonStatus() {
     this.delegate.updateStatus()
     var available = this.delegate.available
+    var setAlready = this.delegate.setAlready
+
+    /* 高亮已经设置的按钮 */
+    if(setAlready.bold) {
+        this.buttons.bold.classList.add('button-active')
+    } else {
+        this.buttons.bold.classList.remove('button-active')
+    }
 
     if(available.h) {
       this.buttons.h3.removeAttribute('disabled')
@@ -400,6 +414,7 @@ function attachHandlers() {
     this.on(document.body, 'mouseup', updateButtonStatus.bind(this))
     this.on(this.editableElement, 'blur', updateButtonStatus.bind(this))
     this.on(this.editableElement, 'click', handleClick.bind(this))
+    this.on(document.body, 'mousedown', handleMousedown.bind(this))
 }
 
 
