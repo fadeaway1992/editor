@@ -90,6 +90,11 @@
           addImageElement.classList.add('insert-image')
           addImageElement.src = e.target.result
           console.log('image 设置src')
+
+          this.options.imageUpload(file, function(result) {
+            addImageElement.src = result
+          }.bind(this))
+
           var imageParent = imageWrapper.querySelector('.image-wrapper')
           imageParent.appendChild(addImageElement)
           if(line.parentNode) {
@@ -100,9 +105,6 @@
         }.bind(this))
 
         fileReader.readAsDataURL(file)
-        this.options.imageUpload(file, function(result) {
-          addImageElement.src = result
-        }.bind(this))
       }
     },
 
@@ -115,4 +117,4 @@
 
   MoreEditor.extensions.fileDragging = fileDragging
 
-}())
+}());

@@ -404,18 +404,11 @@ function checkoutIfFocusedImage() {
         if(activeImage) {
             activeImage.classList.remove('insert-image-active')
             this.buttons.imageOptions.style.display = 'none'
+            document.body.appendChild(this.buttons.imageOptions)
         }
         return
     }
 }
-
-// /* 初始化开关状态 记录输入状态：粗体输入，斜体输入 */
-// function initStatus() {
-//     this.status = {
-//         bold: false,
-//         italic: false
-//     }
-// }
 
 
 /* MoreEditor 实例初始化时增添的一些属性 */
@@ -462,23 +455,23 @@ MoreEditor.prototype = {
 
     activateButtons: function() {
         this.buttons = {}
-        this.buttons.h2 = document.querySelector(this.options.buttons.h2)
-        this.buttons.h3 = document.querySelector(this.options.buttons.h3)
-        this.buttons.ul = document.querySelector(this.options.buttons.ul)
-        this.buttons.ol = document.querySelector(this.options.buttons.ol)
-        this.buttons.quote = document.querySelector(this.options.buttons.quote)
-        this.buttons.bold = document.querySelector(this.options.buttons.bold)
-        this.buttons.italic = document.querySelector(this.options.buttons.italic)
-        this.buttons.strike = document.querySelector(this.options.buttons.strike)
-        this.buttons.url = document.querySelector(this.options.buttons.url)
-        this.buttons.link = document.querySelector(this.options.buttons.link)
-        this.buttons.center = document.querySelector(this.options.buttons.center)
-        this.buttons.imageInput = document.querySelector(this.options.buttons.imageInput)
-        this.buttons.imageButton = document.querySelector(this.options.buttons.imageButton)
-        this.buttons.imageOptions = document.querySelector(this.options.buttons.imageOptions)
+        this.buttons.h3            = document.querySelector(this.options.buttons.h3)
+        this.buttons.ul            = document.querySelector(this.options.buttons.ul)
+        this.buttons.h2            = document.querySelector(this.options.buttons.h2)
+        this.buttons.ol            = document.querySelector(this.options.buttons.ol)
+        this.buttons.quote         = document.querySelector(this.options.buttons.quote)
+        this.buttons.bold          = document.querySelector(this.options.buttons.bold)
+        this.buttons.italic        = document.querySelector(this.options.buttons.italic)
+        this.buttons.strike        = document.querySelector(this.options.buttons.strike)
+        this.buttons.url           = document.querySelector(this.options.buttons.url)
+        this.buttons.link          = document.querySelector(this.options.buttons.link)
+        this.buttons.center        = document.querySelector(this.options.buttons.center)
+        this.buttons.imageInput    = document.querySelector(this.options.buttons.imageInput)
+        this.buttons.imageButton   = document.querySelector(this.options.buttons.imageButton)
+        this.buttons.imageOptions  = document.querySelector(this.options.buttons.imageOptions)
         this.buttons.imageReChoose = document.querySelector(this.options.buttons.imageRechoose)
-        this.buttons.imageRemove = document.querySelector(this.options.buttons.imageRemove)
-        this.buttons.figCaption = document.querySelector(this.options.buttons.figCaption)
+        this.buttons.imageRemove   = document.querySelector(this.options.buttons.imageRemove)
+        this.buttons.figCaption    = document.querySelector(this.options.buttons.figCaption)
 
 
         this.buttons.h2.addEventListener('click', this.API.h2.bind(this.API))
@@ -511,6 +504,7 @@ MoreEditor.prototype = {
         this.events = new MoreEditor.Events(this)
         this.delegate = new MoreEditor.Delegate(this)
         this.API = new MoreEditor.API(this)
+        this.paste = new MoreEditor.Paste(this)
         this.activateButtons()
         // initStatus.call(this)
         initExtensions.call(this)

@@ -73,6 +73,12 @@ MoreEditor.extensions = {};
         // http://stackoverflow.com/a/11752084/569101
         isMac: (window.navigator.platform.toUpperCase().indexOf('MAC') >= 0),
 
+        htmlEntities: function (str) {
+            // converts special characters (like <) into their escaped/encoded values (like &lt;).
+            // This allows you to show to display the string without the browser reading it as HTML.
+            return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+        },
+
         // https://github.com/jashkenas/underscore
         // Lonely letter MUST USE the uppercase code
         keyCode: {
@@ -89,7 +95,6 @@ MoreEditor.extensions = {};
 
         /**
          * Returns true if it's metaKey on Mac, or ctrlKey on non-Mac.
-         * See #591
          */
         isMetaCtrlKey: function (event) {
             if ((Util.isMac && event.metaKey) || (!Util.isMac && event.ctrlKey)) {
@@ -1312,21 +1317,26 @@ MoreEditor.extensions = {};
       if(!delegate.range || delegate.crossBlock ) {return}
 
       var fileReader = new FileReader()
-      
-      fileReader.addEventListener('load', function (e) {
-        var addImageElement = new Image
 
-        addImageElement.onload = function() {
+      var addImageElement = new Image
+      addImageElement.classList.add('insert-image')
+      addImageElement.onload = function() {
           if(this.width<768) {
             this.style.width = this.width +'px'
           } else {
             this.style.width = "768px"
           }
         }
-
-        addImageElement.classList.add('insert-image')
+      
+      fileReader.addEventListener('load', function (e) {
+        
         addImageElement.src = e.target.result
 
+        this.options.imageUpload(file, function(result) {
+          addImageElement.src = result
+        }.bind(this))
+
+        console.log('这时候上传完毕了吗？')
         var imageWrapperHTML = '<figure data-type="more-editor-inserted-image" class="more-editor-inserted-image" contenteditable="false"><li data-type="image-placeholder" class="image-placeholder" contenteditable="true"></li><div class="image-wrapper"></div></figure>'
         var imageWrapper = document.createElement('div')
         imageWrapper.innerHTML = imageWrapperHTML
@@ -1491,6 +1501,11 @@ MoreEditor.extensions = {};
           addImageElement.classList.add('insert-image')
           addImageElement.src = e.target.result
           console.log('image 设置src')
+
+          this.options.imageUpload(file, function(result) {
+            addImageElement.src = result
+          }.bind(this))
+
           var imageParent = imageWrapper.querySelector('.image-wrapper')
           imageParent.appendChild(addImageElement)
           if(line.parentNode) {
@@ -1501,9 +1516,6 @@ MoreEditor.extensions = {};
         }.bind(this))
 
         fileReader.readAsDataURL(file)
-        this.options.imageUpload(file, function(result) {
-          addImageElement.src = result
-        }.bind(this))
       }
     },
 
@@ -1516,7 +1528,103 @@ MoreEditor.extensions = {};
 
   MoreEditor.extensions.fileDragging = fileDragging
 
-}())
+}());
+(function () {
+  'use strict';
+
+  /* 从剪贴板中抓取数据 */
+  function getClipboardContent(event, win, doc) {
+    var dataTransfer = event.clipboardData || win.clipboardData || doc.dataTransfer,
+      data = {};
+
+    if (!dataTransfer) {
+      return data;
+    }
+
+    // Use old WebKit/IE API
+    if (dataTransfer.getData) {
+      var legacyText = dataTransfer.getData('Text');
+      if (legacyText && legacyText.length > 0) {
+        data['text/plain'] = legacyText;
+      }
+    }
+
+    if (dataTransfer.types) {
+      for (var i = 0; i < dataTransfer.types.length; i++) {
+        var contentType = dataTransfer.types[i];
+        data[contentType] = dataTransfer.getData(contentType);
+      }
+    }
+
+    return data;
+  }
+
+  var Paste = function (instance) {
+    this.base = instance
+    this.options = this.base.options
+    this.init()
+  };
+
+  Paste.prototype = {
+
+    init: function() {
+      this.base.on(this.base.editableElement, 'paste', this.handlePaste.bind(this))
+    },
+
+    handlePaste: function(event) {
+      console.log('侦听到粘贴事件。')
+      event.preventDefault()
+
+      /* 获取选区 */
+      var delegate = this.base.delegate
+      delegate.updateStatus()
+
+      /* 
+        基本判断
+        跨块元素、光标在图片中的情况下不能粘贴
+      */
+      if(!delegate.range || delegate.crossBlock || delegate.closestBlock.getAttribute('data-type') === 'image-placeholder') return
+
+      /* 粘贴时要匹配当前的标签，可以是 p, h, li, figcaption */
+      this.pasteTag = delegate.closestBlock.nodeName.toLowerCase()
+
+      var clipboardContent = getClipboardContent(event, window, document)
+      var pastedHTML = clipboardContent['text/html']
+      var pastedPlain = clipboardContent['text/plain']
+
+      if (pastedHTML || pastedPlain) {
+        this.doPaste.call(this, pastedPlain)
+      }
+      return
+    },
+
+    doPaste: function(pastedPlain) {
+      var paragraphs
+      var html = ''
+
+      /* 如果是在 figcaption 中粘贴，保留文本中的换行符 */
+      if(this.pasteTag === 'figcaption') {
+        html = MoreEditor.util.htmlEntities(pastedPlain)
+      } else {
+        /* 检查文本中的换行，将每一行用光标所在块元素的标签包裹 */
+        paragraphs = pastedPlain.split(/[\r\n]+/g)
+        if (paragraphs.length > 1) {
+          for (var i = 0; i < paragraphs.length; i += 1) {
+            if (paragraphs[i] !== '') {
+              html += '<' + this.pasteTag + '>' + MoreEditor.util.htmlEntities(paragraphs[i]) + '</' + this.pasteTag + '>'
+            }
+          }
+        } else {
+          html = MoreEditor.util.htmlEntities(paragraphs[0])
+        }
+      }
+      console.log(html, 'html')
+      document.execCommand('insertHTML', false, html)
+      return
+    }
+  }    
+  MoreEditor.Paste = Paste;
+}());
 /* eslint-disable no-undef */
 
 /* MoreEditor 的原型属性和原型方法 */
@@ -1923,18 +2031,11 @@ function checkoutIfFocusedImage() {
         if(activeImage) {
             activeImage.classList.remove('insert-image-active')
             this.buttons.imageOptions.style.display = 'none'
+            document.body.appendChild(this.buttons.imageOptions)
         }
         return
     }
 }
-
-// /* 初始化开关状态 记录输入状态：粗体输入，斜体输入 */
-// function initStatus() {
-//     this.status = {
-//         bold: false,
-//         italic: false
-//     }
-// }
 
 
 /* MoreEditor 实例初始化时增添的一些属性 */
@@ -1981,23 +2082,23 @@ MoreEditor.prototype = {
 
     activateButtons: function() {
         this.buttons = {}
-        this.buttons.h2 = document.querySelector(this.options.buttons.h2)
-        this.buttons.h3 = document.querySelector(this.options.buttons.h3)
-        this.buttons.ul = document.querySelector(this.options.buttons.ul)
-        this.buttons.ol = document.querySelector(this.options.buttons.ol)
-        this.buttons.quote = document.querySelector(this.options.buttons.quote)
-        this.buttons.bold = document.querySelector(this.options.buttons.bold)
-        this.buttons.italic = document.querySelector(this.options.buttons.italic)
-        this.buttons.strike = document.querySelector(this.options.buttons.strike)
-        this.buttons.url = document.querySelector(this.options.buttons.url)
-        this.buttons.link = document.querySelector(this.options.buttons.link)
-        this.buttons.center = document.querySelector(this.options.buttons.center)
-        this.buttons.imageInput = document.querySelector(this.options.buttons.imageInput)
-        this.buttons.imageButton = document.querySelector(this.options.buttons.imageButton)
-        this.buttons.imageOptions = document.querySelector(this.options.buttons.imageOptions)
+        this.buttons.h3            = document.querySelector(this.options.buttons.h3)
+        this.buttons.ul            = document.querySelector(this.options.buttons.ul)
+        this.buttons.h2            = document.querySelector(this.options.buttons.h2)
+        this.buttons.ol            = document.querySelector(this.options.buttons.ol)
+        this.buttons.quote         = document.querySelector(this.options.buttons.quote)
+        this.buttons.bold          = document.querySelector(this.options.buttons.bold)
+        this.buttons.italic        = document.querySelector(this.options.buttons.italic)
+        this.buttons.strike        = document.querySelector(this.options.buttons.strike)
+        this.buttons.url           = document.querySelector(this.options.buttons.url)
+        this.buttons.link          = document.querySelector(this.options.buttons.link)
+        this.buttons.center        = document.querySelector(this.options.buttons.center)
+        this.buttons.imageInput    = document.querySelector(this.options.buttons.imageInput)
+        this.buttons.imageButton   = document.querySelector(this.options.buttons.imageButton)
+        this.buttons.imageOptions  = document.querySelector(this.options.buttons.imageOptions)
         this.buttons.imageReChoose = document.querySelector(this.options.buttons.imageRechoose)
-        this.buttons.imageRemove = document.querySelector(this.options.buttons.imageRemove)
-        this.buttons.figCaption = document.querySelector(this.options.buttons.figCaption)
+        this.buttons.imageRemove   = document.querySelector(this.options.buttons.imageRemove)
+        this.buttons.figCaption    = document.querySelector(this.options.buttons.figCaption)
 
 
         this.buttons.h2.addEventListener('click', this.API.h2.bind(this.API))
@@ -2030,6 +2131,7 @@ MoreEditor.prototype = {
         this.events = new MoreEditor.Events(this)
         this.delegate = new MoreEditor.Delegate(this)
         this.API = new MoreEditor.API(this)
+        this.paste = new MoreEditor.Paste(this)
         this.activateButtons()
         // initStatus.call(this)
         initExtensions.call(this)

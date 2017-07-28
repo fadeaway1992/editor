@@ -49,6 +49,12 @@
         // http://stackoverflow.com/a/11752084/569101
         isMac: (window.navigator.platform.toUpperCase().indexOf('MAC') >= 0),
 
+        htmlEntities: function (str) {
+            // converts special characters (like <) into their escaped/encoded values (like &lt;).
+            // This allows you to show to display the string without the browser reading it as HTML.
+            return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+        },
+
         // https://github.com/jashkenas/underscore
         // Lonely letter MUST USE the uppercase code
         keyCode: {
@@ -65,7 +71,6 @@
 
         /**
          * Returns true if it's metaKey on Mac, or ctrlKey on non-Mac.
-         * See #591
          */
         isMetaCtrlKey: function (event) {
             if ((Util.isMac && event.metaKey) || (!Util.isMac && event.ctrlKey)) {

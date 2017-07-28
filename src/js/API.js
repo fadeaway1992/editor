@@ -470,21 +470,26 @@
       if(!delegate.range || delegate.crossBlock ) {return}
 
       var fileReader = new FileReader()
-      
-      fileReader.addEventListener('load', function (e) {
-        var addImageElement = new Image
 
-        addImageElement.onload = function() {
+      var addImageElement = new Image
+      addImageElement.classList.add('insert-image')
+      addImageElement.onload = function() {
           if(this.width<768) {
             this.style.width = this.width +'px'
           } else {
             this.style.width = "768px"
           }
         }
-
-        addImageElement.classList.add('insert-image')
+      
+      fileReader.addEventListener('load', function (e) {
+        
         addImageElement.src = e.target.result
 
+        this.options.imageUpload(file, function(result) {
+          addImageElement.src = result
+        }.bind(this))
+
+        console.log('这时候上传完毕了吗？')
         var imageWrapperHTML = '<figure data-type="more-editor-inserted-image" class="more-editor-inserted-image" contenteditable="false"><li data-type="image-placeholder" class="image-placeholder" contenteditable="true"></li><div class="image-wrapper"></div></figure>'
         var imageWrapper = document.createElement('div')
         imageWrapper.innerHTML = imageWrapperHTML

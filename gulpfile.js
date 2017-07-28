@@ -13,6 +13,7 @@ var concatArr = [
     'src/js/delegate.js',
     'src/js/API.js',
     'src/js/fileDragging.js',
+    'src/js/paste.js',
     'src/js/core.js',
     'src/js/end.js'
 ]
