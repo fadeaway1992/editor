@@ -43,6 +43,10 @@ gulp.task('default', ['js','css'], function() {
         server: {
             baseDir: "./dist/",
             index: "demo/index.html"
+        },
+        port: 8080,
+        ui: {
+            port: 8081
         }
     })
 

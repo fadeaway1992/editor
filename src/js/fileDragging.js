@@ -75,19 +75,21 @@
         imageWrapper.innerHTML = imageWrapperHTML
         
         var fileReader = new FileReader()
-        
 
-        fileReader.addEventListener('load', function (e) {
-          var addImageElement = new Image
-          addImageElement.onload = function() {
+        var addImageElement = new Image
+        addImageElement.onload = function() {
+          console.log('imageload')
             if(this.width<768) {
               this.style.width = this.width +'px'
             } else {
               this.style.width = "768px"
             }
           }
+
+        fileReader.addEventListener('load', function (e) {
           addImageElement.classList.add('insert-image')
           addImageElement.src = e.target.result
+          console.log('image 设置src')
           var imageParent = imageWrapper.querySelector('.image-wrapper')
           imageParent.appendChild(addImageElement)
           if(line.parentNode) {
@@ -98,6 +100,9 @@
         }.bind(this))
 
         fileReader.readAsDataURL(file)
+        this.options.imageUpload(file, function(result) {
+          addImageElement.src = result
+        }.bind(this))
       }
     },
 
