@@ -3,8 +3,16 @@
 <head>
   <meta charset="UTF-8">
   <title>more-editor</title>
+
+  <!-- 引入页面样式文件 -->
   <link rel="stylesheet" href="../css/demo.css">
+
+  <!-- 引入编辑器用到的一些样式 -->
   <link rel="stylesheet" href="../css/more-editor.css">
+
+  <!-- 引入 阿里云 oss-sdk -->
+  <script src="https://gosspublic.alicdn.com/aliyun-oss-sdk-4.4.4.min.js"></script>
+
 </head>
 <body>
   <div class="toolbar">
@@ -30,6 +38,42 @@
   <!-- 创建 editor 实例  -->
   <script>
     window.onload = function() {
+
+      /* 定义图片上传所需的变量 */
+      var client,
+          region,
+          accessKeyId,
+          accessKeySecret,
+          stsToken,
+          bucket,
+          dirName,
+          filename
+
+      function getAliyunToken() {  // Authorization  token PPuEtnV44Rj2dh6LK8tCzR5eae1501208628.0156991
+        var ajax = new XMLHttpRequest()
+        ajax.open('POST', 'https://hubdemo.duodian.com/api/v1/sae113475d9/user/aliyun_sts_token', false)
+        ajax.setRequestHeader('Authorization', 'token PPuEtnV44Rj2dh6LK8tCzR5eae1501208628.0156991')
+        ajax.send()
+
+        var response = JSON.parse(ajax.responseText)
+        client = new OSS.Wrapper({
+          region: 'oss-'+response.oss_area,
+          accessKeyId: response.access_key_id,
+          secure: true,
+          accessKeySecret: response.access_key_secret,
+          stsToken: response.security_token,
+          bucket: response.oss_bucket_name
+        })
+        console.log(client,'client')
+        region = 'oss-'+response.oss_area
+        accessKeyId = response.access_key_id
+        accessKeySecret = response.access_key_secret
+        stsToken = response.security_token
+        bucket = response.oss_bucket_name
+        dirName = response.oss_dir_name
+      }
+
+      getAliyunToken()
 
       var editor = new MoreEditor('.editable', {
         imageUpload: function(image){
