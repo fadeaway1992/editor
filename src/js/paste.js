@@ -71,11 +71,11 @@
       var paragraphs
       var html = ''
 
-      /* 如果是在 figcaption 中粘贴，保留文本中的换行符 */
-      if(this.pasteTag === 'figcaption') {
-        html = MoreEditor.util.htmlEntities(pastedPlain)
+      //  如果是在 figcaption 或者 li 中粘贴，直接粘贴没有换行符的纯文本 
+      if(this.pasteTag === 'figcaption' || this.pasteTag === 'li') {
+        html = MoreEditor.util.htmlEntities(pastedPlain.replace(/[\r\n]+/g, ''))
       } else {
-        /* 检查文本中的换行，将每一行用光标所在块元素的标签包裹 */
+        //  检查文本中的换行，将每一行用光标所在块元素的标签包裹 
         paragraphs = pastedPlain.split(/[\r\n]+/g)
         if (paragraphs.length > 1) {
           for (var i = 0; i < paragraphs.length; i += 1) {
@@ -86,7 +86,9 @@
         } else {
           html = MoreEditor.util.htmlEntities(paragraphs[0])
         }
-      }
+      } 
+    
+
       console.log(html, 'html')
       document.execCommand('insertHTML', false, html)
       return
