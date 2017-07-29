@@ -444,6 +444,7 @@
     },
 
     importSelection: function() {
+      console.log(this.savedSelectionContainer,'看看你还在吗')
       MoreEditor.selection.restoreSelection(this.savedSelectionContainer, this.savedSelection)
       console.log(document.getSelection().getRangeAt(0), '恢复的选区')
     },

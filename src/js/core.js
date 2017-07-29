@@ -418,6 +418,10 @@ var initialOptions = {
     imageUploadAddress: null,
 }
 
+
+/* 
+    TODO: 其实不需要专门设置一个 extensions 对象，全部放在 editor 下面即可
+*/
 function initExtensions() {
     this.extensions = {}
     this.extensions.fileDragging = new MoreEditor.extensions.fileDragging(this)
@@ -505,8 +509,8 @@ MoreEditor.prototype = {
         this.delegate = new MoreEditor.Delegate(this)
         this.API = new MoreEditor.API(this)
         this.paste = new MoreEditor.Paste(this)
+        this.undoManager = new MoreEditor.UndoManager(this)
         this.activateButtons()
-        // initStatus.call(this)
         initExtensions.call(this)
         attachHandlers.call(this)
     },

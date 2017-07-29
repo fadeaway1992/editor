@@ -14,6 +14,7 @@ var concatArr = [
     'src/js/API.js',
     'src/js/fileDragging.js',
     'src/js/paste.js',
+    'src/js/undo.js',
     'src/js/core.js',
     'src/js/end.js'
 ]

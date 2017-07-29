@@ -79,7 +79,7 @@
         imageUpload: function(image, updateURL){
           console.log(image, '这是我要上传的图片，请在这个函数中把这个文件上传到服务器，调用 updateURL, 把线上地址传进去。')
           var time = new Date().getTime().toString()
-          var regex = /.*(.jpg|.png|.gif)$/
+          var regex = /.*(.jpe?g|.png|.gif)$/
           var extensionName = regex.exec(image.name)
           var fileName = dirName + '/' + time + extensionName[1]
 

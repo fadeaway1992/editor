@@ -90,7 +90,9 @@ MoreEditor.extensions = {};
             DELETE: 46,
             K: 75, // K keycode, and not k
             M: 77,
-            V: 86
+            V: 86,
+            Y: 89,
+            Z: 90
         },
 
         /**
@@ -1291,6 +1293,7 @@ MoreEditor.extensions = {};
     },
 
     importSelection: function() {
+      console.log(this.savedSelectionContainer,'看看你还在吗')
       MoreEditor.selection.restoreSelection(this.savedSelectionContainer, this.savedSelection)
       console.log(document.getSelection().getRangeAt(0), '恢复的选区')
     },
@@ -1626,6 +1629,65 @@ MoreEditor.extensions = {};
     }
   }    
   MoreEditor.Paste = Paste;
+}());
+(function () {
+  'use strict';
+
+  /* 构造函数 */
+  var UndoManager = function (instance) {
+    this.base = instance
+    this.options = this.base.options
+    this.init()
+  };
+
+  /* 原型 */
+  UndoManager.prototype = {
+
+    init: function() {
+      this.stack = []
+      this.curIndex = 0
+      this.hasUndo = false
+      this.hasRedo = false
+      this.timer = 0
+      this.maxUndo = 20
+      this.inputing = false
+      this.bindEvents()
+    },
+
+    bindEvents: function() {
+      this.base.on(this.base.editableElement, 'keydown', this.CommandListener.bind(this))
+    },
+
+    CommandListener: function(event) {
+      if(MoreEditor.util.isMetaCtrlKey(event) && !event.altKey && !event.shiftKey) {
+        if(MoreEditor.util.isKey(event, MoreEditor.util.keyCode.Z)) {
+          this.undo()
+          event.preventDefault()
+          return
+        }
+        if(MoreEditor.util.isKey(event, MoreEditor.util.keyCode.Y)) {
+          event.preventDefault()
+          this.redo()
+          return
+        }
+      }
+      if(MoreEditor.util.isMetaCtrlKey(event) && !event.altKey && event.shiftKey && MoreEditor.util.isKey(event, MoreEditor.util.keyCode.Z)) {
+        event.preventDefault()
+        this.redo()
+        return
+      }
+    },
+
+    undo: function() {
+      console.log('撤销')
+    },
+
+    redo: function() {
+      console.log('重做')
+    }
+    
+  }
+  MoreEditor.UndoManager = UndoManager;
 }());
 /* eslint-disable no-undef */
 
@@ -2047,6 +2109,10 @@ var initialOptions = {
     imageUploadAddress: null,
 }
 
+
+/* 
+    TODO: 其实不需要专门设置一个 extensions 对象，全部放在 editor 下面即可
+*/
 function initExtensions() {
     this.extensions = {}
     this.extensions.fileDragging = new MoreEditor.extensions.fileDragging(this)
@@ -2134,8 +2200,8 @@ MoreEditor.prototype = {
         this.delegate = new MoreEditor.Delegate(this)
         this.API = new MoreEditor.API(this)
         this.paste = new MoreEditor.Paste(this)
+        this.undoManager = new MoreEditor.UndoManager(this)
         this.activateButtons()
-        // initStatus.call(this)
         initExtensions.call(this)
         attachHandlers.call(this)
     },

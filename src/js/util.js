@@ -66,7 +66,9 @@
             DELETE: 46,
             K: 75, // K keycode, and not k
             M: 77,
-            V: 86
+            V: 86,
+            Y: 89,
+            Z: 90
         },
 
         /**
