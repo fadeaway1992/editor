@@ -88,3 +88,32 @@
     margin-right: 5px;
   }
 }
+
+.anchor-preview {
+  position: absolute;
+  display: inline-block;
+  left: 50%; top: 50%;
+  padding: 0 5px;
+  height: 40px;
+  background-color: #2f3338;
+  border-radius: 5px;
+  line-height: 40px;
+  text-align: center;
+  & a {
+    color: white;
+    font-weight: bold;
+    text-decoration: none;
+  }
+  &::after {
+    content: '';
+    display: block;
+    position: absolute;
+    height: 0;
+    width: 0;
+    border-bottom: 10px solid #2f3338;
+    border-left: 10px solid transparent;
+    border-right: 10px solid transparent;
+    left: 50%; top: -10px;
+    transform: translate(-10px, 0);
+  }
+}

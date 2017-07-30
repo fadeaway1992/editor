@@ -1535,7 +1535,9 @@ MoreEditor.extensions = {};
           } else {
             this.style.width = "768px"
           }
-          _this.base.saveScene()  // 设立撤销点
+         if (this.src.slice(0,4) !== 'data') {
+            _this.base.saveScene()  // 设立撤销点
+          }
         }
       
       fileReader.addEventListener('load', function (e) {
@@ -1704,12 +1706,16 @@ MoreEditor.extensions = {};
         var fileReader = new FileReader()
 
         var addImageElement = new Image
+        var _this = this
         addImageElement.onload = function() {
           console.log('imageload')
             if(this.width<768) {
               this.style.width = this.width +'px'
             } else {
               this.style.width = "768px"
+            }
+            if (this.src.slice(0,4) !== 'data') {
+              _this.base.saveScene()  // 设立撤销点
             }
           }
 
@@ -1728,8 +1734,6 @@ MoreEditor.extensions = {};
             MoreEditor.util.after(line, imageWrapper)
             MoreEditor.util.unwrap(imageWrapper, document)
             line.parentNode.removeChild(line)
-
-            this.base.saveScene()  // 设立撤销点
           }
         }.bind(this))
 
@@ -1933,7 +1937,7 @@ MoreEditor.extensions = {};
       }
       if(curScene === lastScene) return
       this.stack = this.stack.slice(0, this.index + 1)
-      this.stack.push({scene: curScene, selection: MoreEditor.selection.saveSelection(this.base.editableElement)})
+      this.stack.push({scene: curScene, selection: MoreEditor.selection.saveSelectionPrecise(this.base.editableElement)})
       if(this.stack.length > this.maxUndo) this.stack.shift()  // Array.prototype.shift      https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/shift
       this.index = this.stack.length -1
       this.update()
@@ -1951,7 +1955,7 @@ MoreEditor.extensions = {};
       var selection = item.selection
 
       this.setContent(scene)
-      MoreEditor.selection.restoreSelection(this.base.editableElement, selection)
+      MoreEditor.selection.restoreSelectionPrecise(this.base.editableElement, selection)
       this.update()
     },
 
@@ -2206,7 +2210,7 @@ function checkCaretPosition (event) {
     if(selection.rangeCount>0) {                               
         var range = selection.getRangeAt(0)                    
         var rects = range.getClientRects()                       // 获取选区／光标 clientRect 对象  对于光标换行，如果是从文本中间断句换行，可以获取到 rect 对象，如果是在文本末尾另起一行，这样是获取不到 rect 对象的。
-        var clineHeight = document.documentElement.clientHeight  // 获取当前客户端窗口高度
+        var clineHeight = document.documentElement.clientHeight || document.body.clientHeight  // 获取当前客户端窗口高度
         if(rects[0]) {
             var bottom = clineHeight - rects[0].bottom           // 获取光标距离窗口底部的高度
             if(bottom < 50) {
@@ -2253,8 +2257,44 @@ function handleKeyup(event) {
 }
 
 function handleMousedown(event) {
-    if(event.target.nodeName.toLowerCase() === 'button') {
+    if(event.target.nodeName.toLowerCase() === 'button' && event.target !== this.buttons.link) { // 这个地方暂时排除了 link 按钮，因为 link mousedown 时需要触发输入框的 blur 事件
         event.preventDefault()
+    }
+}
+
+/* anchor-preview  链接预览 */
+var timer = 0
+function handleMouseover(event) {
+    if(event.target.nodeName.toLowerCase() === 'a' || event.target.getAttribute('data-type') === 'anchor-preview') {
+        clearTimeout(timer)
+        var anchorPreview = document.querySelector('.anchor-preview')
+        anchorPreview.style.display = 'block'
+        if(event.target.nodeName.toLowerCase() === 'a' && event.target.parentNode.getAttribute('data-type') !== 'anchor-preview') {
+            var view = document.createElement('a')
+            view.href = event.target.href
+            view.target = '_blank'
+            view.innerHTML = event.target.href
+            anchorPreview.innerHTML = ''
+            anchorPreview.appendChild(view)
+            var rect = event.target.getClientRects()[0]
+            var anchorWidth = anchorPreview.offsetWidth
+            var left = rect.left + rect.width/2 - anchorWidth/2
+            anchorPreview.style.left = left + 'px'
+
+            var scrollTop = document.documentElement.scrollTop || document.body.scrollTop
+            var top = rect.bottom + scrollTop + 10
+            anchorPreview.style.top = top + 'px'
+        }
+
+    }
+}
+
+function handleMouseout(event) {
+    if(event.target.nodeName.toLowerCase() === 'a' || event.target.getAttribute('data-type') === 'anchor-preview') {
+        timer = setTimeout(function() {
+            var anchorPreview = document.querySelector('.anchor-preview')
+            anchorPreview.style.display = 'none'
+        }, 500)
     }
 }
 
@@ -2417,6 +2457,8 @@ function attachHandlers() {
     this.on(this.editableElement, 'blur', updateButtonStatus.bind(this))
     this.on(this.editableElement, 'click', handleClick.bind(this))
     this.on(document.body, 'mousedown', handleMousedown.bind(this))
+    this.on(document.body, 'mouseover', handleMouseover.bind(this))
+    this.on(document.body, 'mouseout', handleMouseout.bind(this))
 }
 
 

@@ -77,12 +77,16 @@
         var fileReader = new FileReader()
 
         var addImageElement = new Image
+        var _this = this
         addImageElement.onload = function() {
           console.log('imageload')
             if(this.width<768) {
               this.style.width = this.width +'px'
             } else {
               this.style.width = "768px"
+            }
+            if (this.src.slice(0,4) !== 'data') {
+              _this.base.saveScene()  // 设立撤销点
             }
           }
 
@@ -101,8 +105,6 @@
             MoreEditor.util.after(line, imageWrapper)
             MoreEditor.util.unwrap(imageWrapper, document)
             line.parentNode.removeChild(line)
-
-            this.base.saveScene()  // 设立撤销点
           }
         }.bind(this))
 

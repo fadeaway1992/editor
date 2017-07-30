@@ -85,7 +85,7 @@
       }
       if(curScene === lastScene) return
       this.stack = this.stack.slice(0, this.index + 1)
-      this.stack.push({scene: curScene, selection: MoreEditor.selection.saveSelection(this.base.editableElement)})
+      this.stack.push({scene: curScene, selection: MoreEditor.selection.saveSelectionPrecise(this.base.editableElement)})
       if(this.stack.length > this.maxUndo) this.stack.shift()  // Array.prototype.shift      https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/shift
       this.index = this.stack.length -1
       this.update()
@@ -103,7 +103,7 @@
       var selection = item.selection
 
       this.setContent(scene)
-      MoreEditor.selection.restoreSelection(this.base.editableElement, selection)
+      MoreEditor.selection.restoreSelectionPrecise(this.base.editableElement, selection)
       this.update()
     },
 

@@ -29,7 +29,6 @@
       <input class="url" type="input" placeholder="请输入链接地址"><button class="link">Link</button>
       <input type="file" accept="image/jpg, image/png, image/jpeg, image/gif" class="file-upload" style="display:none;">
       <button class="upload-image" onclick="document.querySelector('.file-upload').click()">上传图片</button>
-      <button onclick = "document.execCommand('insertHTML', false, '&lt;li&gt;hahah&lt;/li&gt;&lt;li&gt;hahah&lt;/li&gt;')">paste</button>
     </div>
   </div>
   <div class="editable" contenteditable="true"></div>
@@ -95,6 +94,7 @@
           })
         },
         sizeAlert:'.size-alert',
+        anchorPreview: '.anchor-preview',
         decorateOnlyWhenTextSelected:false,
         buttons: {
           h2: '.h2',
@@ -136,7 +136,7 @@
 </script>
 <div class="size-alert" style="display:none;"><p>上传的图片大小不能超过 10Mb </p><button onclick = "this.parentNode.style.display = 'none'">确定</button></div>
 <div class="image-options" style="display:none;"><button class="rechoose">替换</button><button class="figure-caption">注释</button><button class="delete">移除</button></div>
-
+<div class="anchor-preview" style="display:none;" data-type="anchor-preview"></div>
 </body>
 </html>
 

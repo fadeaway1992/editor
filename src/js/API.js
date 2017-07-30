@@ -503,7 +503,9 @@
           } else {
             this.style.width = "768px"
           }
-          _this.base.saveScene()  // 设立撤销点
+         if (this.src.slice(0,4) !== 'data') {
+            _this.base.saveScene()  // 设立撤销点
+          }
         }
       
       fileReader.addEventListener('load', function (e) {
