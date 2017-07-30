@@ -101,6 +101,8 @@
             MoreEditor.util.after(line, imageWrapper)
             MoreEditor.util.unwrap(imageWrapper, document)
             line.parentNode.removeChild(line)
+
+            this.base.saveScene()  // 设立撤销点
           }
         }.bind(this))
 

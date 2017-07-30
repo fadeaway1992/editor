@@ -864,6 +864,7 @@ MoreEditor.extensions = {};
       if (delegate.crossBlock || !delegate.range || delegate.closestBlock.nodeName.toLowerCase() === 'li') return
 
       MoreEditor.util.execFormatBlock(document, 'h2')
+      this.base.saveScene()  // 设立撤销点
     },
 
     /* 添加小标题 */
@@ -874,6 +875,7 @@ MoreEditor.extensions = {};
       if (this.base.delegate.crossBlock || !this.base.delegate.range || this.base.delegate.closestBlock.nodeName.toLowerCase() === 'li') return
 
       MoreEditor.util.execFormatBlock(document, 'h3')
+      this.base.saveScene()  // 设立撤销点
     },
 
 
@@ -934,6 +936,8 @@ MoreEditor.extensions = {};
       // 给 引用 加上 blockquote 类
       list.classList.add('blockquote')
       list.setAttribute('data-type', 'blockquote')
+
+      this.base.saveScene()  // 设立撤销点
     },
 
 
@@ -951,12 +955,14 @@ MoreEditor.extensions = {};
       /* 如果选中的是无序列表就取消整个列表 */
       if(delegate.setAlready.ul === true) {
         this.unWrapWholeList()
+        this.base.saveScene()  // 设立撤销点
         return
       }
 
       /* 如果选中的是顺序列表，将其转换为无序列表 */
       if(delegate.setAlready.ol === true) {
         MoreEditor.util.changeTag(delegate.topBlock, 'ul')
+        this.base.saveScene()  // 设立撤销点
         return
       }
 
@@ -987,6 +993,8 @@ MoreEditor.extensions = {};
       if(needSeperator) {
         this.base.editableElement.removeChild(document.querySelector('.seperator'))
       }
+
+      this.base.saveScene()  // 设立撤销点
     },
 
 
@@ -1003,12 +1011,14 @@ MoreEditor.extensions = {};
       /* 如果选中的是顺序列表就取消整个列表 */
       if(delegate.setAlready.ol === true) {
         this.unWrapWholeList()
+        this.base.saveScene()  // 设立撤销点
         return
       }
 
       /* 如果选中的是无序列表，将其转换为顺序列表 */
       if(delegate.setAlready.ul === true) {
         MoreEditor.util.changeTag(delegate.topBlock, 'ol')
+        this.base.saveScene()  // 设立撤销点
         return
       }
 
@@ -1018,6 +1028,8 @@ MoreEditor.extensions = {};
       /* 如果程序没有在前面几步退出，而是成功走到了这里，说明当前的环境可以生成顺序列表 */
       var list = this.createList(true)
       if(list.nodeName.toLowerCase() !== 'ol') console.log('%c你在生成顺序列表的过程中出错啦！', 'color: red;')
+      
+      this.base.saveScene()  // 设立撤销点
     },
 
 
@@ -1103,6 +1115,8 @@ MoreEditor.extensions = {};
       if(!isCancle) {
         MoreEditor.util.preventNestedDecorate(delegate.closestBlock, 'b i, b strike', 'i b, strike b')
       }
+
+      this.base.saveScene()  // 设立撤销点
     },
 
 
@@ -1134,10 +1148,12 @@ MoreEditor.extensions = {};
       /* 如果上一步执行的是斜体操作而不是取消斜体，则需要检查 粗体／斜体／删除线 之间的嵌套 */
       if(!isCancle) {
         MoreEditor.util.preventNestedDecorate(delegate.closestBlock, 'i b, i strike', 'b i, strike i') 
-      }  
+      } 
+      
+      this.base.saveScene()  // 设立撤销点
     },
 
-    /* 斜体／取消斜体 */
+    /* 删除线／取消删除线 */
     strike: function() {
       this.base.delegate.updateStatus()
       var delegate = this.base.delegate
@@ -1159,7 +1175,9 @@ MoreEditor.extensions = {};
       /* 检查 粗体／斜体／删除线 之间的嵌套 */
       if(!isCancle) {
         MoreEditor.util.preventNestedDecorate(delegate.closestBlock, 'strike b, strike i', 'b strike, i strike') 
-      }  
+      }
+
+      this.base.saveScene()  // 设立撤销点
     },
 
     /* 创建链接 */
@@ -1189,8 +1207,6 @@ MoreEditor.extensions = {};
         var focusDecoratedElement = MoreEditor.util.traverseUp(delegate.range.endContainer, function(element) {
               return (element.nodeName.toLowerCase() === 'i' || element.nodeName.toLowerCase() === 'b' || element.nodeName.toLowerCase() === 'strike')
         })
-
-        /* 这个地方要做一个判断：anchorNode 是否在左边， focusNode是否在右边，否则会出现错误 */
 
         /* 可以确定我们的 anchorNode 在 装饰标签内。并且这个装饰标签不包含 focusNode */
         if(anchorDecoratedElement) {
@@ -1249,11 +1265,15 @@ MoreEditor.extensions = {};
         }
 
         MoreEditor.selection.restoreSelection(delegate.closestBlock, origSelection)  // 恢复最开始的选区并退出
+
+        this.base.saveScene()  // 设立撤销点
         return
 
       } else {
 
         document.execCommand('createLink', false, url.trim())
+
+        this.base.saveScene()  // 设立撤销点
         return
       }
     },
@@ -1277,6 +1297,8 @@ MoreEditor.extensions = {};
          this.base.editableElement.focus()
          MoreEditor.selection.select(document, delegate.range.startContainer, delegate.range.startOffset)
        }
+
+       this.base.saveScene()  // 设立撤销点
     },
 
     /* 
@@ -1323,12 +1345,14 @@ MoreEditor.extensions = {};
 
       var addImageElement = new Image
       addImageElement.classList.add('insert-image')
+      var _this = this
       addImageElement.onload = function() {
           if(this.width<768) {
             this.style.width = this.width +'px'
           } else {
             this.style.width = "768px"
           }
+          _this.base.saveScene()  // 设立撤销点
         }
       
       fileReader.addEventListener('load', function (e) {
@@ -1382,6 +1406,9 @@ MoreEditor.extensions = {};
       this.base.editableElement.insertBefore(newLine, imagefigure)
       this.base.editableElement.removeChild(imagefigure)
       MoreEditor.selection.moveCursor(document, newLine, 0)
+
+      this.base.saveScene()  // 设立撤销点
+      return
     },
 
     /* 为图片添加注释 */
@@ -1396,6 +1423,7 @@ MoreEditor.extensions = {};
       if(imagefigure.querySelector('figcaption')) {
         var oldCaption = imagefigure.querySelector('figcaption')
         oldCaption.parentNode.removeChild(oldCaption)
+        this.base.saveScene()  // 设立撤销点
         return
       }
 
@@ -1406,6 +1434,8 @@ MoreEditor.extensions = {};
       imagefigure.appendChild(figCaption)
       MoreEditor.selection.moveCursor(document, figCaption, 0)
       updateButtonStatus.call(this.base)
+
+      this.base.saveScene()  // 设立撤销点
       return
     }
   }
@@ -1515,6 +1545,8 @@ MoreEditor.extensions = {};
             MoreEditor.util.after(line, imageWrapper)
             MoreEditor.util.unwrap(imageWrapper, document)
             line.parentNode.removeChild(line)
+
+            this.base.saveScene()  // 设立撤销点
           }
         }.bind(this))
 
@@ -1596,8 +1628,9 @@ MoreEditor.extensions = {};
       var pastedPlain = clipboardContent['text/plain']
 
       if (pastedHTML || pastedPlain) {
-        this.doPaste.call(this, pastedPlain)
+        this.doPaste(pastedPlain)
       }
+      this.base.saveScene()  // 设立撤销点
       return
     },
 
@@ -1655,7 +1688,11 @@ MoreEditor.extensions = {};
     },
 
     bindEvents: function() {
+      this.base.saveScene = this.save.bind(this)
       this.base.on(this.base.editableElement, 'keydown', this.CommandListener.bind(this))
+      this.base.on(this.base.editableElement, 'keydown', this.saveAfterInput.bind(this))
+      this.base.on(this.base.editableElement, 'compositionstart', this)
+      this.base.on(this.base.editableElement, 'compositionend', this)
     },
 
     CommandListener: function(event) {
@@ -1680,10 +1717,82 @@ MoreEditor.extensions = {};
 
     undo: function() {
       console.log('撤销')
+      if(this.hasUndo) {
+        this.index = this.index - 1
+        this.restore()
+      }
     },
 
     redo: function() {
       console.log('重做')
+      if(this.hasRedo) {
+        this.index = this.index + 1
+        this.restore()
+      }
+    },
+
+    saveAfterInput: function(event) {
+      var keyCode = MoreEditor.util.getKeyCode(event)
+      if ([16,17,18,37,38,39,40].indexOf(keyCode)==-1 && !MoreEditor.util.isMetaCtrlKey(event) && !event.shiftKey && !event.altKey) {
+        clearTimeout(this.timer)
+        if(this.inputing) return
+        this.timer = setTimeout(function() {
+          this.save()
+        }.bind(this), 300)
+      }
+    },
+
+    save: function() {
+      var curScene = this.getContent()
+      var lastScene
+      if(this.stack[this.index]) {
+        lastScene = this.stack[this.index].scene
+      }
+      if(curScene === lastScene) return
+      this.stack = this.stack.slice(0, this.index + 1)
+      this.stack.push({scene: curScene, selection: MoreEditor.selection.saveSelection(this.base.editableElement)})
+      if(this.stack.length > this.maxUndo) this.stack.shift()  // Array.prototype.shift      https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/shift
+      this.index = this.stack.length -1
+      this.update()
+      console.log('设立撤销站')
+    },
+
+    update: function() {
+      this.hasRedo = !!this.stack[this.index + 1]
+      this.hasUndo = !!this.stack[this.index - 1]
+    },
+
+    restore: function() {
+      var item = this.stack[this.index]
+      var scene = item.scene
+      var selection = item.selection
+
+      this.setContent(scene)
+      MoreEditor.selection.restoreSelection(this.base.editableElement, selection)
+      this.update()
+    },
+
+    getContent: function() {
+      return this.base.editableElement.innerHTML.trim()
+    },
+
+    setContent: function(html) {
+      this.base.editableElement.innerHTML = html
+    },
+
+    handleEvent: function(event) {
+      switch(event.type) {
+        case 'compositionstart':
+          this.inputing = true
+          break
+        case 'compositionend':
+          this.inputing = false
+          this.save()
+          break
+        default:
+          console.log('出错了')
+          break
+      }
     }
     
   }

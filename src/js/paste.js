@@ -62,8 +62,9 @@
       var pastedPlain = clipboardContent['text/plain']
 
       if (pastedHTML || pastedPlain) {
-        this.doPaste.call(this, pastedPlain)
+        this.doPaste(pastedPlain)
       }
+      this.base.saveScene()  // 设立撤销点
       return
     },
 
