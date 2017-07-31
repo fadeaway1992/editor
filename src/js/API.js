@@ -112,7 +112,8 @@
 
       /* 如果选中的是顺序列表，将其转换为无序列表 */
       if(delegate.setAlready.ol === true) {
-        MoreEditor.util.changeTag(delegate.topBlock, 'ul')
+        var ul = MoreEditor.util.changeTag(delegate.topBlock, 'ul')
+        MoreEditor.selection.moveCursor(document, ul.firstChild, 0)
         this.base.saveScene()  // 设立撤销点
         return
       }
@@ -168,7 +169,8 @@
 
       /* 如果选中的是无序列表，将其转换为顺序列表 */
       if(delegate.setAlready.ul === true) {
-        MoreEditor.util.changeTag(delegate.topBlock, 'ol')
+        var ol = MoreEditor.util.changeTag(delegate.topBlock, 'ol')
+        MoreEditor.selection.moveCursor(document, ol.firstChild, 0)
         this.base.saveScene()  // 设立撤销点
         return
       }
@@ -227,12 +229,24 @@
     unWrapWholeList: function() {
       var delegate = this.base.delegate
       var topBlock = delegate.topBlock
-      
+      var firstLine, newLine
+
       var listItems = Array.prototype.slice.apply(topBlock.children) // 将所有 li 放入一个数组
       for (var i=0; i<listItems.length; i++) {
-        MoreEditor.util.changeTag(listItems[i],'p')
+        newLine = MoreEditor.util.changeTag(listItems[i],'p')
+        if(i===0) {
+          firstLine = newLine
+        }
       }
       MoreEditor.util.unwrap(topBlock, document)
+      
+      /* 
+        取消列表后无法获取正确的 range, 但是光标却还在那像傻缺一样闪烁着。
+        需要手动 move 一下 cursor
+      */
+      
+        MoreEditor.selection.moveCursor(document, firstLine, 0)
+      console.log(document.getSelection().getRangeAt(0))
     },
 
 
@@ -335,6 +349,11 @@
     createLink: function(url) {
       if(!url) {
         return
+      }
+      
+      /* 对没有协议的链接添加双斜杠 */
+      if(!/:\/\//.test(url)) {
+        url = '//' + url
       }
 
       var delegate = this.base.delegate
