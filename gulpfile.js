@@ -15,6 +15,7 @@ var concatArr = [
     'src/js/fileDragging.js',
     'src/js/paste.js',
     'src/js/undo.js',
+    'src/js/autoLink.js',
     'src/js/core.js',
     'src/js/end.js'
 ]
@@ -24,6 +25,7 @@ gulp.task('js', function() {
         .pipe(concat('more-editor.js'))
         .pipe(gulp.dest('dist/js'))
 })
+
 gulp.task('js-watch', ['js'], function() {
     browserSync.reload()
 })

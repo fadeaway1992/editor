@@ -548,6 +548,7 @@ MoreEditor.prototype = {
         this.API = new MoreEditor.API(this)
         this.paste = new MoreEditor.Paste(this)
         this.undoManager = new MoreEditor.UndoManager(this)
+        this.autoLink = new MoreEditor.autoLink(this)
         this.activateButtons()
         initExtensions.call(this)
         attachHandlers.call(this)
