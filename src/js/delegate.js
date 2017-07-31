@@ -37,6 +37,11 @@
         this.closestBlock = MoreEditor.util.getClosestBlockContainer(this.startElement)
         this.topBlock = MoreEditor.util.getTopBlockContainerWithoutMoreEditor(this.startElement)
 
+        /* 有时候获取到 this.startElement 是整个编辑器，获取 topBlock 是 false, 不知道为什么会产生这种错误。如果获取到 topBlock 是错误，暂时先退出函数。 */
+        if(!this.topBlock) {
+          return
+        }
+
         /* 判断选区是否跨越块元素 */
         if(MoreEditor.util.isRangeCrossBlock(range)) {
           this.crossBlock = true

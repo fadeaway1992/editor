@@ -20,6 +20,10 @@
       this.maxUndo = 20
       this.inputing = false
       this.bindEvents()
+
+      /* 设立第一个空的撤销栈 */
+      this.base.editableElement.focus()
+      this.save()
     },
 
     bindEvents: function() {
