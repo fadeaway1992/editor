@@ -1531,6 +1531,7 @@ MoreEditor.extensions = {};
     insertImage: function(event) {
       console.log(event.target.files, 'insertImage files')
       var file = event.target.files[0]
+      event.target.value = ''
       if(!file) {
         return
       }
@@ -1572,7 +1573,6 @@ MoreEditor.extensions = {};
           addImageElement.src = result
         }.bind(this))
 
-        console.log('这时候上传完毕了吗？')
         var imageWrapperHTML = '<figure data-type="more-editor-inserted-image" class="more-editor-inserted-image" contenteditable="false"><li data-type="image-placeholder" class="image-placeholder" contenteditable="true"></li><div class="image-wrapper"></div></figure>'
         var imageWrapper = document.createElement('div')
         imageWrapper.innerHTML = imageWrapperHTML
@@ -1580,11 +1580,18 @@ MoreEditor.extensions = {};
         imageParent.appendChild(addImageElement)
 
         /* 当前选区存在内容的情况下在后面插入图片 */
-        if(delegate.topBlock.textContent && delegate.topBlock.nodeName.toLowerCase() !== 'figure') {
+        if(delegate.topBlock.nodeName.toLowerCase() !== 'figure') {
           console.log('在后面插入')
           console.log(delegate.topBlock.nodeName.toLowerCase)
           MoreEditor.util.after(delegate.topBlock, imageWrapper)
+
+          /* 在后面插入新的一行 */
+          var newLine = document.createElement('p')
+          newLine.innerHTML = '<br>'
+          MoreEditor.util.after(imageWrapper, newLine)
+
           MoreEditor.util.unwrap(imageWrapper, document)
+          MoreEditor.selection.moveCursor(document, newLine, 0)
           return
         } else {
           console.log('替换')
@@ -2486,6 +2493,16 @@ function checkIfClickedAnImage(event) {
             return
         }
     } else {
+
+        if(event.target.nodeName.toLowerCase() === 'figure') {
+            if(MoreEditor.util.isFF) {
+                console.log('firefox')
+                MoreEditor.selection.select(document, event.target, 0)
+            }
+        }
+        
+        
+        console.log(event.target)
         checkoutIfFocusedImage.call(this)
     }
 }
@@ -2503,6 +2520,7 @@ function checkoutIfFocusedImage() {
         range = selection.getRangeAt(0)
     }
     if(!range) return
+        console.log(range,'hahahahah')
     if(MoreEditor.util.getClosestBlockContainer(range.startContainer).getAttribute('data-type') === 'image-placeholder') {
         console.log('我进去了图片中')
         var topBlock = MoreEditor.util.getTopBlockContainerWithoutMoreEditor(range.startContainer)
@@ -2521,6 +2539,7 @@ function checkoutIfFocusedImage() {
     } else {
         var activeImage = document.querySelector('.insert-image-active')
         if(activeImage) {
+            console.log('准备移除已经聚焦的图片')
             activeImage.classList.remove('insert-image-active')
             this.buttons.imageOptions.style.display = 'none'
             document.body.appendChild(this.buttons.imageOptions)
@@ -2551,7 +2570,7 @@ function attachHandlers() {
     this.on(document.body, 'keyup', handleKeyup.bind(this))
     this.on(document.body, 'mouseup', updateButtonStatus.bind(this))
     this.on(this.editableElement, 'blur', updateButtonStatus.bind(this))
-    this.on(this.editableElement, 'click', handleClick.bind(this))
+    this.on(document.body, 'click', handleClick.bind(this))
     this.on(document.body, 'mousedown', handleMousedown.bind(this))
     this.on(document.body, 'mouseover', handleMouseover.bind(this))
     this.on(document.body, 'mouseout', handleMouseout.bind(this))

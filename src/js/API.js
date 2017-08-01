@@ -494,6 +494,7 @@
     insertImage: function(event) {
       console.log(event.target.files, 'insertImage files')
       var file = event.target.files[0]
+      event.target.value = ''
       if(!file) {
         return
       }
@@ -535,7 +536,6 @@
           addImageElement.src = result
         }.bind(this))
 
-        console.log('这时候上传完毕了吗？')
         var imageWrapperHTML = '<figure data-type="more-editor-inserted-image" class="more-editor-inserted-image" contenteditable="false"><li data-type="image-placeholder" class="image-placeholder" contenteditable="true"></li><div class="image-wrapper"></div></figure>'
         var imageWrapper = document.createElement('div')
         imageWrapper.innerHTML = imageWrapperHTML
@@ -543,11 +543,18 @@
         imageParent.appendChild(addImageElement)
 
         /* 当前选区存在内容的情况下在后面插入图片 */
-        if(delegate.topBlock.textContent && delegate.topBlock.nodeName.toLowerCase() !== 'figure') {
+        if(delegate.topBlock.nodeName.toLowerCase() !== 'figure') {
           console.log('在后面插入')
           console.log(delegate.topBlock.nodeName.toLowerCase)
           MoreEditor.util.after(delegate.topBlock, imageWrapper)
+
+          /* 在后面插入新的一行 */
+          var newLine = document.createElement('p')
+          newLine.innerHTML = '<br>'
+          MoreEditor.util.after(imageWrapper, newLine)
+
           MoreEditor.util.unwrap(imageWrapper, document)
+          MoreEditor.selection.moveCursor(document, newLine, 0)
           return
         } else {
           console.log('替换')
