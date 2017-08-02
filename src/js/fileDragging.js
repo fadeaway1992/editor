@@ -16,15 +16,15 @@
     init: function() {
       line = document.createElement('div')
       line.classList.add('line')
-      document.addEventListener('dragover',function(event) {
+      this.base.on(document, 'dragover',function(event) {
         event.preventDefault()
       }.bind(this))
-      document.addEventListener('drop', function(event) {
+      this.base.on(document, 'drop', function(event) {
         event.preventDefault()
       }.bind(this))
-      this.base.editableElement.addEventListener('dragover', this.handleDrag.bind(this))
-      document.addEventListener('dragenter', this.handleDragEnter.bind(this))
-      this.base.editableElement.addEventListener('drop', this.handleDrop.bind(this))
+      this.base.on(this.base.editableElement, 'dragover', this.handleDrag.bind(this))
+      this.base.on(document, 'dragenter', this.handleDragEnter.bind(this))
+      this.base.on(this.base.editableElement, 'drop', this.handleDrop.bind(this))
     },
 
     handleDrag: function(event) {
@@ -78,13 +78,7 @@
 
         var addImageElement = new Image
         var _this = this
-        addImageElement.onload = function() {
-          console.log('imageload')
-            if(this.width<768) {
-              this.style.width = this.width +'px'
-            } else {
-              this.style.width = "768px"
-            }
+        addImageElement.onload = function() {  // 撤销点可以不用在这里设置了， onload 函数可以去掉了！
             if (this.src.slice(0,4) !== 'data') {
               _this.base.saveScene()  // 设立撤销点
             }

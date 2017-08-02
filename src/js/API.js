@@ -517,12 +517,7 @@
       var addImageElement = new Image
       addImageElement.classList.add('insert-image')
       var _this = this
-      addImageElement.onload = function() {
-          if(this.width<768) {
-            this.style.width = this.width +'px'
-          } else {
-            this.style.width = "768px"
-          }
+      addImageElement.onload = function() {  // 撤销点可以不用在这里设置了， onload 函数可以去掉了！
          if (this.src.slice(0,4) !== 'data') {
             _this.base.saveScene()  // 设立撤销点
           }

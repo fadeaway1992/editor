@@ -29,6 +29,7 @@
       <input class="url" type="input" placeholder="请输入链接地址"><button class="link">Link</button>
       <input type="file" accept="image/jpg, image/png, image/jpeg, image/gif" class="file-upload" style="display:none;">
       <button class="upload-image" onclick="document.querySelector('.file-upload').click()">上传图片</button>
+      <button class="destroy">销毁事件</button>
     </div>
   </div>
   <div class="editable" contenteditable="true"></div>
@@ -49,6 +50,7 @@
           dirName
 
       function getAliyunToken() {  // Authorization  token PPuEtnV44Rj2dh6LK8tCzR5eae1501208628.0156991
+        return
         var ajax = new XMLHttpRequest()
         ajax.open('POST', 'https://hubdemo.duodian.com/api/v1/sae113475d9/user/aliyun_sts_token', false)
         ajax.setRequestHeader('Authorization', 'token PPuEtnV44Rj2dh6LK8tCzR5eae1501208628.0156991')
@@ -76,6 +78,7 @@
 
       var editor = new MoreEditor('.editable', {
         imageUpload: function(image, updateURL){
+          return
           console.log(image, '这是我要上传的图片，请在这个函数中把这个文件上传到服务器，调用 updateURL, 把线上地址传进去。')
           var time = new Date().getTime().toString()
           var regex = /.*(.jpe?g|.png|.gif)$/
@@ -93,6 +96,12 @@
             updateURL(url)
           })
         },
+
+        initReedit: function() {
+          // 重新编辑的时候调用这个函数
+          return
+        },
+
         sizeAlert:'.size-alert',
         anchorPreview: '.anchor-preview',
         decorateOnlyWhenTextSelected:false,
@@ -118,12 +127,13 @@
       })
       console.log(editor)
 
-      var editable = document.querySelector('.editable')
-
       var url = document.querySelector('.url')
-      url.addEventListener('blur', editor.API.importSelection.bind(editor.API))
-      url.addEventListener('mousedown', editor.API.exportSelection.bind(editor.API))
+      editor.on(url, 'blur', editor.API.importSelection.bind(editor.API))
+      editor.on(url, 'mousedown', editor.API.exportSelection.bind(editor.API))
 
+      document.querySelector('.destroy').onclick = function() {
+        editor.destroy()
+      }
     }
     
 </script>

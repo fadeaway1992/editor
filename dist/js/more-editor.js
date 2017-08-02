@@ -809,27 +809,53 @@ MoreEditor.extensions = {};
     'use strict';
 
     var Events = function (instance) {
-        this.base = instance;
-        this.options = this.base.options;
+        this.base = instance
+        this.options = this.base.options
+        this.events = []
     };
 
     Events.prototype = {
 
-        // Helpers for event handling
-
+        /* 给 dom 元素添加事件并将事件存放到 events 对象中 */
         attachDOMEvent: function (target, event, listener, useCapture) {
-            var win = this.base.options.contentWindow,
-                doc = this.base.options.ownerDocument;
 
-                target.addEventListener(event, listener, useCapture);
+            target.addEventListener(event, listener, useCapture)
+            this.events.push([target, event, listener, useCapture])
+
         },
 
+        /* 销毁 dom 元素的某个事件，并将该事件在 events 对象中的纪录删除 */
         detachDOMEvent: function (target, event, listener, useCapture) {
-            var win = this.base.options.contentWindow,
-                doc = this.base.options.ownerDocument;
-
+            var index, e
             target.removeEventListener(event, listener, useCapture)
-        }
+            index = this.indexOfListener(target, event, listener, useCapture);
+            if (index !== -1) {
+                e = this.events.splice(index, 1)[0];
+                e[0].removeEventListener(e[1], e[2], e[3]);
+            }
+        },
+
+        //查找某个元素上的监听事件，返回序号
+        indexOfListener: function (target, event, listener, useCapture) {
+            var i, n, item;
+            for (i = 0, n = this.events.length; i < n; i = i + 1) {
+                item = this.events[i];
+                if (item[0] === target && item[1] === event && item[2] === listener && item[3] === useCapture) {
+                    return i;
+                }
+            }
+            return -1;
+        },
+        
+        //解除所有事件
+        detachAllDOMEvents: function () {
+            var e = this.events.pop();
+            while (e) {
+                e[0].removeEventListener(e[1], e[2], e[3]);
+                e = this.events.pop();
+            }
+        },
+
     }    
     MoreEditor.Events = Events;
 }());
@@ -1554,12 +1580,7 @@ MoreEditor.extensions = {};
       var addImageElement = new Image
       addImageElement.classList.add('insert-image')
       var _this = this
-      addImageElement.onload = function() {
-          if(this.width<768) {
-            this.style.width = this.width +'px'
-          } else {
-            this.style.width = "768px"
-          }
+      addImageElement.onload = function() {  // 撤销点可以不用在这里设置了， onload 函数可以去掉了！
          if (this.src.slice(0,4) !== 'data') {
             _this.base.saveScene()  // 设立撤销点
           }
@@ -1676,15 +1697,15 @@ MoreEditor.extensions = {};
     init: function() {
       line = document.createElement('div')
       line.classList.add('line')
-      document.addEventListener('dragover',function(event) {
+      this.base.on(document, 'dragover',function(event) {
         event.preventDefault()
       }.bind(this))
-      document.addEventListener('drop', function(event) {
+      this.base.on(document, 'drop', function(event) {
         event.preventDefault()
       }.bind(this))
-      this.base.editableElement.addEventListener('dragover', this.handleDrag.bind(this))
-      document.addEventListener('dragenter', this.handleDragEnter.bind(this))
-      this.base.editableElement.addEventListener('drop', this.handleDrop.bind(this))
+      this.base.on(this.base.editableElement, 'dragover', this.handleDrag.bind(this))
+      this.base.on(document, 'dragenter', this.handleDragEnter.bind(this))
+      this.base.on(this.base.editableElement, 'drop', this.handleDrop.bind(this))
     },
 
     handleDrag: function(event) {
@@ -1738,13 +1759,7 @@ MoreEditor.extensions = {};
 
         var addImageElement = new Image
         var _this = this
-        addImageElement.onload = function() {
-          console.log('imageload')
-            if(this.width<768) {
-              this.style.width = this.width +'px'
-            } else {
-              this.style.width = "768px"
-            }
+        addImageElement.onload = function() {  // 撤销点可以不用在这里设置了， onload 函数可以去掉了！
             if (this.src.slice(0,4) !== 'data') {
               _this.base.saveScene()  // 设立撤销点
             }
@@ -2500,9 +2515,7 @@ function checkIfClickedAnImage(event) {
                 MoreEditor.selection.select(document, event.target, 0)
             }
         }
-        
-        
-        console.log(event.target)
+
         checkoutIfFocusedImage.call(this)
     }
 }
@@ -2520,7 +2533,6 @@ function checkoutIfFocusedImage() {
         range = selection.getRangeAt(0)
     }
     if(!range) return
-        console.log(range,'hahahahah')
     if(MoreEditor.util.getClosestBlockContainer(range.startContainer).getAttribute('data-type') === 'image-placeholder') {
         console.log('我进去了图片中')
         var topBlock = MoreEditor.util.getTopBlockContainerWithoutMoreEditor(range.startContainer)
@@ -2594,7 +2606,11 @@ MoreEditor.prototype = {
         }
         editableElement.setAttribute('data-more-editor-element', true)
         editableElement.classList.add('more-editor-element')
-        editableElement.innerHTML = '<p><br></p>'
+        if(editableElement.innerHTML === '') {
+            editableElement.innerHTML = '<p><br></p>'
+        } else {
+            this.options.initReedit(editableElement)
+        }
     },
 
     activateButtons: function() {
@@ -2618,25 +2634,33 @@ MoreEditor.prototype = {
         this.buttons.figCaption    = document.querySelector(this.options.buttons.figCaption)
 
 
-        this.buttons.h2.addEventListener('click', this.API.h2.bind(this.API))
-        this.buttons.h3.addEventListener('click', this.API.h3.bind(this.API))
-        this.buttons.ul.addEventListener('click', this.API.ul.bind(this.API))
-        this.buttons.ol.addEventListener('click', this.API.ol.bind(this.API))
-        this.buttons.quote.addEventListener('click', this.API.quote.bind(this.API))
-        this.buttons.bold.addEventListener('click', this.API.bold.bind(this.API))
-        this.buttons.italic.addEventListener('click', this.API.italic.bind(this.API))
-        this.buttons.strike.addEventListener('click', this.API.strike.bind(this.API))
-        this.buttons.center.addEventListener('click', this.API.center.bind(this.API))
-        this.buttons.imageInput.addEventListener('change', this.API.insertImage.bind(this.API))
-        this.buttons.imageReChoose.addEventListener('click', function() {this.buttons.imageInput.click()}.bind(this))
-        this.buttons.imageRemove.addEventListener('click', this.API.removeImage.bind(this.API))
-        this.buttons.figCaption.addEventListener('click', this.API.figCaption.bind(this.API))
+        this.on(this.buttons.h2, 'click', this.API.h2.bind(this.API))
+        this.on(this.buttons.h3, 'click', this.API.h3.bind(this.API))
+        this.on(this.buttons.ul, 'click', this.API.ul.bind(this.API))
+        this.on(this.buttons.ol, 'click', this.API.ol.bind(this.API))
+        this.on(this.buttons.quote, 'click', this.API.quote.bind(this.API))
+        this.on(this.buttons.bold, 'click', this.API.bold.bind(this.API))
+        this.on(this.buttons.italic, 'click', this.API.italic.bind(this.API))
+        this.on(this.buttons.strike, 'click', this.API.strike.bind(this.API))
+        this.on(this.buttons.center, 'click', this.API.center.bind(this.API))
+        this.on(this.buttons.imageInput, 'change', this.API.insertImage.bind(this.API))
+        this.on(this.buttons.imageReChoose, 'click', function() {this.buttons.imageInput.click()}.bind(this))
+        this.on(this.buttons.imageRemove, 'click', this.API.removeImage.bind(this.API))
+        this.on(this.buttons.figCaption, 'click', this.API.figCaption.bind(this.API))
 
         var _this = this
-        this.buttons.link.addEventListener('click', function() {
+        this.on(this.buttons.link, 'click', function() {
             _this.API.createLink(_this.buttons.url.value)
             _this.buttons.url.value = ''
         })
+
+        this.sizeAlert = document.querySelector(this.options.sizeAlert)
+        document.body.appendChild(this.sizeAlert)
+
+        this.anchorPreview = document.querySelector(this.options.anchorPreview)
+        document.body.appendChild(this.anchorPreview)
+
+        document.body.appendChild(this.buttons.imageOptions)
     },
     /* 
         setup 方法：
@@ -2665,6 +2689,16 @@ MoreEditor.prototype = {
         this.events.detachDOMEvent(target, event, listener, useCapture);
         return this;
     },
+
+    // 销毁所有事件
+    destroy: function() {
+        console.log('调用 destroy')
+        this.events.detachAllDOMEvents()
+        this.buttons.imageOptions.remove()
+        this.sizeAlert.remove()
+        this.anchorPreview.remove()
+        
+    }
 }
   
 /* eslint-enable no-undef */
