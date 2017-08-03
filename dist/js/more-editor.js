@@ -2541,8 +2541,7 @@ function checkoutIfFocusedImage() {
     if(selection.rangeCount>0) {
         range = selection.getRangeAt(0)
     }
-    if(!range) return
-    if(MoreEditor.util.getClosestBlockContainer(range.startContainer).getAttribute('data-type') === 'image-placeholder') {
+    if(range && MoreEditor.util.getClosestBlockContainer(range.startContainer).getAttribute('data-type') === 'image-placeholder') {
         console.log('我进去了图片中')
         var topBlock = MoreEditor.util.getTopBlockContainerWithoutMoreEditor(range.startContainer)
         var image = topBlock.querySelector('.insert-image')
@@ -2706,7 +2705,7 @@ MoreEditor.prototype = {
         this.buttons.imageOptions.remove()
         this.sizeAlert.remove()
         this.anchorPreview.remove()
-        
+        console.log('销毁所有事件')
     }
 }
   
