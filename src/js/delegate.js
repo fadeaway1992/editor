@@ -112,7 +112,7 @@
         }
 
         /* 判断 bold italic strike 是否可用 */
-        if(this.crossBlock || (this.range.collapsed  && this.base.options.decorateOnlyWhenTextSelected) || this.closestBlock.getAttribute('data-type') === 'image-placeholder' || this.closestBlock.nodeName.toLowerCase() === 'figcaption') {
+        if(this.crossBlock || (this.collapsed  && this.base.options.decorateOnlyWhenTextSelected) || this.closestBlock.getAttribute('data-type') === 'image-placeholder' || this.closestBlock.nodeName.toLowerCase() === 'figcaption' || this.topBlock.nodeName.toLowerCase().match(/h[23]/)) {
           this.available.decorate = false
         } else {
           this.available.decorate = true

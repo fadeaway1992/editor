@@ -974,7 +974,7 @@ MoreEditor.extensions = {};
         }
 
         /* 判断 bold italic strike 是否可用 */
-        if(this.crossBlock || (this.range.collapsed  && this.base.options.decorateOnlyWhenTextSelected) || this.closestBlock.getAttribute('data-type') === 'image-placeholder' || this.closestBlock.nodeName.toLowerCase() === 'figcaption') {
+        if(this.crossBlock || (this.collapsed  && this.base.options.decorateOnlyWhenTextSelected) || this.closestBlock.getAttribute('data-type') === 'image-placeholder' || this.closestBlock.nodeName.toLowerCase() === 'figcaption' || this.topBlock.nodeName.toLowerCase().match(/h[23]/)) {
           this.available.decorate = false
         } else {
           this.available.decorate = true
@@ -2263,8 +2263,8 @@ function handleBackAndEnterKeydown(event) {
                     topBlockContainer.parentNode.appendChild(newLine)
                     console.log('插入新行')
                 }
-                if(topBlockContainer.classList.contains('text-center')){
-                    newLine.classList.add('text-center')
+                if(topBlockContainer.classList.contains('text-align-center')){
+                    newLine.classList.add('text-align-center')
                 }
                 MoreEditor.selection.moveCursor(document, newLine, 0)
                 event.preventDefault()
