@@ -1523,7 +1523,7 @@ MoreEditor.extensions = {};
         return delegate.topBlock.classList.toggle('block-center')
       }
 
-       delegate.topBlock.classList.toggle('text-center')
+       delegate.topBlock.classList.toggle('text-align-center')
        
        /* 如果只有一个光标的话，执行居中后光标会消失，需要重新手动聚焦，有碍连续操作体验。下面的代码对此进行了优化。 */
        if(delegate.range.collapsed) {
