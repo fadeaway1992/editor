@@ -1009,7 +1009,11 @@ MoreEditor.extensions = {};
         if(this.crossBlock || this.closestBlock.getAttribute('data-type') === 'image-placeholder' || this.closestBlock.nodeName.toLowerCase() === 'figcaption') {
           this.available.center = false
         } else {
-          this.available.center = true
+          if(!this.base.options.canListsBeAligned && this.closestBlock.nodeName.toLowerCase() === 'li') {
+            this.available.center = false
+          } else {
+            this.available.center = true
+          }
         }
 
         /* 判断 上传图片 是否可用 */
@@ -1515,12 +1519,17 @@ MoreEditor.extensions = {};
     center: function() {
       var delegate = this.base.delegate
       delegate.updateStatus()
-
+      
       /* 基本判断 */
       if(delegate.crossBlock || !delegate.range) return
 
+      /* 判断是否在列表中操作，判断设置项中列表是否可以居中 */
       if(delegate.closestBlock.nodeName.toLowerCase() === 'li') {
-        return delegate.topBlock.classList.toggle('block-center')
+        if(this.base.options.canListsBeAligned) {
+          return delegate.topBlock.classList.toggle('block-center')
+        } else {
+          return
+        }
       }
 
        delegate.topBlock.classList.toggle('text-align-center')

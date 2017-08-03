@@ -147,7 +147,11 @@
         if(this.crossBlock || this.closestBlock.getAttribute('data-type') === 'image-placeholder' || this.closestBlock.nodeName.toLowerCase() === 'figcaption') {
           this.available.center = false
         } else {
-          this.available.center = true
+          if(!this.base.options.canListsBeAligned && this.closestBlock.nodeName.toLowerCase() === 'li') {
+            this.available.center = false
+          } else {
+            this.available.center = true
+          }
         }
 
         /* 判断 上传图片 是否可用 */
