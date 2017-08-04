@@ -104,8 +104,9 @@
     },
 
     sizeAlert: function() {
-      var sizeAlert = document.querySelector(this.base.options.sizeAlert)
-      sizeAlert.style.display = "block"
+      // var sizeAlert = document.querySelector(this.base.sizeAlert)
+      // sizeAlert.style.display = "block"
+      alert('上传的图片大小不能超过 10Mb')
     }
 
   }

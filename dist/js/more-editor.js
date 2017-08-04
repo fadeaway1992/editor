@@ -1096,6 +1096,27 @@ MoreEditor.extensions = {};
       this.base.saveScene()  // 设立撤销点
     },
 
+    /* 在 段落／小标题／大标题 之间切换 */
+    switchTitle: function() {
+      var delegate = this.base.delegate
+      delegate.updateStatus()
+
+      switch (delegate.closestBlock.nodeName.toLowerCase()) {
+        case 'p':
+          this.h2()
+          break
+        case 'h2':
+          this.h3()
+          break
+        case 'h3':
+          this.h3()
+          break
+        default:
+          return
+      }
+      
+    },
+
 
     /* 创建引用列表 */
     quote: function() {
@@ -1419,6 +1440,9 @@ MoreEditor.extensions = {};
 
       /* 基本判断 */
       if(delegate.crossBlock || !delegate.range) return
+      
+      /* 标题不可加链接 */
+      if(delegate.setAlready.h2 || delegate.setAlready.h3) return
 
       this.exportSelection()
 
@@ -1450,6 +1474,9 @@ MoreEditor.extensions = {};
 
       /* 基本判断 */
       if(delegate.crossBlock || !delegate.range) return
+
+      /* 标题不可加链接 */
+      if(delegate.setAlready.h2 || delegate.setAlready.h3) return
       
       /* 确定我们的选区不是全部在一个装饰标签内 */ 
       if(!MoreEditor.util.wrappedByDecoratedElement(delegate.range.commonAncestorContainer)) {
@@ -1815,8 +1842,9 @@ MoreEditor.extensions = {};
     },
 
     sizeAlert: function() {
-      var sizeAlert = document.querySelector(this.base.options.sizeAlert)
-      sizeAlert.style.display = "block"
+      // var sizeAlert = document.querySelector(this.base.sizeAlert)
+      // sizeAlert.style.display = "block"
+      alert('上传的图片大小不能超过 10Mb')
     }
 
   }
@@ -2636,6 +2664,7 @@ MoreEditor.prototype = {
         this.buttons.h3            = document.querySelector(this.options.buttons.h3)
         this.buttons.ul            = document.querySelector(this.options.buttons.ul)
         this.buttons.h2            = document.querySelector(this.options.buttons.h2)
+        this.buttons.switchTitle   = document.querySelector(this.options.buttons.switchTitle)
         this.buttons.ol            = document.querySelector(this.options.buttons.ol)
         this.buttons.quote         = document.querySelector(this.options.buttons.quote)
         this.buttons.bold          = document.querySelector(this.options.buttons.bold)
@@ -2655,6 +2684,7 @@ MoreEditor.prototype = {
 
         this.on(this.buttons.h2, 'click', this.API.h2.bind(this.API))
         this.on(this.buttons.h3, 'click', this.API.h3.bind(this.API))
+        this.on(this.buttons.switchTitle, 'click', this.API.switchTitle.bind(this.API))
         this.on(this.buttons.ul, 'click', this.API.ul.bind(this.API))
         this.on(this.buttons.ol, 'click', this.API.ol.bind(this.API))
         this.on(this.buttons.quote, 'click', this.API.quote.bind(this.API))

@@ -29,6 +29,27 @@
       this.base.saveScene()  // 设立撤销点
     },
 
+    /* 在 段落／小标题／大标题 之间切换 */
+    switchTitle: function() {
+      var delegate = this.base.delegate
+      delegate.updateStatus()
+
+      switch (delegate.closestBlock.nodeName.toLowerCase()) {
+        case 'p':
+          this.h2()
+          break
+        case 'h2':
+          this.h3()
+          break
+        case 'h3':
+          this.h3()
+          break
+        default:
+          return
+      }
+      
+    },
+
 
     /* 创建引用列表 */
     quote: function() {
@@ -352,6 +373,9 @@
 
       /* 基本判断 */
       if(delegate.crossBlock || !delegate.range) return
+      
+      /* 标题不可加链接 */
+      if(delegate.setAlready.h2 || delegate.setAlready.h3) return
 
       this.exportSelection()
 
@@ -383,6 +407,9 @@
 
       /* 基本判断 */
       if(delegate.crossBlock || !delegate.range) return
+
+      /* 标题不可加链接 */
+      if(delegate.setAlready.h2 || delegate.setAlready.h3) return
       
       /* 确定我们的选区不是全部在一个装饰标签内 */ 
       if(!MoreEditor.util.wrappedByDecoratedElement(delegate.range.commonAncestorContainer)) {

@@ -504,6 +504,7 @@ MoreEditor.prototype = {
         this.buttons.h3            = document.querySelector(this.options.buttons.h3)
         this.buttons.ul            = document.querySelector(this.options.buttons.ul)
         this.buttons.h2            = document.querySelector(this.options.buttons.h2)
+        this.buttons.switchTitle   = document.querySelector(this.options.buttons.switchTitle)
         this.buttons.ol            = document.querySelector(this.options.buttons.ol)
         this.buttons.quote         = document.querySelector(this.options.buttons.quote)
         this.buttons.bold          = document.querySelector(this.options.buttons.bold)
@@ -523,6 +524,7 @@ MoreEditor.prototype = {
 
         this.on(this.buttons.h2, 'click', this.API.h2.bind(this.API))
         this.on(this.buttons.h3, 'click', this.API.h3.bind(this.API))
+        this.on(this.buttons.switchTitle, 'click', this.API.switchTitle.bind(this.API))
         this.on(this.buttons.ul, 'click', this.API.ul.bind(this.API))
         this.on(this.buttons.ol, 'click', this.API.ol.bind(this.API))
         this.on(this.buttons.quote, 'click', this.API.quote.bind(this.API))
