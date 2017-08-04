@@ -343,9 +343,11 @@ function updateButtonStatus(event) {
     if(available.h) {
       this.buttons.h3.removeAttribute('disabled')
       this.buttons.h2.removeAttribute('disabled')
+      this.buttons.switchTitle.removeAttribute('disabled')
     } else {
       this.buttons.h2.setAttribute('disabled', 'disabled')
       this.buttons.h3.setAttribute('disabled', 'disabled')
+      this.buttons.switchTitle.setAttribute('disabled', 'disabled')
     }
 
     if(available.decorate) {

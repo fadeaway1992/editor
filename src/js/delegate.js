@@ -104,7 +104,7 @@
           this.setAlready.strike = false
         }
 
-        /* 判断 h2 h3 是否可用 */
+        /* 判断 h2 h3 switchTitle 是否可用 */
         if (this.crossBlock || this.closestBlock.nodeName.toLowerCase() === 'li' || this.closestBlock.nodeName.toLowerCase() === 'figcaption') {
           this.available.h = false
         } else {

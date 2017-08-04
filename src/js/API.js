@@ -14,16 +14,27 @@
       /* 基本判断 */  // 只有 段落 和 小标题  可以执行大标题命令哦！
       if (delegate.crossBlock || !delegate.range || delegate.closestBlock.nodeName.toLowerCase() === 'li') return
 
+      /* 有装饰标签或者链接的情况下要转化为纯文本 */
+      if(delegate.closestBlock.querySelector('b') || delegate.closestBlock.querySelector('i') || delegate.closestBlock.querySelector('strike') || delegate.closestBlock.querySelector('a')) {
+        delegate.closestBlock.innerHTML = delegate.closestBlock.textContent
+      }
+
       MoreEditor.util.execFormatBlock(document, 'h2')
       this.base.saveScene()  // 设立撤销点
     },
 
     /* 添加小标题 */
     h3: function() {
-      this.base.delegate.updateStatus()
+      var delegate = this.base.delegate
+      delegate.updateStatus()
 
       /* 基本判断 */
       if (this.base.delegate.crossBlock || !this.base.delegate.range || this.base.delegate.closestBlock.nodeName.toLowerCase() === 'li') return
+
+      /* 有装饰标签或者链接的情况下要转化为纯文本 */
+      if(delegate.closestBlock.querySelector('b') || delegate.closestBlock.querySelector('i') || delegate.closestBlock.querySelector('strike') || delegate.closestBlock.querySelector('a')) {
+        delegate.closestBlock.innerHTML = delegate.closestBlock.textContent
+      }
 
       MoreEditor.util.execFormatBlock(document, 'h3')
       this.base.saveScene()  // 设立撤销点

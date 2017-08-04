@@ -966,7 +966,7 @@ MoreEditor.extensions = {};
           this.setAlready.strike = false
         }
 
-        /* 判断 h2 h3 是否可用 */
+        /* 判断 h2 h3 switchTitle 是否可用 */
         if (this.crossBlock || this.closestBlock.nodeName.toLowerCase() === 'li' || this.closestBlock.nodeName.toLowerCase() === 'figcaption') {
           this.available.h = false
         } else {
@@ -1081,16 +1081,27 @@ MoreEditor.extensions = {};
       /* 基本判断 */  // 只有 段落 和 小标题  可以执行大标题命令哦！
       if (delegate.crossBlock || !delegate.range || delegate.closestBlock.nodeName.toLowerCase() === 'li') return
 
+      /* 有装饰标签或者链接的情况下要转化为纯文本 */
+      if(delegate.closestBlock.querySelector('b') || delegate.closestBlock.querySelector('i') || delegate.closestBlock.querySelector('strike') || delegate.closestBlock.querySelector('a')) {
+        delegate.closestBlock.innerHTML = delegate.closestBlock.textContent
+      }
+
       MoreEditor.util.execFormatBlock(document, 'h2')
       this.base.saveScene()  // 设立撤销点
     },
 
     /* 添加小标题 */
     h3: function() {
-      this.base.delegate.updateStatus()
+      var delegate = this.base.delegate
+      delegate.updateStatus()
 
       /* 基本判断 */
       if (this.base.delegate.crossBlock || !this.base.delegate.range || this.base.delegate.closestBlock.nodeName.toLowerCase() === 'li') return
+
+      /* 有装饰标签或者链接的情况下要转化为纯文本 */
+      if(delegate.closestBlock.querySelector('b') || delegate.closestBlock.querySelector('i') || delegate.closestBlock.querySelector('strike') || delegate.closestBlock.querySelector('a')) {
+        delegate.closestBlock.innerHTML = delegate.closestBlock.textContent
+      }
 
       MoreEditor.util.execFormatBlock(document, 'h3')
       this.base.saveScene()  // 设立撤销点
@@ -2503,9 +2514,11 @@ function updateButtonStatus(event) {
     if(available.h) {
       this.buttons.h3.removeAttribute('disabled')
       this.buttons.h2.removeAttribute('disabled')
+      this.buttons.switchTitle.removeAttribute('disabled')
     } else {
       this.buttons.h2.setAttribute('disabled', 'disabled')
       this.buttons.h3.setAttribute('disabled', 'disabled')
+      this.buttons.switchTitle.setAttribute('disabled', 'disabled')
     }
 
     if(available.decorate) {
