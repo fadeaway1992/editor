@@ -109,6 +109,7 @@
       this.setContent(scene)
       MoreEditor.selection.restoreSelectionPrecise(this.base.editableElement, selection)
       this.update()
+      updateButtonStatus.call(this.base)
     },
 
     getContent: function() {

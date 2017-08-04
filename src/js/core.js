@@ -317,7 +317,7 @@ function handleMouseout(event) {
 function updateButtonStatus(event) {
 
     /* 在按钮上 mouseup 时不执行 */
-    if(event.target.nodeName.toLowerCase() === 'button') {
+    if(event && event.target.nodeName.toLowerCase() === 'button') {
         return
     }
 
@@ -336,6 +336,24 @@ function updateButtonStatus(event) {
         this.buttons.italic.classList.add('button-active')
     } else {
         this.buttons.italic.classList.remove('button-active')
+    }
+
+    if(setAlready.quote) {
+        this.buttons.quote.classList.add('button-active')
+    } else {
+        this.buttons.quote.classList.remove('button-active')
+    }
+
+    if(setAlready.ol) {
+        this.buttons.ol.classList.add('button-active')
+    } else {
+        this.buttons.ol.classList.remove('button-active')
+    }
+
+    if(setAlready.ul) {
+        this.buttons.ul.classList.add('button-active')
+    } else {
+        this.buttons.ul.classList.remove('button-active')
     }
 
 

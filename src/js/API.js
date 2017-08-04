@@ -120,6 +120,7 @@
       list.classList.add('blockquote')
       list.setAttribute('data-type', 'blockquote')
 
+      updateButtonStatus.call(this.base)
       this.base.saveScene()  // 设立撤销点
     },
 
@@ -146,6 +147,7 @@
       if(delegate.setAlready.ol === true) {
         var ul = MoreEditor.util.changeTag(delegate.topBlock, 'ul')
         MoreEditor.selection.moveCursor(document, ul.firstChild, 0)
+        updateButtonStatus.call(this.base)
         this.base.saveScene()  // 设立撤销点
         return
       }
@@ -178,6 +180,7 @@
         this.base.editableElement.removeChild(document.querySelector('.seperator'))
       }
 
+      updateButtonStatus.call(this.base)
       this.base.saveScene()  // 设立撤销点
     },
 
@@ -203,6 +206,7 @@
       if(delegate.setAlready.ul === true) {
         var ol = MoreEditor.util.changeTag(delegate.topBlock, 'ol')
         MoreEditor.selection.moveCursor(document, ol.firstChild, 0)
+        updateButtonStatus.call(this.base)
         this.base.saveScene()  // 设立撤销点
         return
       }
@@ -213,7 +217,8 @@
       /* 如果程序没有在前面几步退出，而是成功走到了这里，说明当前的环境可以生成顺序列表 */
       var list = this.createList(true)
       if(list.nodeName.toLowerCase() !== 'ol') console.log('%c你在生成顺序列表的过程中出错啦！', 'color: red;')
-      
+
+      updateButtonStatus.call(this.base)
       this.base.saveScene()  // 设立撤销点
     },
 
@@ -277,8 +282,8 @@
         需要手动 move 一下 cursor
       */
       
-        MoreEditor.selection.moveCursor(document, firstLine, 0)
-      console.log(document.getSelection().getRangeAt(0))
+      MoreEditor.selection.moveCursor(document, firstLine, 0)
+      updateButtonStatus.call(this.base)
     },
 
 
@@ -307,6 +312,8 @@
         this.base.buttons.bold.classList.toggle('button-active')
         return
       }
+
+      updateButtonStatus.call(this.base)
 
       /* 如果上一步执行的是加粗操作而不是取消加粗，则需要检查 粗体／斜体／删除线 之间的嵌套 */
       if(!isCancle) {
@@ -341,6 +348,8 @@
         this.base.buttons.italic.classList.toggle('button-active')
         return
       }
+
+      updateButtonStatus.call(this.base)
 
       /* 如果上一步执行的是斜体操作而不是取消斜体，则需要检查 粗体／斜体／删除线 之间的嵌套 */
       if(!isCancle) {
