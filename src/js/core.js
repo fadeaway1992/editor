@@ -511,6 +511,7 @@ MoreEditor.prototype = {
         this.buttons.strike        = document.querySelector(this.options.buttons.strike)
         this.buttons.url           = document.querySelector(this.options.buttons.url)
         this.buttons.link          = document.querySelector(this.options.buttons.link)
+        this.buttons.promptLink    = document.querySelector(this.options.buttons.promptLink)
         this.buttons.center        = document.querySelector(this.options.buttons.center)
         this.buttons.imageInput    = document.querySelector(this.options.buttons.imageInput)
         this.buttons.imageButton   = document.querySelector(this.options.buttons.imageButton)
@@ -533,6 +534,7 @@ MoreEditor.prototype = {
         this.on(this.buttons.imageReChoose, 'click', function() {this.buttons.imageInput.click()}.bind(this))
         this.on(this.buttons.imageRemove, 'click', this.API.removeImage.bind(this.API))
         this.on(this.buttons.figCaption, 'click', this.API.figCaption.bind(this.API))
+        this.on(this.buttons.promptLink, 'click', this.API.promptLink.bind(this.API))
 
         var _this = this
         this.on(this.buttons.link, 'click', function() {

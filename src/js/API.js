@@ -345,6 +345,28 @@
       this.base.saveScene()  // 设立撤销点
     },
 
+    /* 使用 prompt 创建链接 */
+    promptLink: function() {
+      var delegate = this.base.delegate
+      delegate.updateStatus()
+
+      /* 基本判断 */
+      if(delegate.crossBlock || !delegate.range) return
+
+      this.exportSelection()
+
+      var url = prompt('请输入链接地址',"")
+      
+      if(url) {
+        this.importSelection()
+        this.createLink(url)
+      } else {
+        this.importSelection()
+      }
+
+      return
+    },
+
     /* 创建链接 */
     createLink: function(url) {
       if(!url) {

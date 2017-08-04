@@ -1412,6 +1412,28 @@ MoreEditor.extensions = {};
       this.base.saveScene()  // 设立撤销点
     },
 
+    /* 使用 prompt 创建链接 */
+    promptLink: function() {
+      var delegate = this.base.delegate
+      delegate.updateStatus()
+
+      /* 基本判断 */
+      if(delegate.crossBlock || !delegate.range) return
+
+      this.exportSelection()
+
+      var url = prompt('请输入链接地址',"")
+      
+      if(url) {
+        this.importSelection()
+        this.createLink(url)
+      } else {
+        this.importSelection()
+      }
+
+      return
+    },
+
     /* 创建链接 */
     createLink: function(url) {
       if(!url) {
@@ -1713,7 +1735,7 @@ MoreEditor.extensions = {};
       }.bind(this))
       this.base.on(this.base.editableElement, 'dragover', this.handleDrag.bind(this))
       this.base.on(document, 'dragenter', this.handleDragEnter.bind(this))
-      this.base.on(this.base.editableElement, 'drop', this.handleDrop.bind(this))
+      this.base.on(this.base.editableElement, 'drop', this.handleDrop.bind(this)) 
     },
 
     handleDrag: function(event) {
@@ -2621,6 +2643,7 @@ MoreEditor.prototype = {
         this.buttons.strike        = document.querySelector(this.options.buttons.strike)
         this.buttons.url           = document.querySelector(this.options.buttons.url)
         this.buttons.link          = document.querySelector(this.options.buttons.link)
+        this.buttons.promptLink    = document.querySelector(this.options.buttons.promptLink)
         this.buttons.center        = document.querySelector(this.options.buttons.center)
         this.buttons.imageInput    = document.querySelector(this.options.buttons.imageInput)
         this.buttons.imageButton   = document.querySelector(this.options.buttons.imageButton)
@@ -2643,6 +2666,7 @@ MoreEditor.prototype = {
         this.on(this.buttons.imageReChoose, 'click', function() {this.buttons.imageInput.click()}.bind(this))
         this.on(this.buttons.imageRemove, 'click', this.API.removeImage.bind(this.API))
         this.on(this.buttons.figCaption, 'click', this.API.figCaption.bind(this.API))
+        this.on(this.buttons.promptLink, 'click', this.API.promptLink.bind(this.API))
 
         var _this = this
         this.on(this.buttons.link, 'click', function() {

@@ -24,7 +24,7 @@
       }.bind(this))
       this.base.on(this.base.editableElement, 'dragover', this.handleDrag.bind(this))
       this.base.on(document, 'dragenter', this.handleDragEnter.bind(this))
-      this.base.on(this.base.editableElement, 'drop', this.handleDrop.bind(this))
+      this.base.on(this.base.editableElement, 'drop', this.handleDrop.bind(this)) 
     },
 
     handleDrag: function(event) {
