@@ -458,18 +458,10 @@ function checkoutIfFocusedImage() {
 /* MoreEditor 实例初始化时增添的一些属性 */
 var initialOptions = {
     contentWindow: window,
-    ownerDocument: document,
-    imageUploadAddress: null,
+    ownerDocument: document
 }
 
 
-/* 
-    TODO: 其实不需要专门设置一个 extensions 对象，全部放在 editor 下面即可
-*/
-function initExtensions() {
-    this.extensions = {}
-    this.extensions.fileDragging = new MoreEditor.extensions.fileDragging(this)
-}
 
 function attachHandlers() {
     this.on(this.editableElement, 'keydown', handleKeydown.bind(this))
@@ -569,8 +561,8 @@ MoreEditor.prototype = {
         this.paste = new MoreEditor.Paste(this)
         this.undoManager = new MoreEditor.UndoManager(this)
         this.autoLink = new MoreEditor.autoLink(this)
+        this.fileDragging = new MoreEditor.fileDragging(this)
         this.activateButtons()
-        initExtensions.call(this)
         attachHandlers.call(this)
     },
     // 添加 dom 事件

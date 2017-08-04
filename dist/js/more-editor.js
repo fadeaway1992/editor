@@ -1574,7 +1574,7 @@ MoreEditor.extensions = {};
       /* 判断图片大小是否超限 */
       var maxFileSize = 10 * 1024 * 1024
       if(file.size > maxFileSize) {
-        this.base.extensions.fileDragging.sizeAlert()
+        this.base.fileDragging.sizeAlert()
         return
       }
 
@@ -1588,12 +1588,10 @@ MoreEditor.extensions = {};
 
       var addImageElement = new Image
       addImageElement.classList.add('insert-image')
-      var _this = this
-      addImageElement.onload = function() {  // 撤销点可以不用在这里设置了， onload 函数可以去掉了！
-         if (this.src.slice(0,4) !== 'data') {
-            _this.base.saveScene()  // 设立撤销点
-          }
-        }
+
+      addImageElement.onload = function() {  
+         // 图片渲染成功
+      }
       
       fileReader.addEventListener('load', function (e) {
         
@@ -1601,6 +1599,7 @@ MoreEditor.extensions = {};
 
         this.options.imageUpload(file, function(result) {
           addImageElement.src = result
+           this.base.saveScene()  // 设立撤销点
         }.bind(this))
 
         var imageWrapperHTML = '<figure data-type="more-editor-inserted-image" class="more-editor-inserted-image" contenteditable="false"><li data-type="image-placeholder" class="image-placeholder" contenteditable="true"></li><div class="image-wrapper"></div></figure>'
@@ -1767,20 +1766,17 @@ MoreEditor.extensions = {};
         var fileReader = new FileReader()
 
         var addImageElement = new Image
-        var _this = this
-        addImageElement.onload = function() {  // 撤销点可以不用在这里设置了， onload 函数可以去掉了！
-            if (this.src.slice(0,4) !== 'data') {
-              _this.base.saveScene()  // 设立撤销点
-            }
-          }
+        addImageElement.onload = function() {
+          // 图片渲染成功
+        }
 
         fileReader.addEventListener('load', function (e) {
           addImageElement.classList.add('insert-image')
           addImageElement.src = e.target.result
-          console.log('image 设置src')
 
           this.options.imageUpload(file, function(result) {
             addImageElement.src = result
+             this.base.saveScene()  // 设立撤销点
           }.bind(this))
 
           var imageParent = imageWrapper.querySelector('.image-wrapper')
@@ -1803,7 +1799,7 @@ MoreEditor.extensions = {};
 
   }
 
-  MoreEditor.extensions.fileDragging = fileDragging
+  MoreEditor.fileDragging = fileDragging
 
 }());
 (function () {
@@ -2572,18 +2568,10 @@ function checkoutIfFocusedImage() {
 /* MoreEditor 实例初始化时增添的一些属性 */
 var initialOptions = {
     contentWindow: window,
-    ownerDocument: document,
-    imageUploadAddress: null,
+    ownerDocument: document
 }
 
 
-/* 
-    TODO: 其实不需要专门设置一个 extensions 对象，全部放在 editor 下面即可
-*/
-function initExtensions() {
-    this.extensions = {}
-    this.extensions.fileDragging = new MoreEditor.extensions.fileDragging(this)
-}
 
 function attachHandlers() {
     this.on(this.editableElement, 'keydown', handleKeydown.bind(this))
@@ -2683,8 +2671,8 @@ MoreEditor.prototype = {
         this.paste = new MoreEditor.Paste(this)
         this.undoManager = new MoreEditor.UndoManager(this)
         this.autoLink = new MoreEditor.autoLink(this)
+        this.fileDragging = new MoreEditor.fileDragging(this)
         this.activateButtons()
-        initExtensions.call(this)
         attachHandlers.call(this)
     },
     // 添加 dom 事件

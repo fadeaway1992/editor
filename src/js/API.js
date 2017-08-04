@@ -507,7 +507,7 @@
       /* 判断图片大小是否超限 */
       var maxFileSize = 10 * 1024 * 1024
       if(file.size > maxFileSize) {
-        this.base.extensions.fileDragging.sizeAlert()
+        this.base.fileDragging.sizeAlert()
         return
       }
 
@@ -521,12 +521,10 @@
 
       var addImageElement = new Image
       addImageElement.classList.add('insert-image')
-      var _this = this
-      addImageElement.onload = function() {  // 撤销点可以不用在这里设置了， onload 函数可以去掉了！
-         if (this.src.slice(0,4) !== 'data') {
-            _this.base.saveScene()  // 设立撤销点
-          }
-        }
+
+      addImageElement.onload = function() {  
+         // 图片渲染成功
+      }
       
       fileReader.addEventListener('load', function (e) {
         
@@ -534,6 +532,7 @@
 
         this.options.imageUpload(file, function(result) {
           addImageElement.src = result
+           this.base.saveScene()  // 设立撤销点
         }.bind(this))
 
         var imageWrapperHTML = '<figure data-type="more-editor-inserted-image" class="more-editor-inserted-image" contenteditable="false"><li data-type="image-placeholder" class="image-placeholder" contenteditable="true"></li><div class="image-wrapper"></div></figure>'

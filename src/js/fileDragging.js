@@ -77,20 +77,17 @@
         var fileReader = new FileReader()
 
         var addImageElement = new Image
-        var _this = this
-        addImageElement.onload = function() {  // 撤销点可以不用在这里设置了， onload 函数可以去掉了！
-            if (this.src.slice(0,4) !== 'data') {
-              _this.base.saveScene()  // 设立撤销点
-            }
-          }
+        addImageElement.onload = function() {
+          // 图片渲染成功
+        }
 
         fileReader.addEventListener('load', function (e) {
           addImageElement.classList.add('insert-image')
           addImageElement.src = e.target.result
-          console.log('image 设置src')
 
           this.options.imageUpload(file, function(result) {
             addImageElement.src = result
+             this.base.saveScene()  // 设立撤销点
           }.bind(this))
 
           var imageParent = imageWrapper.querySelector('.image-wrapper')
@@ -113,6 +110,6 @@
 
   }
 
-  MoreEditor.extensions.fileDragging = fileDragging
+  MoreEditor.fileDragging = fileDragging
 
 }());
