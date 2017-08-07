@@ -312,7 +312,7 @@ function handleMouseout(event) {
 }
 
 /* 
-    每次 keyup, mouseup 以及编辑器 blur 时都会执行下面的函数检测当前选区的变化，相应的调整哪些按钮可用，哪些按钮不可用。
+    每次 keyup, mouseup 以及编辑器 blur 时都会执行下面的函数检测当前选区的变化，相应的调整按钮高亮，以及哪些按钮可用，哪些按钮不可用。
 */
 function updateButtonStatus(event) {
 
@@ -338,6 +338,12 @@ function updateButtonStatus(event) {
         this.buttons.italic.classList.remove('button-active')
     }
 
+    if(setAlready.strike) {
+        this.buttons.strike.classList.add('button-active')
+    } else {
+        this.buttons.strike.classList.remove('button-active')
+    }
+
     if(setAlready.quote) {
         this.buttons.quote.classList.add('button-active')
     } else {
@@ -355,6 +361,26 @@ function updateButtonStatus(event) {
     } else {
         this.buttons.ul.classList.remove('button-active')
     }
+
+    if(setAlready.h2) {
+        this.buttons.h2.classList.add('button-active')
+    } else {
+        this.buttons.h2.classList.remove('button-active')
+    }
+
+    if(setAlready.h3) {
+        this.buttons.h3.classList.add('button-active')
+    } else {
+        this.buttons.h3.classList.remove('button-active')
+    }
+
+    if(setAlready.center) {
+        this.buttons.center.classList.add('button-active')
+    } else {
+        this.buttons.center.classList.remove('button-active')
+    }
+
+    
 
 
     /* disable 当前不能使用的按钮 */

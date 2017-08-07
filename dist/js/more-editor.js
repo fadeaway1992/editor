@@ -966,6 +966,13 @@ MoreEditor.extensions = {};
           this.setAlready.strike = false
         }
 
+        /* 判断选中的部分是否已经居中 */
+        if(this.topBlock.classList.contains('text-align-center') || this.topBlock.classList.contains('block-center')) {
+          this.setAlready.center = true
+        } else {
+          this.setAlready.center = false
+        }
+
         /* 判断 h2 h3 switchTitle 是否可用 */
         if (this.crossBlock || this.closestBlock.nodeName.toLowerCase() === 'li' || this.closestBlock.nodeName.toLowerCase() === 'figcaption') {
           this.available.h = false
@@ -1028,6 +1035,8 @@ MoreEditor.extensions = {};
         console.log('set defaults')
         this.setDefault()
       }
+
+      console.log(this.range, 'range')
     },
 
     setDefault: function() {
@@ -1048,7 +1057,8 @@ MoreEditor.extensions = {};
         strike: false,
         quote: false,
         ul: false,
-        ol: false
+        ol: false,
+        center: false
       }
       this.available = {
         h: false,
@@ -1087,6 +1097,9 @@ MoreEditor.extensions = {};
       }
 
       MoreEditor.util.execFormatBlock(document, 'h2')
+
+      updateButtonStatus.call(this.base)
+
       this.base.saveScene()  // 设立撤销点
     },
 
@@ -1104,6 +1117,9 @@ MoreEditor.extensions = {};
       }
 
       MoreEditor.util.execFormatBlock(document, 'h3')
+
+      updateButtonStatus.call(this.base)
+
       this.base.saveScene()  // 设立撤销点
     },
 
@@ -1608,6 +1624,8 @@ MoreEditor.extensions = {};
          this.base.editableElement.focus()
          MoreEditor.selection.select(document, delegate.range.startContainer, delegate.range.startOffset)
        }
+
+       updateButtonStatus.call(this.base)
 
        this.base.saveScene()  // 设立撤销点
     },
@@ -2493,7 +2511,7 @@ function handleMouseout(event) {
 }
 
 /* 
-    每次 keyup, mouseup 以及编辑器 blur 时都会执行下面的函数检测当前选区的变化，相应的调整哪些按钮可用，哪些按钮不可用。
+    每次 keyup, mouseup 以及编辑器 blur 时都会执行下面的函数检测当前选区的变化，相应的调整按钮高亮，以及哪些按钮可用，哪些按钮不可用。
 */
 function updateButtonStatus(event) {
 
@@ -2519,6 +2537,12 @@ function updateButtonStatus(event) {
         this.buttons.italic.classList.remove('button-active')
     }
 
+    if(setAlready.strike) {
+        this.buttons.strike.classList.add('button-active')
+    } else {
+        this.buttons.strike.classList.remove('button-active')
+    }
+
     if(setAlready.quote) {
         this.buttons.quote.classList.add('button-active')
     } else {
@@ -2536,6 +2560,26 @@ function updateButtonStatus(event) {
     } else {
         this.buttons.ul.classList.remove('button-active')
     }
+
+    if(setAlready.h2) {
+        this.buttons.h2.classList.add('button-active')
+    } else {
+        this.buttons.h2.classList.remove('button-active')
+    }
+
+    if(setAlready.h3) {
+        this.buttons.h3.classList.add('button-active')
+    } else {
+        this.buttons.h3.classList.remove('button-active')
+    }
+
+    if(setAlready.center) {
+        this.buttons.center.classList.add('button-active')
+    } else {
+        this.buttons.center.classList.remove('button-active')
+    }
+
+    
 
 
     /* disable 当前不能使用的按钮 */

@@ -104,6 +104,13 @@
           this.setAlready.strike = false
         }
 
+        /* 判断选中的部分是否已经居中 */
+        if(this.topBlock.classList.contains('text-align-center') || this.topBlock.classList.contains('block-center')) {
+          this.setAlready.center = true
+        } else {
+          this.setAlready.center = false
+        }
+
         /* 判断 h2 h3 switchTitle 是否可用 */
         if (this.crossBlock || this.closestBlock.nodeName.toLowerCase() === 'li' || this.closestBlock.nodeName.toLowerCase() === 'figcaption') {
           this.available.h = false
@@ -166,6 +173,8 @@
         console.log('set defaults')
         this.setDefault()
       }
+
+      console.log(this.range, 'range')
     },
 
     setDefault: function() {
@@ -186,7 +195,8 @@
         strike: false,
         quote: false,
         ul: false,
-        ol: false
+        ol: false,
+        center: false
       }
       this.available = {
         h: false,

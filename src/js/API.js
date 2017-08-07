@@ -20,6 +20,9 @@
       }
 
       MoreEditor.util.execFormatBlock(document, 'h2')
+
+      updateButtonStatus.call(this.base)
+
       this.base.saveScene()  // 设立撤销点
     },
 
@@ -37,6 +40,9 @@
       }
 
       MoreEditor.util.execFormatBlock(document, 'h3')
+
+      updateButtonStatus.call(this.base)
+
       this.base.saveScene()  // 设立撤销点
     },
 
@@ -541,6 +547,8 @@
          this.base.editableElement.focus()
          MoreEditor.selection.select(document, delegate.range.startContainer, delegate.range.startOffset)
        }
+
+       updateButtonStatus.call(this.base)
 
        this.base.saveScene()  // 设立撤销点
     },
