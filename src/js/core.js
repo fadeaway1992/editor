@@ -315,9 +315,10 @@ function handleMouseout(event) {
     每次 keyup, mouseup 以及编辑器 blur 时都会执行下面的函数检测当前选区的变化，相应的调整按钮高亮，以及哪些按钮可用，哪些按钮不可用。
 */
 function updateButtonStatus(event) {
-
+    console.log('updateButtonStatus')
     /* 在按钮上 mouseup 时不执行 */
     if(event && event.target.nodeName.toLowerCase() === 'button') {
+        console.log('我要 return')
         return
     }
 

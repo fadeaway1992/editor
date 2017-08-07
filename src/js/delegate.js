@@ -18,7 +18,7 @@
       检查当前选区状态，并输出当前选区的数据
     */
     updateStatus: function() {
-      console.log('updateStatus')
+
       var selection = document.getSelection()
       var range
 
@@ -174,7 +174,6 @@
         this.setDefault()
       }
 
-      console.log(this.range, 'range')
     },
 
     setDefault: function() {

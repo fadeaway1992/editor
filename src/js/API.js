@@ -298,7 +298,6 @@
       this.base.delegate.updateStatus()
       var delegate = this.base.delegate
       var isCancle
-     
 
       /* 基本判断 命令是否可以执行 */
       if (delegate.crossBlock || !delegate.range || (delegate.range.collapsed  && this.base.options.decorateOnlyWhenTextSelected)) return
@@ -311,6 +310,17 @@
         isCancle = true
       }
 
+      /* 火狐浏览器的问题，如果选区开始已经加粗，只要选区内还有没有加粗的，首先全加粗。 */
+      if(MoreEditor.util.isFF && isCancle && !delegate.collapsed) {
+        console.log('先执行一次')
+        document.execCommand('bold', false)
+        /* 如果选区中的文字全部加粗了，上一步就是取消加粗，我们还要再加回来 */
+        var endContainer = document.getSelection().getRangeAt(0).endContainer
+        if(!MoreEditor.util.traverseUp(endContainer, function(current) { return current.nodeName.toLowerCase() === 'b'})) {
+          document.execCommand('bold', false)
+        }
+      }
+
       document.execCommand('bold', false)
 
       // 如果只有一个光标没有选中文字，则执行的是开启粗体输入或者关闭粗体输入，这时候不需要去执行下面的 preventNestedDecorate
@@ -319,7 +329,31 @@
         return
       }
 
+      /* 火狐浏览器有一个问题，选区加粗后得到的选区的开始不在 b 标签中，而是在 b 标签之外，这样 updataButtonStatus 的时候就不会高亮，这时候需要我们去调整选区。 */
+      if(MoreEditor.util.isFF) {
+        if(!isCancle) {
+          var selectedBold
+          var endContainer = document.getSelection().getRangeAt(0).endContainer
+          selectedBold = MoreEditor.util.traverseUp(endContainer, function(current) {
+            return current.nodeName.toLowerCase() === 'b'
+          })
+          if(selectedBold) {
+            MoreEditor.selection.selectNode(selectedBold, document)
+          }
+        } else {
+          var range = document.getSelection().getRangeAt(0)
+          var shouldChangeStart = MoreEditor.util.traverseUp(range.startContainer, function (current) {
+            return current.nodeName.toLowerCase().match(/^(b|i|strike)$/g)
+          })
+          if(shouldChangeStart) {
+            range.setStart(shouldChangeStart.nextSibling ? shouldChangeStart.nextSibling : shouldChangeStart.parentNode.nextSibling, 0)
+            MoreEditor.selection.selectRange(document, range)
+          }
+        }
+      }
+
       updateButtonStatus.call(this.base)
+
 
       /* 如果上一步执行的是加粗操作而不是取消加粗，则需要检查 粗体／斜体／删除线 之间的嵌套 */
       if(!isCancle) {
@@ -339,12 +373,23 @@
       /* 基本判断 命令是否可以执行 */
       if (delegate.crossBlock || !delegate.range || (delegate.range.collapsed  && this.base.options.decorateOnlyWhenTextSelected)) return
 
-      /* 标题不可加粗 */
+      /* 标题不可斜体 */
       if(delegate.setAlready.h2 || delegate.setAlready.h3) return
 
       /* 判断将要执行的是斜体还是取消斜体 */
       if(delegate.setAlready.italic) {
         isCancle = true
+      }
+
+      /* 火狐浏览器的问题，如果选区开始已经斜体，只要选区内还有没有斜体的，首先全斜体。 */
+      if(MoreEditor.util.isFF && isCancle && !delegate.collapsed) {
+        console.log('先执行一次')
+        document.execCommand('italic', false)
+        /* 如果选区中的文字全部斜体了，上一步就是取消斜体，我们还要再加回来 */
+        var endContainer = document.getSelection().getRangeAt(0).endContainer
+        if(!MoreEditor.util.traverseUp(endContainer, function(current) { return current.nodeName.toLowerCase() === 'i'})) {
+          document.execCommand('italic', false)
+        }
       }
 
       document.execCommand('italic', false)
@@ -353,6 +398,29 @@
       if(delegate.collapsed) {
         this.base.buttons.italic.classList.toggle('button-active')
         return
+      }
+
+      /* 火狐浏览器 execCommand 之后选区的 bug */
+      if(MoreEditor.util.isFF) {
+        if(!isCancle) {
+          var selectedItalic
+          var endContainer = document.getSelection().getRangeAt(0).endContainer
+          selectedItalic = MoreEditor.util.traverseUp(endContainer, function(current) {
+            return current.nodeName.toLowerCase() === 'i'
+          })
+          if(selectedItalic) {
+            MoreEditor.selection.selectNode(selectedItalic, document)
+          }
+        } else {
+          var range = document.getSelection().getRangeAt(0)
+          var shouldChangeStart = MoreEditor.util.traverseUp(range.startContainer, function (current) {
+            return current.nodeName.toLowerCase().match(/^(b|i|strike)$/g)
+          })
+          if(shouldChangeStart) {
+            range.setStart(shouldChangeStart.nextSibling ? shouldChangeStart.nextSibling : shouldChangeStart.parentNode.nextSibling, 0)
+            MoreEditor.selection.selectRange(document, range)
+          }
+        }
       }
 
       updateButtonStatus.call(this.base)
@@ -374,15 +442,52 @@
       /* 基本判断 命令是否可以执行 */
       if (delegate.crossBlock || !delegate.range || delegate.range.collapsed) return
 
-      /* 标题不可加粗 */
+      /* 标题不可加删除线 */
       if(delegate.setAlready.h2 || delegate.setAlready.h3) return
 
-      /* 判断将要执行的是斜体还是取消斜体 */
+      /* 判断将要执行的是加删除线还是取消删除线 */
       if(delegate.setAlready.strike) {
         isCancle = true
       }
 
+      /* 火狐浏览器的问题，如果选区开始已经删除线，只要选区内还有没有删除线的，首先全删除线。 */
+      if(MoreEditor.util.isFF && isCancle && !delegate.collapsed) {
+        console.log('先执行一次')
+        document.execCommand('strikeThrough', false)
+        /* 如果选区中的文字全部删除线了，上一步就是取消删除线，我们还要再加回来 */
+        var endContainer = document.getSelection().getRangeAt(0).endContainer
+        if(!MoreEditor.util.traverseUp(endContainer, function(current) { return current.nodeName.toLowerCase() === 'strike'})) {
+          document.execCommand('strikeThrough', false)
+        }
+      }
+
       document.execCommand('strikeThrough', false)
+
+      /* 火狐浏览器 execCommand 之后选区的 bug */
+      if(MoreEditor.util.isFF) {
+        if(!isCancle) {
+          var selectedStrike
+          var endContainer = document.getSelection().getRangeAt(0).endContainer
+          selectedStrike = MoreEditor.util.traverseUp(endContainer, function(current) {
+            return current.nodeName.toLowerCase() === 'strike'
+          })
+          if(selectedStrike) {
+            MoreEditor.selection.selectNode(selectedStrike, document)
+          }
+        } else {
+          var range = document.getSelection().getRangeAt(0)
+          var shouldChangeStart = MoreEditor.util.traverseUp(range.startContainer, function (current) {
+            return current.nodeName.toLowerCase().match(/^(b|i|strike)$/g)
+          })
+          if(shouldChangeStart) {
+            range.setStart(shouldChangeStart.nextSibling ? shouldChangeStart.nextSibling : shouldChangeStart.parentNode.nextSibling, 0)
+            MoreEditor.selection.selectRange(document, range)
+          }
+        }
+      }
+
+      updateButtonStatus.call(this.base)
+
 
       /* 检查 粗体／斜体／删除线 之间的嵌套 */
       if(!isCancle) {
