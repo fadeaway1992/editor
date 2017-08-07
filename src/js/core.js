@@ -157,6 +157,14 @@ function handleBackAndEnterKeydown(event) {
                 return
             }
 
+            /* 在没有内容的、居中的段落和标题中按下 backspace 键， 取消居中 */
+            if(MoreEditor.util.isKey(event, MoreEditor.util.keyCode.BACKSPACE) && cloestBlockContainer.textContent === '' && cloestBlockContainer.classList.contains('text-align-center')) {
+                this.API.center()
+                event.preventDefault()
+                return
+            }
+
+
             /*  在当前块元素的第一个字符按下 backspace 键 */
             if(MoreEditor.util.isKey(event, MoreEditor.util.keyCode.BACKSPACE) && MoreEditor.util.isElementAtBeginningOfBlock(node) && MoreEditor.selection.getCaretOffsets(node).left === 0) {
                 console.log('hahahah')

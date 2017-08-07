@@ -899,6 +899,8 @@ MoreEditor.extensions = {};
         this.closestBlock = MoreEditor.util.getClosestBlockContainer(this.startElement)
         this.topBlock = MoreEditor.util.getTopBlockContainerWithoutMoreEditor(this.startElement)
 
+        console.log(this.range, 'range')
+
         /* 有时候获取到 this.startElement 是整个编辑器，获取 topBlock 是 false, 不知道为什么会产生这种错误。如果获取到 topBlock 是错误，暂时先退出函数。 */
         if(!this.topBlock) {
           return
@@ -1172,7 +1174,7 @@ MoreEditor.extensions = {};
         */
 
       /* 防止生成的引用和下面的无序列表合并 */
-      if(delegate.topBlock.nextElementSibling && delegate.topBlock.nextElementSibling.nodeName.toLowerCase() === 'ul' && !delegate.topBlock.nextElementSibling.getAttribute('data-type')) {
+      if(delegate.topBlock.nextElementSibling && delegate.topBlock.nextElementSibling.nodeName.toLowerCase() === 'ul') {
         var newLine = document.createElement('p')
         newLine.innerHTML = '<br>'
         newLine.classList.add('seperator')
@@ -1181,7 +1183,7 @@ MoreEditor.extensions = {};
       }
 
       /* 防止生成的引用和上面的无序列表合并 */
-      if(delegate.topBlock.previousElementSibling && delegate.topBlock.previousElementSibling.nodeName.toLowerCase() === 'ul' && !delegate.topBlock.previousElementSibling.getAttribute('data-type')) {
+      if(delegate.topBlock.previousElementSibling && delegate.topBlock.previousElementSibling.nodeName.toLowerCase() === 'ul') {
         var newLine = document.createElement('p')
         newLine.innerHTML = '<br>'
         newLine.classList.add('seperator')
@@ -1238,7 +1240,7 @@ MoreEditor.extensions = {};
       if(delegate.closestBlock.nodeName.toLowerCase() !== 'p') return
 
       /* 防止生成的无序列表和毗邻的引用合并 */
-      if(delegate.topBlock.nextElementSibling && delegate.topBlock.nextElementSibling.nodeName.toLowerCase() === 'ul' && delegate.topBlock.nextElementSibling.getAttribute('data-type') === 'blockquote') {
+      if(delegate.topBlock.nextElementSibling && delegate.topBlock.nextElementSibling.nodeName.toLowerCase() === 'ul') {
         var newLine = document.createElement('p')
         newLine.innerHTML = '<br>'
         newLine.classList.add('seperator')
@@ -1246,7 +1248,7 @@ MoreEditor.extensions = {};
         needSeperator = true
       }
 
-      if(delegate.topBlock.previousElementSibling && delegate.topBlock.previousElementSibling.nodeName.toLowerCase() === 'ul' && delegate.topBlock.previousElementSibling.getAttribute('data-type') === 'blockquote') {
+      if(delegate.topBlock.previousElementSibling && delegate.topBlock.previousElementSibling.nodeName.toLowerCase() === 'ul') {
         var newLine = document.createElement('p')
         newLine.innerHTML = '<br>'
         newLine.classList.add('seperator')
@@ -1273,6 +1275,7 @@ MoreEditor.extensions = {};
       /* 刷新选区状态，获取选区信息 */
       this.base.delegate.updateStatus()
       var delegate = this.base.delegate
+      var needSeperator
 
       /* 基本判断 */
       if(delegate.crossBlock || !delegate.range) return
@@ -1296,9 +1299,30 @@ MoreEditor.extensions = {};
       /* 只有选中的是段落的情况下才生成顺序列表， 标题、引用都不能执行生成顺序列表的命令 */
       if(delegate.closestBlock.nodeName.toLowerCase() !== 'p') return
 
+      /* 防止生成的顺序列表和毗邻的列表合并 */
+      if(delegate.topBlock.nextElementSibling && delegate.topBlock.nextElementSibling.nodeName.toLowerCase() === 'ol') {
+        var newLine = document.createElement('p')
+        newLine.innerHTML = '<br>'
+        newLine.classList.add('seperator')
+        delegate.topBlock.parentNode.insertBefore(newLine, delegate.topBlock.nextElementSibling)
+        needSeperator = true
+      }
+
+      if(delegate.topBlock.previousElementSibling && delegate.topBlock.previousElementSibling.nodeName.toLowerCase() === 'ol') {
+        var newLine = document.createElement('p')
+        newLine.innerHTML = '<br>'
+        newLine.classList.add('seperator')
+        delegate.topBlock.parentNode.insertBefore(newLine, delegate.topBlock)
+        needSeperator = true
+      }
+
       /* 如果程序没有在前面几步退出，而是成功走到了这里，说明当前的环境可以生成顺序列表 */
       var list = this.createList(true)
       if(list.nodeName.toLowerCase() !== 'ol') console.log('%c你在生成顺序列表的过程中出错啦！', 'color: red;')
+
+      if(needSeperator) {
+        this.base.editableElement.removeChild(document.querySelector('.seperator'))
+      }
 
       updateButtonStatus.call(this.base)
       this.base.saveScene()  // 设立撤销点
@@ -2459,6 +2483,14 @@ function handleBackAndEnterKeydown(event) {
                 event.preventDefault()
                 return
             }
+
+            /* 在没有内容的、居中的段落和标题中按下 backspace 键， 取消居中 */
+            if(MoreEditor.util.isKey(event, MoreEditor.util.keyCode.BACKSPACE) && cloestBlockContainer.textContent === '' && cloestBlockContainer.classList.contains('text-align-center')) {
+                this.API.center()
+                event.preventDefault()
+                return
+            }
+
 
             /*  在当前块元素的第一个字符按下 backspace 键 */
             if(MoreEditor.util.isKey(event, MoreEditor.util.keyCode.BACKSPACE) && MoreEditor.util.isElementAtBeginningOfBlock(node) && MoreEditor.selection.getCaretOffsets(node).left === 0) {
