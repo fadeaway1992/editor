@@ -77,9 +77,20 @@
         var fileReader = new FileReader()
 
         var addImageElement = new Image
-        addImageElement.onload = function() {
-          // 图片渲染成功
+
+        var imageParent = imageWrapper.querySelector('.image-wrapper')
+        imageParent.appendChild(addImageElement)
+        imageParent.appendChild(this.base.loadingImg)
+        this.base.loadingImg.style.display = 'block'
+        if(line.parentNode) {
+          MoreEditor.util.after(line, imageWrapper)
+          MoreEditor.util.unwrap(imageWrapper, document)
+          line.parentNode.removeChild(line)
         }
+        addImageElement.onload = function() {
+          document.body.appendChild(this.base.loadingImg)
+          this.base.loadingImg.style.display = 'none'
+        }.bind(this)
 
         fileReader.addEventListener('load', function (e) {
           addImageElement.classList.add('insert-image')
@@ -90,13 +101,6 @@
              this.base.saveScene()  // 设立撤销点
           }.bind(this))
 
-          var imageParent = imageWrapper.querySelector('.image-wrapper')
-          imageParent.appendChild(addImageElement)
-          if(line.parentNode) {
-            MoreEditor.util.after(line, imageWrapper)
-            MoreEditor.util.unwrap(imageWrapper, document)
-            line.parentNode.removeChild(line)
-          }
         }.bind(this))
 
         fileReader.readAsDataURL(file)

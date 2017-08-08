@@ -5,7 +5,7 @@
   <title>more-editor</title>
 
   <!-- 引入页面样式文件 -->
-  <link rel="stylesheet" href="../css/demo.css">
+  <link rel="stylesheet" href="../css/ui.css">
 
   <!-- 引入编辑器用到的一些样式 -->
   <link rel="stylesheet" href="../css/more-editor.css">
@@ -42,61 +42,10 @@
   <script>
     window.onload = function() {
 
-      /* 定义图片上传所需的变量 */
-      var client,
-          region,
-          accessKeyId,
-          accessKeySecret,
-          stsToken,
-          bucket,
-          dirName
-
-      function getAliyunToken() {  // Authorization  token PPuEtnV44Rj2dh6LK8tCzR5eae1501208628.0156991
-        return
-        var ajax = new XMLHttpRequest()
-        ajax.open('POST', 'https://hubdemo.duodian.com/api/v1/sae113475d9/user/aliyun_sts_token', false)
-        ajax.setRequestHeader('Authorization', 'token PPuEtnV44Rj2dh6LK8tCzR5eae1501208628.0156991')
-        ajax.send()
-
-        var response = JSON.parse(ajax.responseText)
-        client = new OSS.Wrapper({
-          region: 'oss-'+response.oss_area,
-          accessKeyId: response.access_key_id,
-          secure: true,
-          accessKeySecret: response.access_key_secret,
-          stsToken: response.security_token,
-          bucket: response.oss_bucket_name
-        })
-        console.log(client,'client')
-        region = 'oss-'+response.oss_area
-        accessKeyId = response.access_key_id
-        accessKeySecret = response.access_key_secret
-        stsToken = response.security_token
-        bucket = response.oss_bucket_name
-        dirName = response.oss_dir_name
-      }
-
-      getAliyunToken()
-
       var editor = new MoreEditor('.editable', {
-        imageUpload: function(image, updateURL){
+        imageUpload: function(image, updateURL, failAlert){
           return
           console.log(image, '这是我要上传的图片，请在这个函数中把这个文件上传到服务器，调用 updateURL, 把线上地址传进去。')
-          var time = new Date().getTime().toString()
-          var regex = /.*(.jpe?g|.png|.gif)$/
-          var extensionName = regex.exec(image.name)
-          var fileName = dirName + '/' + time + extensionName[1]
-
-          client.multipartUpload(fileName,image).then(function(res){
-            var url = ''
-            if (res.url) {
-              url = res.url
-            } else {
-              url = 'https://' + res.bucket + '.' + region + '.aliyuncs.com/' + res.name
-            }
-            console.log(url, '线上地址')
-            updateURL(url)
-          })
         },
 
         initReedit: function() {
@@ -107,6 +56,7 @@
         sizeAlert:'.size-alert',
         anchorPreview: '.anchor-preview',
         decorateOnlyWhenTextSelected:false,
+        loadingImg:'.spinner',
         buttons: {
           h2: '.h2',
           h3: '.h3',
@@ -142,15 +92,10 @@
     
 </script>
 
-<!-- 给按钮绑定编辑器事件 -->
-<script>
-  
-
-
-</script>
 <div class="size-alert" style="display:none;"><p>上传的图片大小不能超过 10Mb </p><button onclick = "this.parentNode.style.display = 'none'">确定</button></div>
 <div class="image-options" style="display:none;"><button class="rechoose">替换</button><button class="figure-caption">注释</button><button class="delete">移除</button></div>
 <div class="anchor-preview" style="display:none;" data-type="anchor-preview"></div>
+<div class="spinner" style="display:none;"><div class="double-bounce1"></div><div class="double-bounce2"></div></div>
 </body>
 </html>
 

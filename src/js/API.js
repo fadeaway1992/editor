@@ -727,47 +727,59 @@
       addImageElement.classList.add('insert-image')
 
       addImageElement.onload = function() {  
-         // 图片渲染成功
-      }
+        if(addImageElement.src.indexOf('http') !== -1) {
+          this.base.loadingImg.style.display = 'none'
+          document.body.appendChild(this.base.loadingImg)
+        }
+      }.bind(this)
       
       fileReader.addEventListener('load', function (e) {
+        setTimeout(function() {
+          addImageElement.src = e.target.result
+        }, 55000)
         
-        addImageElement.src = e.target.result
 
-        this.options.imageUpload(file, function(result) {
-          addImageElement.src = result
-           this.base.saveScene()  // 设立撤销点
-        }.bind(this))
+        this.options.imageUpload(
+          file, 
 
-        var imageWrapperHTML = '<figure data-type="more-editor-inserted-image" class="more-editor-inserted-image" contenteditable="false"><li data-type="image-placeholder" class="image-placeholder" contenteditable="true"></li><div class="image-wrapper"></div></figure>'
-        var imageWrapper = document.createElement('div')
-        imageWrapper.innerHTML = imageWrapperHTML
-        var imageParent = imageWrapper.querySelector('.image-wrapper')
-        imageParent.appendChild(addImageElement)
+          function(result) {
+            addImageElement.src = result
+            this.base.saveScene()  // 设立撤销点
+          }.bind(this),
 
-        /* 当前选区存在内容的情况下在后面插入图片 */
-        if(delegate.topBlock.nodeName.toLowerCase() !== 'figure') {
-          console.log('在后面插入')
-          console.log(delegate.topBlock.nodeName.toLowerCase)
-          MoreEditor.util.after(delegate.topBlock, imageWrapper)
-
-          /* 在后面插入新的一行 */
-          var newLine = document.createElement('p')
-          newLine.innerHTML = '<br>'
-          MoreEditor.util.after(imageWrapper, newLine)
-
-          MoreEditor.util.unwrap(imageWrapper, document)
-          MoreEditor.selection.moveCursor(document, newLine, 0)
-          return
-        } else {
-          console.log('替换')
-          this.base.editableElement.replaceChild(imageWrapper, delegate.topBlock)
-          MoreEditor.util.unwrap(imageWrapper, document)
-          return
-        }
+          function() {
+            alert('图片上传失败')
+          }
+        )
       }.bind(this))
 
-      fileReader.readAsDataURL(file) 
+      fileReader.readAsDataURL(file)
+
+      var imageWrapperHTML = '<figure data-type="more-editor-inserted-image" class="more-editor-inserted-image" contenteditable="false"><li data-type="image-placeholder" class="image-placeholder" contenteditable="true"></li><div class="image-wrapper"></div></figure>'
+      var imageWrapper = document.createElement('div')
+      imageWrapper.innerHTML = imageWrapperHTML
+      var imageParent = imageWrapper.querySelector('.image-wrapper')
+      imageParent.appendChild(addImageElement)
+      imageParent.appendChild(this.base.loadingImg)
+      this.base.loadingImg.style.display = 'block'
+      /* 当前选区存在内容的情况下在后面插入图片 */
+      if(delegate.topBlock.nodeName.toLowerCase() !== 'figure') {
+        console.log('在后面插入')
+        MoreEditor.util.after(delegate.topBlock, imageWrapper)
+
+        /* 在后面插入新的一行 */
+        var newLine = document.createElement('p')
+        newLine.innerHTML = '<br>'
+        MoreEditor.util.after(imageWrapper, newLine)
+
+        MoreEditor.util.unwrap(imageWrapper, document)
+        MoreEditor.selection.moveCursor(document, newLine, 0)
+      } else {
+        console.log('替换')
+        this.base.editableElement.replaceChild(imageWrapper, delegate.topBlock)
+        MoreEditor.util.unwrap(imageWrapper, document)
+      }
+
     },
     
     /* 点击按钮删除选中的图片 */

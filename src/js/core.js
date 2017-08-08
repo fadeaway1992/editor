@@ -616,6 +616,9 @@ MoreEditor.prototype = {
         this.anchorPreview = document.querySelector(this.options.anchorPreview)
         document.body.appendChild(this.anchorPreview)
 
+        this.loadingImg = document.querySelector(this.options.loadingImg)
+        document.body.appendChild(this.loadingImg)
+
         document.body.appendChild(this.buttons.imageOptions)
     },
     /* 
@@ -653,6 +656,7 @@ MoreEditor.prototype = {
         this.buttons.imageOptions.remove()
         this.sizeAlert.remove()
         this.anchorPreview.remove()
+        this.loadingImg.remove()
         console.log('销毁所有事件')
     }
 }
