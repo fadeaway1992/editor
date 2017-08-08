@@ -2070,9 +2070,10 @@ MoreEditor.extensions = {};
 
       /* 
         基本判断
-        跨块元素、光标在图片中的情况下不能粘贴
+        光标在图片中的情况下不能粘贴
+        跨块元素选择时可以粘贴，行为为先删除选中内容，再执行粘贴。
       */
-      if(!delegate.range || delegate.crossBlock || delegate.closestBlock.getAttribute('data-type') === 'image-placeholder') return
+      if(!delegate.range || delegate.closestBlock.getAttribute('data-type') === 'image-placeholder') return
 
       /* 粘贴时要匹配当前的标签，可以是 p, h, li, figcaption */
       this.pasteTag = delegate.closestBlock.nodeName.toLowerCase()
@@ -2089,11 +2090,12 @@ MoreEditor.extensions = {};
     },
 
     doPaste: function(pastedPlain) {
+      var delegate = this.base.delegate
       var paragraphs
       var html = ''
 
       //  如果是在 figcaption 或者 li 中粘贴，直接粘贴没有换行符的纯文本 
-      if(this.pasteTag === 'figcaption' || this.pasteTag === 'li') {
+      if(this.pasteTag === 'figcaption') {
         html = MoreEditor.util.htmlEntities(pastedPlain.replace(/[\r\n]+/g, ''))
       } else {
         //  检查文本中的换行，将每一行用光标所在块元素的标签包裹 
@@ -2103,6 +2105,18 @@ MoreEditor.extensions = {};
             if (paragraphs[i] !== '') {
               html += '<' + this.pasteTag + '>' + MoreEditor.util.htmlEntities(paragraphs[i]) + '</' + this.pasteTag + '>'
             }
+          }
+          /* 如果是在 li 中执行粘贴操作，当粘贴内容为多行 li html 时，li 会进行嵌套，我们需要手动处理 */
+          if(this.pasteTag === 'li') {
+            if(!delegate.collapsed) {
+              document.execCommand('delete', false)
+            }
+            var wrapper = document.createElement('div')
+            wrapper.innerHTML = html
+            wrapper.firstChild.innerHTML = delegate.closestBlock.innerHTML.replace(/<br\s{0,1}\/?>/, '') + wrapper.firstChild.innerHTML
+            delegate.closestBlock.outerHTML = wrapper.innerHTML
+            MoreEditor.selection.moveCursor(document, delegate.topBlock.lastChild, delegate.topBlock.lastChild.childNodes.length)
+            return
           }
         } else {
           html = MoreEditor.util.htmlEntities(paragraphs[0])
