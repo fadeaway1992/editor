@@ -164,6 +164,16 @@ function handleBackAndEnterKeydown(event) {
                 return
             }
 
+            /* editableElement 中只剩最后一个空元素的时候按下 backspace, 保持 editableElement 中有一个 p 标签 */
+            if(MoreEditor.util.isKey(event, MoreEditor.util.keyCode.BACKSPACE) && this.editableElement.textContent === '' && this.editableElement.children && this.editableElement.children.length === 1) {
+                console.log('再删就要gg')
+                var newLine = document.createElement('p')
+                newLine.innerHTML = "<br>"
+                this.editableElement.replaceChild(newLine, this.editableElement.firstChild)
+                MoreEditor.selection.moveCursor(document, newLine, 0)
+                event.preventDefault()
+                return
+            }
 
             /*  在当前块元素的第一个字符按下 backspace 键 */
             if(MoreEditor.util.isKey(event, MoreEditor.util.keyCode.BACKSPACE) && MoreEditor.util.isElementAtBeginningOfBlock(node) && MoreEditor.selection.getCaretOffsets(node).left === 0) {
@@ -202,6 +212,7 @@ function handleBackAndEnterKeydown(event) {
 
 /* 不能删没了，至少保留一个 p 标签 */
 function keepAtleastOneParagraph(event) {
+    return
     if(!this.editableElement.hasChildNodes()) {
         console.log('删没了')
         var newLine = document.createElement('p')
