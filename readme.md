@@ -9,24 +9,73 @@
  ### 使用
  1. 在你的编辑器页面引入  ```dist/js/more-editor.js```
  2. 在你的编辑页面引入    ```dist/css/more-editor.css```
- 3. 初始化编辑器：
+ 3. 在你的编辑页面引入 ```dist/css/ui.css```
+ 4. 初始化编辑器：
  ```
- var editor = new MoreEditor('.editable', {  // 第一个参数是你的编辑器元素的选择器
-      imageUploadAddress: 'zi.com',  // 图片上传到服务器的地址
-      buttons: {
-        h2: '.h2',  // 大标题按钮的选择器
-        h3: '.h3',  // 小标题按钮的选择器
-        ul: '.ul',  // 无序列表按钮的选择器
-        ol: '.ol',  // 顺序列表按钮的选择器按钮
-        quote: '.quote',  // 引用按钮的选择器
-        bold: '.bold',  // 加粗按钮的选择器
-        italic: '.italic',  // 斜体按钮的选择器
-        strike: '.strike',  // 删除线按钮的选择器
-        url: '.url',  // 链接地址输入框的选择器
-        link: '.link',  // 生成链接按钮选择器
-        center: '.center'  // 居中按钮选择器
-      }
-    })
+ editorConfig = {
+
+  /* 
+    编辑器上传图片时会调用这个函数，请将上传图片的语句写在这个函数中。
+    这个函数提供的第一个参数是要上传的源文件，上传完成后得到线上地址，调用第二个参数，将线上地址传进去。
+    如果上传失败，调用第三个参数（updateURL 和 failAlert 是两个编辑器里的内置函数）
+  */
+
+  imageUpload: function(image, updateURL,failAlert){
+    // 上传图片时调用这个函数
+  },
+
+
+
+
+  ／* 
+    重新编辑帖子的时候，将 editable div 中的内容转换为我们可以编辑的形式。比如帖子中一张图片是
+    <div><img></div>
+    我们需要转换成
+    <figure data-type="more-editor-inserted-image" class="more-editor-inserted-image" contenteditable="false">
+      <li data-type="image-placeholder" class="image-placeholder" contenteditable="true"></li>
+      <div class="image-wrapper"><img class="inserte-img"></div>
+    </figure>
+  *／
+
+  initReedit: function(editableElement) {
+    // 在这个函数中将需要再编辑的帖子的 html 转换成我们可以编辑的格式，第一个参数是编辑器 DOM 元素 <div contenteditable="true"></div>
+  },
+
+  canListsBeAligned: false,               // 列表是否可以设置居中,默认不可使列表居中
+  sizeAlert:'.size-alert',                // 图片超过规定大小时显示的警告
+  anchorPreview: '.anchor-preview',       // 鼠标悬停在 a 标签中时显示一个卡片，用来说明链接地址
+  decorateOnlyWhenTextSelected:false,     // 是否开启粗体、斜体直接输入。false: 开启； true: 关闭。
+  loadingImg:'.spinner',                  // 图片上传时显示一个元素表示上传中
+
+
+
+  /* 各种命令按钮的 class 类名 */
+
+  buttons: {
+    h2: '.h2',                         // 大标题
+    h3: '.h3',                         // 小标题
+    switchTitle: '.switch-title',      // 在 段落／大标题／小标题 之间切换
+    ul: '.ul',                         // 无序列表
+    ol: '.ol',                         // 顺序列表
+    quote: '.quote',                   // 引用
+    bold: '.bold',                     // 粗体
+    italic: '.italic',                 // 斜体
+    strike: '.strike',                 // 删除线
+    url: '.url',                       // 输入链接地址的 input 框
+    link: '.link',                     // 生成链接
+    promptLink: '.show-link',          // 用 window.prompt 生成链接
+    center: '.center',                 // 居中
+    imageInput: '.file-upload',        // 上传图片的 input 按钮
+    imageButton: '.upload-image',      // 上传图片的按钮。点击这个按钮会自动触发上传图片的 input-file 框
+    imageOptions: '.image-options',    // 在编辑器中点击每张图片时会显示三个按钮，这三个按钮请放在这个 DOM 元素中
+    imageRechoose: '.rechoose',        // 重置图片,三个图片处理选项之一
+    imageRemove: '.delete',            // 删除图片，三个图片处理选项之一
+    figCaption: '.figure-caption'      // 添加图片注释， 三个图片处理选项之一。
+  }
+
+}
+
+var editor = MoreEditor.new('.editable', editorConfig)
  ```
 
 ## 功能逻辑
@@ -53,7 +102,7 @@
 ## 2. 文本结构
 
   - 标题
-    - 装饰文本／链接
+    - 纯文本
   - 段落
     - 装饰文本／链接
   - 列表
