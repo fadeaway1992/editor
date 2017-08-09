@@ -77,8 +77,10 @@
         var fileReader = new FileReader()
 
         var addImageElement = new Image
+        addImageElement.classList.add('insert-image')
 
         var imageParent = imageWrapper.querySelector('.image-wrapper')
+        var theFigure = imageWrapper.firstChild
         imageParent.appendChild(addImageElement)
         imageParent.appendChild(this.base.loadingImg)
         this.base.loadingImg.style.display = 'block'
@@ -88,18 +90,28 @@
           line.parentNode.removeChild(line)
         }
         addImageElement.onload = function() {
-          document.body.appendChild(this.base.loadingImg)
           this.base.loadingImg.style.display = 'none'
+          document.body.appendChild(this.base.loadingImg)
+          this.base.saveScene() // 设立撤销栈
         }.bind(this)
 
         fileReader.addEventListener('load', function (e) {
-          addImageElement.classList.add('insert-image')
           addImageElement.src = e.target.result
 
-          this.options.imageUpload(file, function(result) {
-            addImageElement.src = result
-             this.base.saveScene()  // 设立撤销点
-          }.bind(this))
+          this.options.imageUpload(
+            file,
+
+            function(result) {
+              addImageElement.src = result
+            }.bind(this),
+
+            function() {
+              this.base.loadingImg.style.display = "none"
+              document.body.appendChild(this.base.loadingImg)
+              theFigure.remove()
+              alert('图片上传失败')
+            }.bind(this)
+          )
 
         }.bind(this))
 

@@ -10,9 +10,6 @@
   <!-- 引入编辑器用到的一些样式 -->
   <link rel="stylesheet" href="../css/more-editor.css">
 
-  <!-- 引入 阿里云 oss-sdk -->
-  <script src="https://gosspublic.alicdn.com/aliyun-oss-sdk-4.4.4.min.js"></script>
-
 </head>
 <body>
   <div class="toolbar">
@@ -52,11 +49,13 @@
           // 重新编辑的时候调用这个函数
           return
         },
+
         canListsBeAligned: false,
         sizeAlert:'.size-alert',
         anchorPreview: '.anchor-preview',
         decorateOnlyWhenTextSelected:false,
         loadingImg:'.spinner',
+
         buttons: {
           h2: '.h2',
           h3: '.h3',

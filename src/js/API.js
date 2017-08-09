@@ -727,29 +727,27 @@
       addImageElement.classList.add('insert-image')
 
       addImageElement.onload = function() {  
-        if(addImageElement.src.indexOf('http') !== -1) {
-          this.base.loadingImg.style.display = 'none'
-          document.body.appendChild(this.base.loadingImg)
-        }
+        this.base.loadingImg.style.display = 'none'
+        document.body.appendChild(this.base.loadingImg)
+        this.base.saveScene() // 设立撤销栈
       }.bind(this)
       
       fileReader.addEventListener('load', function (e) {
-        setTimeout(function() {
-          addImageElement.src = e.target.result
-        }, 55000)
+        addImageElement.src = e.target.result
         
-
         this.options.imageUpload(
           file, 
 
           function(result) {
             addImageElement.src = result
-            this.base.saveScene()  // 设立撤销点
           }.bind(this),
 
           function() {
+            this.base.loadingImg.style.display = "none"
+            document.body.appendChild(this.base.loadingImg)
+            theFigure.remove()
             alert('图片上传失败')
-          }
+          }.bind(this)
         )
       }.bind(this))
 
@@ -758,6 +756,7 @@
       var imageWrapperHTML = '<figure data-type="more-editor-inserted-image" class="more-editor-inserted-image" contenteditable="false"><li data-type="image-placeholder" class="image-placeholder" contenteditable="true"></li><div class="image-wrapper"></div></figure>'
       var imageWrapper = document.createElement('div')
       imageWrapper.innerHTML = imageWrapperHTML
+      var theFigure = imageWrapper.firstChild
       var imageParent = imageWrapper.querySelector('.image-wrapper')
       imageParent.appendChild(addImageElement)
       imageParent.appendChild(this.base.loadingImg)

@@ -899,8 +899,6 @@ MoreEditor.extensions = {};
         this.closestBlock = MoreEditor.util.getClosestBlockContainer(this.startElement)
         this.topBlock = MoreEditor.util.getTopBlockContainerWithoutMoreEditor(this.startElement)
 
-        console.log(this.range, 'range')
-
         /* 有时候获取到 this.startElement 是整个编辑器，获取 topBlock 是 false, 不知道为什么会产生这种错误。如果获取到 topBlock 是错误，暂时先退出函数。 */
         if(!this.topBlock) {
           return
@@ -1805,29 +1803,27 @@ MoreEditor.extensions = {};
       addImageElement.classList.add('insert-image')
 
       addImageElement.onload = function() {  
-        if(addImageElement.src.indexOf('http') !== -1) {
-          this.base.loadingImg.style.display = 'none'
-          document.body.appendChild(this.base.loadingImg)
-        }
+        this.base.loadingImg.style.display = 'none'
+        document.body.appendChild(this.base.loadingImg)
+        this.base.saveScene() // 设立撤销栈
       }.bind(this)
       
       fileReader.addEventListener('load', function (e) {
-        setTimeout(function() {
-          addImageElement.src = e.target.result
-        }, 55000)
+        addImageElement.src = e.target.result
         
-
         this.options.imageUpload(
           file, 
 
           function(result) {
             addImageElement.src = result
-            this.base.saveScene()  // 设立撤销点
           }.bind(this),
 
           function() {
+            this.base.loadingImg.style.display = "none"
+            document.body.appendChild(this.base.loadingImg)
+            theFigure.remove()
             alert('图片上传失败')
-          }
+          }.bind(this)
         )
       }.bind(this))
 
@@ -1836,6 +1832,7 @@ MoreEditor.extensions = {};
       var imageWrapperHTML = '<figure data-type="more-editor-inserted-image" class="more-editor-inserted-image" contenteditable="false"><li data-type="image-placeholder" class="image-placeholder" contenteditable="true"></li><div class="image-wrapper"></div></figure>'
       var imageWrapper = document.createElement('div')
       imageWrapper.innerHTML = imageWrapperHTML
+      var theFigure = imageWrapper.firstChild
       var imageParent = imageWrapper.querySelector('.image-wrapper')
       imageParent.appendChild(addImageElement)
       imageParent.appendChild(this.base.loadingImg)
@@ -1993,8 +1990,10 @@ MoreEditor.extensions = {};
         var fileReader = new FileReader()
 
         var addImageElement = new Image
+        addImageElement.classList.add('insert-image')
 
         var imageParent = imageWrapper.querySelector('.image-wrapper')
+        var theFigure = imageWrapper.firstChild
         imageParent.appendChild(addImageElement)
         imageParent.appendChild(this.base.loadingImg)
         this.base.loadingImg.style.display = 'block'
@@ -2004,18 +2003,28 @@ MoreEditor.extensions = {};
           line.parentNode.removeChild(line)
         }
         addImageElement.onload = function() {
-          document.body.appendChild(this.base.loadingImg)
           this.base.loadingImg.style.display = 'none'
+          document.body.appendChild(this.base.loadingImg)
+          this.base.saveScene() // 设立撤销栈
         }.bind(this)
 
         fileReader.addEventListener('load', function (e) {
-          addImageElement.classList.add('insert-image')
           addImageElement.src = e.target.result
 
-          this.options.imageUpload(file, function(result) {
-            addImageElement.src = result
-             this.base.saveScene()  // 设立撤销点
-          }.bind(this))
+          this.options.imageUpload(
+            file,
+
+            function(result) {
+              addImageElement.src = result
+            }.bind(this),
+
+            function() {
+              this.base.loadingImg.style.display = "none"
+              document.body.appendChild(this.base.loadingImg)
+              theFigure.remove()
+              alert('图片上传失败')
+            }.bind(this)
+          )
 
         }.bind(this))
 
