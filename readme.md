@@ -1,10 +1,14 @@
 # more-editor
  v 1.0
 
+ **所见即所得的 web 富文本编辑器，特点是只暴露编辑命令的接口，用户交互与用户界面可由开发者自定义。**
+ <hr>
+
  ## 开始使用
 
  ### 调试
- 在根目录下运行 ```gulp``` 、 ```npm run test``` 、或者手动打开 ```dist/demo/index.html```。
+ 1. 在项目根目录下运行 ```npm install``` 安装依赖包。
+ 2. 在项目根目录下运行 ```gulp``` 、 ```npm run test``` 、或者手动打开 ```dist/demo/index.html```。
 
  ### 使用
  1. 在你的编辑器页面引入  ```dist/js/more-editor.js```
@@ -77,6 +81,61 @@
 
 var editor = MoreEditor.new('.editable', editorConfig)
  ```
+<hr>
+
+## 项目文件结构
+
+| 文件／目录      | 说明                |
+| ------------- | ------------------- |
+| __dist__      | 用来存放编译后的文件   |
+| __src__       | 存放源文件           |
+| .eslintignore | eslint 配置文件      |
+| .eslint.json  | eslint 配置文件      |
+| .gitignore    | git 配置文件         |
+| gulpfile.js   | gulp 配置文件        |
+| package.json  | 项目配置文件         |
+| readme.md     | 项目说明文档         |
+
+```
+dist
+ |
+ |__css
+ |   |__ui.css               demo 页面的样式文件。
+ |   |
+ |   |__more-editor.css      编辑器样式文件。
+ |  
+ |__ demo
+ |    |
+ |    |__index.html          demo 页面，引入了本项目的编辑器，双击点开即可调试。 
+ |
+ |__ js
+     |
+     |__more-editor.js       编译后的供生产使用的 JavaScript 文件。
+
+
+
+ src
+  |
+  |__ js
+  |   |
+  |   |__*.js                各种 JavaScript 源文件, 最终合并成 ／dist/js/more-editor.js。
+  |
+  |__ sass
+       |
+       |__ui.scss            demo 页面样式文件，每次修改后用 gulp 编译到  /dist/css/ui.css。
+       |
+       |__more-editor.scss   编辑器样式文件，每次修改后用 gulp 编译到  /dist/css/more-editor.css。
+
+```
+
+
+
+
+
+
+
+
+
 
 ## 功能逻辑
 
@@ -98,6 +157,41 @@ var editor = MoreEditor.new('.editable', editorConfig)
   - 撤销与重做
   - 快捷键操作
 
+### paste
+![](gif/more-editor-paste.gif)
+
+### title
+![](gif/more-editor-title.gif)
+
+### italic
+![](gif/more-editor-italic.gif)
+
+### bold
+![](gif/more-editor-bold.gif)
+
+### strikeThrough
+![](gif/more-editor-strikeThrough.gif)
+
+### transform
+![](gif/more-editor-transform.gif)
+
+### center
+![](gif/more-editor-center.gif)
+
+### quote
+![](gif/more-editor-quote.gif)
+
+### ul
+![](gif/more-editor-ul.gif)
+
+### anchor
+![](gif/more-editor-anchor.gif)
+
+### image
+![](gif/more-editor-image.gif)
+
+### undo
+![](gif/more-editor-undo.gif)
 
 ## 2. 文本结构
 
