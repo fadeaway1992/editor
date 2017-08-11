@@ -820,6 +820,10 @@
         return
       }
 
+      /* 把图片选项放到 body 中，防止存入撤销栈 */
+      this.base.buttons.imageOptions.style.display = 'none'
+      document.body.appendChild(this.base.buttons.imageOptions)
+
       var figCaption = document.createElement('figcaption')
       figCaption.innerHTML = '<br>'
       figCaption.setAttribute('contenteditable', 'true')

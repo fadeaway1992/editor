@@ -617,8 +617,10 @@ MoreEditor.prototype = {
         document.body.appendChild(this.anchorPreview)
 
         this.loadingImg = document.querySelector(this.options.loadingImg)
+        this.loadingImg.setAttribute('data-type', 'loading')
         document.body.appendChild(this.loadingImg)
 
+        this.buttons.imageOptions.setAttribute('data-type', 'image-options')
         document.body.appendChild(this.buttons.imageOptions)
     },
     /* 

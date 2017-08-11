@@ -1896,6 +1896,10 @@ MoreEditor.extensions = {};
         return
       }
 
+      /* 把图片选项放到 body 中，防止存入撤销栈 */
+      this.base.buttons.imageOptions.style.display = 'none'
+      document.body.appendChild(this.base.buttons.imageOptions)
+
       var figCaption = document.createElement('figcaption')
       figCaption.innerHTML = '<br>'
       figCaption.setAttribute('contenteditable', 'true')
@@ -2240,6 +2244,13 @@ MoreEditor.extensions = {};
     },
 
     save: function() {
+
+      /* 排除几种不可保存的情况 */
+      if(this.base.editableElement.querySelector('[data-type=image-options]') || this.base.editableElement.querySelector('[data-type=loading]')) {
+        console.log('防止存入撤销栈')
+        return
+      }
+
       var curScene = this.getContent()
       var lastScene
       if(this.stack[this.index]) {
@@ -2251,6 +2262,7 @@ MoreEditor.extensions = {};
       if(this.stack.length > this.maxUndo) this.stack.shift()  // Array.prototype.shift      https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/shift
       this.index = this.stack.length -1
       this.update()
+      console.trace()
       console.log('设立撤销站')
     },
 
@@ -2983,8 +2995,10 @@ MoreEditor.prototype = {
         document.body.appendChild(this.anchorPreview)
 
         this.loadingImg = document.querySelector(this.options.loadingImg)
+        this.loadingImg.setAttribute('data-type', 'loading')
         document.body.appendChild(this.loadingImg)
 
+        this.buttons.imageOptions.setAttribute('data-type', 'image-options')
         document.body.appendChild(this.buttons.imageOptions)
     },
     /* 
