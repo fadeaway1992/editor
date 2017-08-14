@@ -2,10 +2,12 @@
 
 (function () {
     'use strict';
+
     /*
         Gets the offset of a node within another node. Text nodes are
         counted a n where n is the length. Entering (or passing) an
         element is one offset. Exiting is 0.
+        精准的存储与还原选区时用到的函数
     */
     var getNodeOffset = function(start, dest) {
         var offset = 0;
@@ -61,6 +63,7 @@
     };
 
     // Calculate the total offsets of a node
+    /* 精准的存储与还原选区的时候用到的函数 */
     var calculateNodeOffset = function(node) {
         var offset = 0;
 
@@ -80,6 +83,7 @@
     };
 
     // Determine total offset length from returned offset from ranges
+    /* 精准的存储与还原选区的时候用到的函数 */
     var totalOffsets = function(parentNode, offset) {
         if (parentNode.nodeType == 3)
             return offset;
@@ -96,6 +100,7 @@
         return 0;
     };
 
+    /* 精准的存储与还原选区的时候用到的函数 */
     var getNodeAndOffsetAt = function(start, offset) {
         var node = start;
         var stack = [];
@@ -162,6 +167,7 @@
          *  @param {DOMElement} An element containing the cursor to find offsets relative to.
          *  @param {Range} A Range representing cursor position. Will window.getSelection if none is passed.
          *  @return {Object} 'left' and 'right' attributes contain offsets from begining and end of Element
+         *  确定当前光标的位置
          */
         getCaretOffsets: function getCaretOffsets(element, range) {
             var preCaretRange, postCaretRange;
@@ -209,10 +215,7 @@
 
         /**
          * Move cursor to the given node with the given offset.
-         *
-         * @param  {DomDocument} doc     Current document
-         * @param  {DomElement}  node    Element where to jump
-         * @param  {integer}     offset  Where in the element should we jump, 0 by default
+         * 将光标移到指定的位置
          */
         moveCursor: function (doc, node, offset) {
             this.select(doc, node, offset);
@@ -249,6 +252,7 @@
             return endNode;
         },
 
+        /* 保存选区 */
         saveSelection: function(containerEl) {
             var range = window.getSelection().getRangeAt(0)
             var preSelectionRange = range.cloneRange()
@@ -257,11 +261,12 @@
             var start = preSelectionRange.toString().length
 
             return {
-                start: start,   
+                start: start,
                 end: start + range.toString().length
             }
         },
 
+        /* 恢复选区 */
         restoreSelection : function(containerEl, savedSel) {
             var charIndex = 0, range = document.createRange()
             range.setStart(containerEl, 0)
