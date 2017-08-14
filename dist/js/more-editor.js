@@ -922,7 +922,7 @@ var MoreEditor = function(elements, options) {
       }
 
       /* 选区存在并且选区在 editableElement 中 */
-      if(range && MoreEditor.util.isRangeInsideMoreEditor(this.base.editableElement, range)) {   
+      if(range && MoreEditor.util.isRangeInsideMoreEditor(this.base.editableElement, range)) {
         this.range = range
         this.collapsed = range.collapsed
         this.startContainer = range.startContainer
@@ -979,21 +979,21 @@ var MoreEditor = function(elements, options) {
         }
 
         /* 判断是否选中粗体 以选区开始处为准*/
-        if(this.startElement.nodeName.toLowerCase() === 'b' || this.startElement.parentNode.nodeName === 'b') {
+        if(this.startElement.nodeName.toLowerCase() === 'b' || this.startElement.parentNode.nodeName.toLowerCase() === 'b') {
           this.setAlready.bold = true
         } else {
           this.setAlready.bold = false
         }
         
         /* 判断是否选中斜体 以选区开始处为准 */
-        if(this.startElement.nodeName.toLowerCase() === 'i' || this.startElement.parentNode.nodeName === 'i') {
+        if(this.startElement.nodeName.toLowerCase() === 'i' || this.startElement.parentNode.nodeName.toLowerCase() === 'i') {
           this.setAlready.italic = true
         } else {
           this.setAlready.italic = false
         }
 
         /* 判断是否选中删除线 以选区开始处为准 */
-        if(this.startElement.nodeName.toLowerCase() === 'strike' || this.startElement.parentNode.nodeName === 'strike') {
+        if(this.startElement.nodeName.toLowerCase() === 'strike' || this.startElement.parentNode.nodeName.toLowerCase() === 'strike') {
           this.setAlready.strike = true
         } else {
           this.setAlready.strike = false
