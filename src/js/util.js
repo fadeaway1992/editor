@@ -27,6 +27,9 @@
     // Some browsers (including phantom) don't return true for Node.contains(child)
     // if child is a text node.  Detect these cases here and use a fallback
     // for calls to Util.isDescendant()
+    /* 
+      检测 Node.contains() 对 textNode 是否有效。
+    */
     var nodeContainsWorksWithTextNodes = false;
     try {
         var testParent = document.createElement('div'),
@@ -126,11 +129,17 @@
 
         emptyElementNames: ['br', 'col', 'colgroup', 'hr', 'img', 'input', 'source', 'wbr'],
 
+        /* 
+          将几个 JavaScript 对象合并成一个对象，属性重复后面的会覆盖前面的
+        */
         extend: function extend(/* dest, source1, source2, ...*/) {
             var args = [true].concat(Array.prototype.slice.call(arguments));
             return copyInto.apply(this, args);
         },
 
+        /* 
+          将几个 JavaScript 对象合并成一个对象，属性重复默认保留之前的属性。
+        */
         defaults: function defaults(/*dest, source1, source2, ...*/) {
             var args = [false].concat(Array.prototype.slice.call(arguments));
             return copyInto.apply(this, args);
@@ -138,12 +147,17 @@
 
 
         // https://github.com/jashkenas/underscore
+        /* 
+          判断节点是否是元素节点
+        */
         isElement: function isElement(obj) {
             return !!(obj && obj.nodeType === 1);
         },
 
        
-
+        /* 
+          从 current 向上追溯，直到找到一个满足 testElementFunction 的元素，返回这个元素。找不到返回 false
+        */
         traverseUp: function (current, testElementFunction) {
             if (!current) {
                 return false;
@@ -215,6 +229,7 @@
         /* Finds the closest ancestor which is a block container element
          * If element is within editor element but not within any other block element,
          * the editor element is returned
+         * 找到距离 node 最近的块元素。
          */
         getClosestBlockContainer: function (node) {
             return Util.traverseUp(node, function (node) {
@@ -288,7 +303,9 @@
             return doc.execCommand('formatBlock', false, tagName);
         },
 
-
+        /* 
+          检查第二个参数是否是第一个参数的后代，如果相同返回 第三个参数。
+        */
         isDescendant: function isDescendant(parent, child, checkEquality) {
             if (!parent || !child) {
                 return false;
@@ -314,6 +331,9 @@
         },
 
         /* based on http://stackoverflow.com/a/6183069 */
+        /* 
+          返回节点在 DOM 中的深度。
+        */
         depthOfNode: function (inNode) {
             var theDepth = 0,
                 node = inNode;
@@ -324,6 +344,9 @@
             return theDepth;
         },
 
+        /* 
+          返回两个元素最近的共同父元素
+        */
         findCommonRoot: function (inNode1, inNode2) {
             var depth1 = Util.depthOfNode(inNode1),
                 depth2 = Util.depthOfNode(inNode2),
@@ -395,7 +418,7 @@
 
             var unwrapSelf = root.querySelectorAll(selector1)
             for(var i=0; i<unwrapSelf.length; i++) {
-            this.unwrap(unwrapSelf[i], document)
+              this.unwrap(unwrapSelf[i], document)
             }
 
             var unwrapParent = root.querySelectorAll(selector2)
@@ -436,6 +459,7 @@
             MoreEditor.selection.restoreSelection(root, savedSelection)
         },
 
+        /* 判断 container 是否被一个在一个装饰标签内 */
         wrappedByDecoratedElement: function(container) {
             return this.traverseUp(container, function(node) {
                 return (node.nodeName.toLowerCase() === 'b' || node.nodeName.toLowerCase() === 'i' || node.nodeName.toLowerCase() === 'strike')

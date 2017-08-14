@@ -1,3 +1,6 @@
+/* 
+  整个编辑器插件封装为一个立即执行函数，函数的返回结果是 MoreEditor 构造函数。执行 new MoreEditor(editableSlector, editorOptions) 就可以生成一个编辑器对象
+*/
 (function (root, factory) {
     'use strict';
     var isElectron = typeof module === 'object' && typeof process !== 'undefined' && process && process.versions && process.versions.electron;
@@ -12,16 +15,17 @@
     }
 }(this, function () {
     'use strict';  
-/* eslint-disable no-unused-vars, no-undef */
 
+/* 
+  MoreEditor 接受两个参数。第一个参数是作为编辑器的 DOM 元素的选择器，第二个参数是编辑器的一些设置。
+*/
 var MoreEditor = function(elements, options) {
     'use strict'
     return this.init(elements, options)
-}
+};
 
-MoreEditor.extensions = {};
 
-/* eslint-enable no-unused-vars, no-undef */
+
 
 
 (function (window) {
@@ -51,6 +55,9 @@ MoreEditor.extensions = {};
     // Some browsers (including phantom) don't return true for Node.contains(child)
     // if child is a text node.  Detect these cases here and use a fallback
     // for calls to Util.isDescendant()
+    /* 
+      检测 Node.contains() 对 textNode 是否有效。
+    */
     var nodeContainsWorksWithTextNodes = false;
     try {
         var testParent = document.createElement('div'),
@@ -150,11 +157,17 @@ MoreEditor.extensions = {};
 
         emptyElementNames: ['br', 'col', 'colgroup', 'hr', 'img', 'input', 'source', 'wbr'],
 
+        /* 
+          将几个 JavaScript 对象合并成一个对象，属性重复后面的会覆盖前面的
+        */
         extend: function extend(/* dest, source1, source2, ...*/) {
             var args = [true].concat(Array.prototype.slice.call(arguments));
             return copyInto.apply(this, args);
         },
 
+        /* 
+          将几个 JavaScript 对象合并成一个对象，属性重复默认保留之前的属性。
+        */
         defaults: function defaults(/*dest, source1, source2, ...*/) {
             var args = [false].concat(Array.prototype.slice.call(arguments));
             return copyInto.apply(this, args);
@@ -162,12 +175,17 @@ MoreEditor.extensions = {};
 
 
         // https://github.com/jashkenas/underscore
+        /* 
+          判断节点是否是元素节点
+        */
         isElement: function isElement(obj) {
             return !!(obj && obj.nodeType === 1);
         },
 
        
-
+        /* 
+          从 current 向上追溯，直到找到一个满足 testElementFunction 的元素，返回这个元素。找不到返回 false
+        */
         traverseUp: function (current, testElementFunction) {
             if (!current) {
                 return false;
@@ -239,6 +257,7 @@ MoreEditor.extensions = {};
         /* Finds the closest ancestor which is a block container element
          * If element is within editor element but not within any other block element,
          * the editor element is returned
+         * 找到距离 node 最近的块元素。
          */
         getClosestBlockContainer: function (node) {
             return Util.traverseUp(node, function (node) {
@@ -312,7 +331,9 @@ MoreEditor.extensions = {};
             return doc.execCommand('formatBlock', false, tagName);
         },
 
-
+        /* 
+          检查第二个参数是否是第一个参数的后代，如果相同返回 第三个参数。
+        */
         isDescendant: function isDescendant(parent, child, checkEquality) {
             if (!parent || !child) {
                 return false;
@@ -338,6 +359,9 @@ MoreEditor.extensions = {};
         },
 
         /* based on http://stackoverflow.com/a/6183069 */
+        /* 
+          返回节点在 DOM 中的深度。
+        */
         depthOfNode: function (inNode) {
             var theDepth = 0,
                 node = inNode;
@@ -348,6 +372,9 @@ MoreEditor.extensions = {};
             return theDepth;
         },
 
+        /* 
+          返回两个元素最近的共同父元素
+        */
         findCommonRoot: function (inNode1, inNode2) {
             var depth1 = Util.depthOfNode(inNode1),
                 depth2 = Util.depthOfNode(inNode2),
@@ -419,7 +446,7 @@ MoreEditor.extensions = {};
 
             var unwrapSelf = root.querySelectorAll(selector1)
             for(var i=0; i<unwrapSelf.length; i++) {
-            this.unwrap(unwrapSelf[i], document)
+              this.unwrap(unwrapSelf[i], document)
             }
 
             var unwrapParent = root.querySelectorAll(selector2)
@@ -460,6 +487,7 @@ MoreEditor.extensions = {};
             MoreEditor.selection.restoreSelection(root, savedSelection)
         },
 
+        /* 判断 container 是否被一个在一个装饰标签内 */
         wrappedByDecoratedElement: function(container) {
             return this.traverseUp(container, function(node) {
                 return (node.nodeName.toLowerCase() === 'b' || node.nodeName.toLowerCase() === 'i' || node.nodeName.toLowerCase() === 'strike')
@@ -2262,7 +2290,6 @@ MoreEditor.extensions = {};
       if(this.stack.length > this.maxUndo) this.stack.shift()  // Array.prototype.shift      https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/shift
       this.index = this.stack.length -1
       this.update()
-      console.trace()
       console.log('设立撤销站')
     },
 

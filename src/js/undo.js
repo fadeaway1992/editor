@@ -100,7 +100,6 @@
       if(this.stack.length > this.maxUndo) this.stack.shift()  // Array.prototype.shift      https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/shift
       this.index = this.stack.length -1
       this.update()
-      console.trace()
       console.log('设立撤销站')
     },
 
