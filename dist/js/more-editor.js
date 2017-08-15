@@ -1115,12 +1115,12 @@ var MoreEditor = function(elements, options) {
 
   API.prototype = {
 
-    /* 增加大标题 */
+    /* 增加／取消 大标题 */
     h2: function() {
       var delegate = this.base.delegate
       delegate.updateStatus()
 
-      /* 基本判断 */  // 只有 段落 和 小标题  可以执行大标题命令哦！
+      /* 基本判断  只有 段落 和 小标题  可以执行大标题命令哦！*/
       if (delegate.crossBlock || !delegate.range || delegate.closestBlock.nodeName.toLowerCase() === 'li') return
 
       /* 有装饰标签或者链接的情况下要转化为纯文本 */
@@ -1191,7 +1191,7 @@ var MoreEditor = function(elements, options) {
        /* 如果选区中有引用就取消引用，转为纯文本 */
       if(delegate.setAlready.quote === true) {
         this.unWrapWholeList()
-        return 
+        return
       }
 
       /* 选区不在引用中，生成引用，判断选区是否是段落（选区在 列表／标题 中时不能执行命令） */
@@ -1454,9 +1454,22 @@ var MoreEditor = function(elements, options) {
 
       document.execCommand('bold', false)
 
+      /* 针对 Edge 关闭粗体输入的 bug 做调整 */
+      if(delegate.collapsed && MoreEditor.util.isEdge && delegate.startElement.nodeName.toLowerCase() === 'b' && MoreEditor.selection.getCaretOffsets(delegate.startElement, delegate.range).right === 0) {
+        var index
+        for(var i=0; i<delegate.startElement.parentNode.childNodes.length; i++) {
+          if(delegate.startElement.parentNode.childNodes[i] === delegate.startElement) {
+            index = i
+            break
+          }
+        }
+        MoreEditor.selection.moveCursor(document, delegate.startElement.parentNode, index+1)
+      }
+
       // 如果只有一个光标没有选中文字，则执行的是开启粗体输入或者关闭粗体输入，这时候不需要去执行下面的 preventNestedDecorate
       if(delegate.collapsed) {
         this.base.buttons.bold.classList.toggle('button-active')
+        console.log('toggle button')
         return
       }
 
@@ -1524,6 +1537,18 @@ var MoreEditor = function(elements, options) {
       }
 
       document.execCommand('italic', false)
+
+      /* 针对 Edge 关闭斜体输入的 bug 做调整 */
+      if(delegate.collapsed && MoreEditor.util.isEdge && delegate.startElement.nodeName.toLowerCase() === 'i' && MoreEditor.selection.getCaretOffsets(delegate.startElement, delegate.range).right === 0) {
+        var index
+        for(var i=0; i<delegate.startElement.parentNode.childNodes.length; i++) {
+          if(delegate.startElement.parentNode.childNodes[i] === delegate.startElement) {
+            index = i
+            break
+          }
+        }
+        MoreEditor.selection.moveCursor(document, delegate.startElement.parentNode, index+1)
+      }
 
       // 如果只有一个光标没有选中文字，则执行的是开启斜体输入或者关闭斜体输入，这时候不需要去执行下面的 preventNestedDecorate
       if(delegate.collapsed) {
@@ -1896,7 +1921,7 @@ var MoreEditor = function(elements, options) {
       if(!currentImage){console.log('出错了！')}
 
       var imagefigure = currentImage.parentNode.parentNode
-      if(imagefigure.nodeName.toLocaleLowerCase() !== 'figure') {console.log('出错了')}
+      if(imagefigure.nodeName.toLowerCase() !== 'figure') {console.log('出错了')}
       
       var newLine = document.createElement('p')
       newLine.innerHTML = '<br>'
@@ -1919,7 +1944,7 @@ var MoreEditor = function(elements, options) {
       if(!currentImage){console.log('出错了！')}
 
       var imagefigure = currentImage.parentNode.parentNode
-      if(imagefigure.nodeName.toLocaleLowerCase() !== 'figure') {console.log('出错了')}
+      if(imagefigure.nodeName.toLowerCase() !== 'figure') {console.log('出错了')}
 
       /* 判断当前图片是否已经存在 figurecaption */
       if(imagefigure.querySelector('figcaption')) {
@@ -2968,7 +2993,8 @@ MoreEditor.prototype = {
         }
         editableElement.setAttribute('data-more-editor-element', true)
         editableElement.classList.add('more-editor-element')
-        if(editableElement.innerHTML === '') {
+        console.log(editableElement.innerHTML, 'editableElement.innerHTML')
+        if(editableElement.innerHTML === '' || editableElement.innerHTML === '<br>') {  // 在 Edge 中默认 html 是 <br>
             editableElement.innerHTML = '<p><br></p>'
         } else {
             this.options.initReedit(editableElement)

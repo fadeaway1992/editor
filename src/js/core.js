@@ -558,7 +558,8 @@ MoreEditor.prototype = {
         }
         editableElement.setAttribute('data-more-editor-element', true)
         editableElement.classList.add('more-editor-element')
-        if(editableElement.innerHTML === '') {
+        console.log(editableElement.innerHTML, 'editableElement.innerHTML')
+        if(editableElement.innerHTML === '' || editableElement.innerHTML === '<br>') {  // 在 Edge 中默认 html 是 <br>
             editableElement.innerHTML = '<p><br></p>'
         } else {
             this.options.initReedit(editableElement)
