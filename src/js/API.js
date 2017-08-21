@@ -745,6 +745,9 @@
 
       /* 基本判断 */
       if(!delegate.range || delegate.crossBlock ) {return}
+      if(delegate.closestBlock.getAttribute('data-type') === 'image-placeholder') {
+        delegate.topBlock.querySelector('img').click()
+      }
 
       var fileReader = new FileReader()
 
@@ -807,7 +810,12 @@
     },
     
     /* 点击按钮删除选中的图片 */
-    removeImage: function() {
+    removeImage: function(event) {
+
+      /* 先选中那个图片 */
+      event.target.parentNode.parentNode.querySelector('img').click()
+
+
       var currentImage = document.querySelector('.insert-image-active')
       if(!currentImage){console.log('出错了！')}
 
@@ -830,7 +838,11 @@
     },
 
     /* 为图片添加注释 */
-    figCaption: function() {
+    figCaption: function(event) {
+
+      /* 先选中那个图片 */
+      event.target.parentNode.parentNode.querySelector('img').click()
+
       var currentImage = document.querySelector('.insert-image-active')
       if(!currentImage){console.log('出错了！')}
 

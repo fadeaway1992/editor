@@ -176,7 +176,6 @@
 
                 current = current.parentNode;
             } while (current);
-
             return false;
         },
 

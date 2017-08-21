@@ -325,6 +325,16 @@ function handleMouseover(event) {
         }
 
     }
+
+    /* 移动到图片中的时候现实图片选项 */
+    var theFigure = MoreEditor.util.traverseUp(event.target, function(current){
+        return current.nodeName.toLowerCase() === 'figure'
+    })
+    if(theFigure){
+        theFigure.querySelector('.image-wrapper').appendChild(this.buttons.imageOptions)
+        this.buttons.imageOptions.style.display = 'block'
+    }
+    
 }
 
 function handleMouseout(event) {
@@ -333,6 +343,15 @@ function handleMouseout(event) {
             var anchorPreview = document.querySelector('.anchor-preview')
             anchorPreview.style.display = 'none'
         }, 500)
+    }
+
+    /* 移出图片的时候隐藏图片选项 */
+    var theFigure = MoreEditor.util.traverseUp(event.toElement, function(current){
+        return current.nodeName.toLowerCase() === 'figure'
+    })
+    if(!theFigure){
+        this.buttons.imageOptions.style.display = 'none'
+        document.body.appendChild(this.buttons.imageOptions)
     }
 }
 
@@ -463,11 +482,14 @@ function handleClick(event) {
 
 /* 判断点击的是不是图片，如果是图片，检查这个图片是否已经激活，如果已经激活，什么都不做。如果没有激活，把光标移到 imagePlaceHolder 中，执行相关的操作。如果点击的不是图片，执行相关的操作。 */
 function checkIfClickedAnImage(event) {
-    if(event.target.nodeName.toLowerCase() === 'img') {
-        if(event.target.classList.contains('insert-image-active')) {
+    var theFigure = MoreEditor.util.traverseUp(event.target, function(current) {
+        return current.nodeName.toLowerCase() === 'figure'
+    })
+    if(theFigure) {
+        var clickedImage = theFigure.querySelector('img')
+        if(clickedImage.classList.contains('insert-image-active')) {
             return
         }
-        var clickedImage = event.target
         if(clickedImage.parentNode.previousElementSibling.getAttribute('data-type') === 'image-placeholder') {
             var imageHolder = clickedImage.parentNode.previousElementSibling
             MoreEditor.selection.select(document,imageHolder, 0)
@@ -476,12 +498,12 @@ function checkIfClickedAnImage(event) {
         }
     } else {
 
-        if(event.target.nodeName.toLowerCase() === 'figure') {
-            if(MoreEditor.util.isFF) {
-                console.log('firefox')
-                MoreEditor.selection.select(document, event.target, 0)
-            }
-        }
+        // if(event.target.nodeName.toLowerCase() === 'figure') {
+        //     if(MoreEditor.util.isFF) {
+        //         console.log('firefox')
+        //         MoreEditor.selection.select(document, event.target, 0)
+        //     }
+        // }
 
         checkoutIfFocusedImage.call(this)
     }
