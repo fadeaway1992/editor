@@ -2801,7 +2801,8 @@ function handleMouseout(event) {
     }
 
     /* 移出图片的时候隐藏图片选项 */
-    var theFigure = MoreEditor.util.traverseUp(event.toElement, function(current){
+    var toTarget = event.toElement || event.relatedTarget  // FF 不支持 event.toElement, 要用 relatedTarget
+    var theFigure = MoreEditor.util.traverseUp(toTarget, function(current){
         return current.nodeName.toLowerCase() === 'figure'
     })
     if(!theFigure){
