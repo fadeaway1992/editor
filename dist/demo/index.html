@@ -29,6 +29,7 @@
       <input type="file" accept="image/jpg, image/png, image/jpeg, image/gif" class="file-upload" style="display:none;">
       <button class="upload-image" onclick="document.querySelector('.file-upload').click()">上传图片</button>
       <button class="destroy">销毁事件</button>
+      <button class="range" onclick ="console.log(document.getSelection().getRangeAt(0))">显示当前选区</button>  
     </div>
   </div>
   <div class="editable" contenteditable="true"></div>

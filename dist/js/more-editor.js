@@ -937,6 +937,15 @@ var MoreEditor = function(elements, options) {
           return
         }
 
+        /* 判断是否是连续点击选中，这种情况下会选中下一个块元素会被选中 */
+        if(this.crossBlock && MoreEditor.util.isBlockContainer(this.endContainer) && this.range.endOffset === 0) {
+          console.log('aaaaaa')
+          MoreEditor.selection.selectNode(this.closestBlock, document)
+          this.updateStatus()
+          console.log('重新选中')
+          return
+        }
+
         /* 判断选区是否跨越块元素 */
         if(MoreEditor.util.isRangeCrossBlock(range)) {
           this.crossBlock = true
@@ -2723,9 +2732,15 @@ function handleKeyup(event) {
     keepImagePlaceHolderEmpty.call(this.event)
 }
 
+
 function handleMousedown(event) {
     if(event.target.nodeName.toLowerCase() === 'button' && event.target !== this.buttons.link) { // 这个地方暂时排除了 link 按钮，因为 link mousedown 时需要触发输入框的 blur 事件
         event.preventDefault()
+    }
+    if(this.editableElement.contains(event.target)) {
+        window.setTimeout(function(){
+            updateButtonStatus.call(this)
+        }.bind(this), 0)
     }
 }
 
@@ -2996,6 +3011,9 @@ MoreEditor.prototype = {
         console.log(editableElement.innerHTML, 'editableElement.innerHTML')
         if(editableElement.innerHTML === '' || editableElement.innerHTML === '<br>') {  // 在 Edge 中默认 html 是 <br>
             editableElement.innerHTML = '<p><br></p>'
+            /* 火狐浏览器直接输入会写到 div 中，所以要先选中 p 标签 */
+            var firstLine = editableElement.querySelector('p')
+            MoreEditor.selection.moveCursor(document, firstLine, 0)
         } else {
             this.options.initReedit(editableElement)
         }

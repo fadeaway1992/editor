@@ -42,6 +42,15 @@
           return
         }
 
+        /* 判断是否是连续点击选中，这种情况下会选中下一个块元素会被选中 */
+        if(this.crossBlock && MoreEditor.util.isBlockContainer(this.endContainer) && this.range.endOffset === 0) {
+          console.log('aaaaaa')
+          MoreEditor.selection.selectNode(this.closestBlock, document)
+          this.updateStatus()
+          console.log('重新选中')
+          return
+        }
+
         /* 判断选区是否跨越块元素 */
         if(MoreEditor.util.isRangeCrossBlock(range)) {
           this.crossBlock = true
