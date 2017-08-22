@@ -134,6 +134,13 @@
           this.available.decorate = true
         }
 
+        /* 判断 promptLink 是否可用 */
+        if(this.crossBlock || this.closestBlock.getAttribute('data-type') === 'image-placeholder' || this.topBlock.nodeName.toLowerCase().match(/h[23]/)) {
+          this.available.promptLink = false
+        } else {
+          this.available.promptLink = true
+        }
+
         /* 判断 ul ol quote 是否可用 */
         if (!this.crossBlock) {
           if(this.closestBlock.nodeName.toLowerCase() === 'p') {
@@ -213,6 +220,7 @@
         list: false,
         center: false,
         image: false,
+        promptLink: false
       }
     }
   }

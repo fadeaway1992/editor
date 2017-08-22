@@ -1028,6 +1028,13 @@ var MoreEditor = function(elements, options) {
           this.available.decorate = true
         }
 
+        /* 判断 promptLink 是否可用 */
+        if(this.crossBlock || this.closestBlock.getAttribute('data-type') === 'image-placeholder' || this.topBlock.nodeName.toLowerCase().match(/h[23]/)) {
+          this.available.promptLink = false
+        } else {
+          this.available.promptLink = true
+        }
+
         /* 判断 ul ol quote 是否可用 */
         if (!this.crossBlock) {
           if(this.closestBlock.nodeName.toLowerCase() === 'p') {
@@ -1107,6 +1114,7 @@ var MoreEditor = function(elements, options) {
         list: false,
         center: false,
         image: false,
+        promptLink: false
       }
     }
   }
@@ -1667,7 +1675,7 @@ var MoreEditor = function(elements, options) {
       delegate.updateStatus()
 
       /* 基本判断 */
-      if(delegate.crossBlock || !delegate.range) return
+      if(delegate.crossBlock || !delegate.range || delegate.closestBlock.getAttribute('data-type') === 'image-placeholder') return
       
       /* 标题不可加链接 */
       if(delegate.setAlready.h2 || delegate.setAlready.h3) return
@@ -2943,6 +2951,12 @@ function updateButtonStatus(event) {
       this.buttons.ol.setAttribute('disabled', 'disabled')
     }
 
+    if(available.promptLink) {
+      this.buttons.promptLink.removeAttribute('disabled')
+    } else {
+      this.buttons.promptLink.setAttribute('disabled', 'disabled')
+    }
+    
     if(available.quote) {
       this.buttons.quote.removeAttribute('disabled')
     } else {

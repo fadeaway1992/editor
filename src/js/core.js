@@ -458,6 +458,12 @@ function updateButtonStatus(event) {
       this.buttons.ol.setAttribute('disabled', 'disabled')
     }
 
+    if(available.promptLink) {
+      this.buttons.promptLink.removeAttribute('disabled')
+    } else {
+      this.buttons.promptLink.setAttribute('disabled', 'disabled')
+    }
+    
     if(available.quote) {
       this.buttons.quote.removeAttribute('disabled')
     } else {

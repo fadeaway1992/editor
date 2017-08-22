@@ -550,7 +550,7 @@
       delegate.updateStatus()
 
       /* 基本判断 */
-      if(delegate.crossBlock || !delegate.range) return
+      if(delegate.crossBlock || !delegate.range || delegate.closestBlock.getAttribute('data-type') === 'image-placeholder') return
       
       /* 标题不可加链接 */
       if(delegate.setAlready.h2 || delegate.setAlready.h3) return
