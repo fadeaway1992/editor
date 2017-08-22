@@ -1862,6 +1862,8 @@ var MoreEditor = function(elements, options) {
 
       /* 基本判断 */
       if(!delegate.range || delegate.crossBlock ) {return}
+      
+      /* 选中这个图片 */
       if(delegate.closestBlock.getAttribute('data-type') === 'image-placeholder') {
         delegate.topBlock.querySelector('img').click()
       }
@@ -1871,11 +1873,24 @@ var MoreEditor = function(elements, options) {
       var addImageElement = new Image
       addImageElement.classList.add('insert-image')
 
-      addImageElement.onload = function() {  
-        this.base.loadingImg.style.display = 'none'
-        document.body.appendChild(this.base.loadingImg)
-        this.base.saveScene() // 设立撤销栈
-      }.bind(this)
+      if(this.base.options.shouldImageUpload){
+        addImageElement.onload = function() {
+          if(addImageElement.src.indexOf('http') !== -1) {
+            addImageElement.style.opacity = 1
+            this.base.loadingImg.style.display = 'none'
+            document.body.appendChild(this.base.loadingImg)
+            this.base.saveScene()  // 设立撤销点
+          } else {
+            addImageElement.style.opacity = 0.6
+          }
+        }.bind(this)
+      } else {
+        addImageElement.onload = function() {  
+          this.base.loadingImg.style.display = 'none'
+          document.body.appendChild(this.base.loadingImg)
+          this.base.saveScene() // 设立撤销栈
+        }.bind(this)
+      }
       
       fileReader.addEventListener('load', function (e) {
         addImageElement.src = e.target.result
@@ -2084,11 +2099,26 @@ var MoreEditor = function(elements, options) {
           MoreEditor.util.unwrap(imageWrapper, document)
           line.parentNode.removeChild(line)
         }
-        addImageElement.onload = function() {
-          this.base.loadingImg.style.display = 'none'
-          document.body.appendChild(this.base.loadingImg)
-          this.base.saveScene() // 设立撤销栈
-        }.bind(this)
+
+        /* 根据是否需要将图片上传到服务器分为两种情况 */
+        if(this.base.options.shouldImageUpload) {
+          addImageElement.onload = function() {
+            if(addImageElement.src.indexOf('http') !== -1) {
+              addImageElement.style.opacity = 1
+              this.base.loadingImg.style.display = 'none'
+              document.body.appendChild(this.base.loadingImg)
+              this.base.saveScene()  // 设立撤销点
+            } else {
+              addImageElement.style.opacity = 0.6
+            }
+          }.bind(this)
+        } else {
+          addImageElement.onload = function() {
+            this.base.loadingImg.style.display = 'none'
+            document.body.appendChild(this.base.loadingImg)
+            this.base.saveScene() // 设立撤销栈
+          }.bind(this)
+        }
 
         fileReader.addEventListener('load', function (e) {
           addImageElement.src = e.target.result
