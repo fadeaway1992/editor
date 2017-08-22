@@ -131,6 +131,11 @@
         }.bind(this))
 
         fileReader.readAsDataURL(file)
+      } else {
+        if(line) {
+          line.remove()
+        }
+        alert('拖拽失败，只能拖拽图片，请检查文件格式。')
       }
     },
 
