@@ -2801,7 +2801,17 @@ function handleMousedown(event) {
 /* anchor-preview  链接预览 */
 var timer = 0
 function handleMouseover(event) {
-    if(event.target.nodeName.toLowerCase() === 'a' || event.target.getAttribute('data-type') === 'anchor-preview') {
+
+    /* 
+      当鼠标移入 editable 内的 a 标签中时。
+      或者鼠标移入 anchor-preview 时
+      显示链接预览
+    */
+
+    var isInAnchorPreview = MoreEditor.util.traverseUp(event.target, function(current) {
+        return current.getAttribute('data-type') === 'anchor-preview'
+    })
+    if((event.target.nodeName.toLowerCase() === 'a' && this.editableElement.contains(event.target)) || isInAnchorPreview) {
         clearTimeout(timer)
         var anchorPreview = document.querySelector('.anchor-preview')
         anchorPreview.style.display = 'block'
@@ -3150,13 +3160,17 @@ MoreEditor.prototype = {
         this.sizeAlert = document.querySelector(this.options.sizeAlert)
         document.body.appendChild(this.sizeAlert)
 
+        /* 找到 anchor-preview 并把其放入 body 下 */
         this.anchorPreview = document.querySelector(this.options.anchorPreview)
+        this.anchorPreview.setAttribute('data-type', 'anchor-preview')
         document.body.appendChild(this.anchorPreview)
 
+        /* 找到 loadingImg 并把其放入 body 下 */
         this.loadingImg = document.querySelector(this.options.loadingImg)
         this.loadingImg.setAttribute('data-type', 'loading')
         document.body.appendChild(this.loadingImg)
 
+        /* 将 image-options 放到 body 下 */
         this.buttons.imageOptions.setAttribute('data-type', 'image-options')
         document.body.appendChild(this.buttons.imageOptions)
     },

@@ -29,7 +29,8 @@
       <input type="file" accept="image/jpg, image/png, image/jpeg, image/gif" class="file-upload" style="display:none;">
       <button class="upload-image" onclick="document.querySelector('.file-upload').click()">上传图片</button>
       <button class="destroy">销毁事件</button>
-      <button class="range" onclick ="console.log(document.getSelection().getRangeAt(0))">显示当前选区</button>  
+      <button class="range" onclick ="console.log(document.getSelection().getRangeAt(0))">当前选区</button>
+      <a href="//baidu.com">这是一个 anchor</a> 
     </div>
   </div>
   <div class="editable" contenteditable="true"></div>
@@ -95,7 +96,7 @@
 
 <div class="size-alert" style="display:none;"><p>上传的图片大小不能超过 10Mb </p><button onclick = "this.parentNode.style.display = 'none'">确定</button></div>
 <div class="image-options" style="display:none;"><button class="rechoose">替换</button><button class="figure-caption">注释</button><button class="delete">移除</button></div>
-<div class="anchor-preview" style="display:none;" data-type="anchor-preview"></div>
+<div class="anchor-preview" style="display:none;"></div>
 <div class="spinner" style="display:none;"><div class="double-bounce1"></div><div class="double-bounce2"></div></div>
 </body>
 </html>
