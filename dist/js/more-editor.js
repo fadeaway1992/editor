@@ -1885,6 +1885,8 @@ var MoreEditor = function(elements, options) {
         addImageElement.onload = function() {
           if(addImageElement.src.indexOf('http') !== -1) {
             addImageElement.style.opacity = 1
+            addImageElement.setAttribute('realwidth', addImageElement.naturalWidth)
+            addImageElement.setAttribute('realheight', addImageElement.naturalHeight)
             this.base.loadingImg.style.display = 'none'
             document.body.appendChild(this.base.loadingImg)
             this.base.saveScene()  // 设立撤销点
@@ -2113,6 +2115,8 @@ var MoreEditor = function(elements, options) {
           addImageElement.onload = function() {
             if(addImageElement.src.indexOf('http') !== -1) {
               addImageElement.style.opacity = 1
+              addImageElement.setAttribute('realwidth', addImageElement.naturalWidth)
+              addImageElement.setAttribute('realheight', addImageElement.naturalHeight)
               this.base.loadingImg.style.display = 'none'
               document.body.appendChild(this.base.loadingImg)
               this.base.saveScene()  // 设立撤销点
