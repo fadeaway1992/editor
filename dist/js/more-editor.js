@@ -2834,7 +2834,7 @@ function handleMouseover(event) {
 
     }
 
-    /* 移动到图片中的时候现实图片选项 */
+    /* 移动到图片中的时候显示图片选项 */
     var theFigure = MoreEditor.util.traverseUp(event.target, function(current){
         return current.nodeName.toLowerCase() === 'figure'
     })
@@ -3067,7 +3067,8 @@ function checkoutIfFocusedImage() {
 /* MoreEditor 实例初始化时增添的一些属性 */
 var initialOptions = {
     contentWindow: window,
-    ownerDocument: document
+    ownerDocument: document,
+    spellcheck: false,
 }
 
 
@@ -3099,6 +3100,9 @@ MoreEditor.prototype = {
         if(!editableElement.getAttribute('contentEditable')) {
             editableElement.setAttribute('contentEditable', true)
         }
+
+        // 如果用户设置了开启拼写检查则开启
+        editableElement.setAttribute('spellcheck', this.options.spellcheck)
         editableElement.setAttribute('data-more-editor-element', true)
         editableElement.classList.add('more-editor-element')
         console.log(editableElement.innerHTML, 'editableElement.innerHTML')
