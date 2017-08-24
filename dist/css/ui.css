@@ -1,3 +1,4 @@
+@charset "UTF-8";
 .editable {
   border: 2px solid lightcoral;
   outline: none;
@@ -10,7 +11,10 @@
   -webkit-box-sizing: content-box;
           box-sizing: content-box;
   margin: 0 auto;
-  padding: 5px; }
+  padding: 5px;
+  /* 单词内不换行，但当单词长度超过一行溢出时强制换行。 */
+  word-wrap: break-word;
+  word-break: normal; }
 
 .toolbar {
   text-align: center;

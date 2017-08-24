@@ -9,6 +9,10 @@
   box-sizing: content-box;
   margin: 0 auto;
   padding: 5px;
+
+  /* 单词内不换行，但当单词长度超过一行溢出时强制换行。 */
+  word-wrap: break-word;
+  word-break: normal;
 }
 
 .toolbar{
