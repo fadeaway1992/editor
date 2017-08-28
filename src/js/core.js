@@ -213,15 +213,15 @@ function handleBackAndEnterKeydown(event) {
 /* 不能删没了，至少保留一个 p 标签 */
 function keepAtleastOneParagraph(event) {
     return
-    if(!this.editableElement.hasChildNodes()) {
-        console.log('删没了')
-        var newLine = document.createElement('p')
-        newLine.innerHTML = '<br>'
-        this.editableElement.appendChild(newLine)
-        MoreEditor.selection.moveCursor(document, newLine, 0)
-        event.preventDefault()
-        return
-    }
+    // if(!this.editableElement.hasChildNodes()) {
+    //     console.log('删没了')
+    //     var newLine = document.createElement('p')
+    //     newLine.innerHTML = '<br>'
+    //     this.editableElement.appendChild(newLine)
+    //     MoreEditor.selection.moveCursor(document, newLine, 0)
+    //     event.preventDefault()
+    //     return
+    // }
 
 }
 
@@ -566,11 +566,27 @@ function checkoutIfFocusedImage() {
 }
 
 
-/* MoreEditor 实例初始化时增添的一些属性 */
+/* MoreEditor 默认设置设置，会被手动设置覆盖。 */
+
 var initialOptions = {
+
+    imageUpload: function() {
+        return
+    },
+
+    initReedit: function() {
+        return
+    },
+
     contentWindow: window,
     ownerDocument: document,
+
+    canListsBeAligned: false,
     spellcheck: false,
+    shouldImageUpload: true,
+    decorateOnlyWhenTextSelected: false,
+
+
 }
 
 
@@ -586,6 +602,7 @@ function attachHandlers() {
     this.on(document.body, 'mouseout', handleMouseout.bind(this))
 }
 
+var agentBtn = document.createElement('span')  // 一个放在内存里的 dom 元素。对于用户没有设置的按钮，我们把事件加在它身上。
 
 MoreEditor.prototype = {
     init: function(element, options) {
@@ -620,19 +637,19 @@ MoreEditor.prototype = {
 
     activateButtons: function() {
         this.buttons = {}
-        this.buttons.h3            = document.querySelector(this.options.buttons.h3)
-        this.buttons.ul            = document.querySelector(this.options.buttons.ul)
-        this.buttons.h2            = document.querySelector(this.options.buttons.h2)
-        this.buttons.switchTitle   = document.querySelector(this.options.buttons.switchTitle)
-        this.buttons.ol            = document.querySelector(this.options.buttons.ol)
-        this.buttons.quote         = document.querySelector(this.options.buttons.quote)
-        this.buttons.bold          = document.querySelector(this.options.buttons.bold)
-        this.buttons.italic        = document.querySelector(this.options.buttons.italic)
-        this.buttons.strike        = document.querySelector(this.options.buttons.strike)
-        this.buttons.url           = document.querySelector(this.options.buttons.url)
-        this.buttons.link          = document.querySelector(this.options.buttons.link)
-        this.buttons.promptLink    = document.querySelector(this.options.buttons.promptLink)
-        this.buttons.center        = document.querySelector(this.options.buttons.center)
+        this.buttons.h3            = this.options.buttons.h3 ? document.querySelector(this.options.buttons.h3) : agentBtn
+        this.buttons.h2            = this.options.buttons.h2 ? document.querySelector(this.options.buttons.h2) : agentBtn
+        this.buttons.ul            = this.options.buttons.ul ? document.querySelector(this.options.buttons.ul) : agentBtn
+        this.buttons.switchTitle   = this.options.buttons.switchTitle ? document.querySelector(this.options.buttons.switchTitle) : agentBtn
+        this.buttons.ol            = this.options.buttons.ol ? document.querySelector(this.options.buttons.ol) : agentBtn
+        this.buttons.quote         = this.options.buttons.quote ? document.querySelector(this.options.buttons.quote) : agentBtn
+        this.buttons.bold          = this.options.buttons.bold ? document.querySelector(this.options.buttons.bold) : agentBtn
+        this.buttons.italic        = this.options.buttons.italic ? document.querySelector(this.options.buttons.italic) : agentBtn
+        this.buttons.strike        = this.options.buttons.strike ? document.querySelector(this.options.buttons.strike) : agentBtn
+        this.buttons.url           = this.options.buttons.url ? document.querySelector(this.options.buttons.url) : agentBtn
+        this.buttons.link          = this.options.buttons.link ? document.querySelector(this.options.buttons.link) : agentBtn
+        this.buttons.promptLink    = this.options.buttons.promptLink ? document.querySelector(this.options.buttons.promptLink) : agentBtn
+        this.buttons.center        = this.options.buttons.center ? document.querySelector(this.options.buttons.center) : agentBtn
         this.buttons.imageInput    = document.querySelector(this.options.buttons.imageInput)
         this.buttons.imageButton   = document.querySelector(this.options.buttons.imageButton)
         this.buttons.imageOptions  = document.querySelector(this.options.buttons.imageOptions)
@@ -655,6 +672,7 @@ MoreEditor.prototype = {
         this.on(this.buttons.imageReChoose, 'click', function() {this.buttons.imageInput.click()}.bind(this))
         this.on(this.buttons.imageRemove, 'click', this.API.removeImage.bind(this.API))
         this.on(this.buttons.figCaption, 'click', this.API.figCaption.bind(this.API))
+
         this.on(this.buttons.promptLink, 'click', this.API.promptLink.bind(this.API))
 
         var _this = this
@@ -662,6 +680,7 @@ MoreEditor.prototype = {
             _this.API.createLink(_this.buttons.url.value)
             _this.buttons.url.value = ''
         })
+        
 
         this.sizeAlert = document.querySelector(this.options.sizeAlert)
         document.body.appendChild(this.sizeAlert)
