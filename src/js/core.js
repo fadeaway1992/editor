@@ -637,6 +637,19 @@ MoreEditor.prototype = {
 
     activateButtons: function() {
         this.buttons = {}
+
+        /* 创建上传图片的 input 按钮 */
+        var imageInput = document.createElement('input')
+        imageInput.type = 'file'
+        imageInput.accept = "image/jpg, image/png, image/jpeg, image/gif"
+        imageInput.classList.add("file-upload")
+        imageInput.style.display = 'none'
+        document.body.appendChild(imageInput)
+
+        this.buttons.imageInput = imageInput
+
+        
+
         this.buttons.h3            = this.options.buttons.h3 ? document.querySelector(this.options.buttons.h3) : agentBtn
         this.buttons.h2            = this.options.buttons.h2 ? document.querySelector(this.options.buttons.h2) : agentBtn
         this.buttons.ul            = this.options.buttons.ul ? document.querySelector(this.options.buttons.ul) : agentBtn
@@ -650,8 +663,8 @@ MoreEditor.prototype = {
         this.buttons.link          = this.options.buttons.link ? document.querySelector(this.options.buttons.link) : agentBtn
         this.buttons.promptLink    = this.options.buttons.promptLink ? document.querySelector(this.options.buttons.promptLink) : agentBtn
         this.buttons.center        = this.options.buttons.center ? document.querySelector(this.options.buttons.center) : agentBtn
-        this.buttons.imageInput    = document.querySelector(this.options.buttons.imageInput)
-        this.buttons.imageButton   = document.querySelector(this.options.buttons.imageButton)
+        // this.buttons.imageInput    = document.querySelector(this.options.buttons.imageInput)
+        this.buttons.imageButton   = this.options.buttons.imageButton ? document.querySelector(this.options.buttons.imageButton) : agentBtn
         this.buttons.imageOptions  = document.querySelector(this.options.buttons.imageOptions)
         this.buttons.imageReChoose = document.querySelector(this.options.buttons.imageRechoose)
         this.buttons.imageRemove   = document.querySelector(this.options.buttons.imageRemove)
@@ -669,6 +682,7 @@ MoreEditor.prototype = {
         this.on(this.buttons.strike, 'click', this.API.strike.bind(this.API))
         this.on(this.buttons.center, 'click', this.API.center.bind(this.API))
         this.on(this.buttons.imageInput, 'change', this.API.insertImage.bind(this.API))
+        this.on(this.buttons.imageButton, 'click', function() {this.buttons.imageInput.click()}.bind(this))
         this.on(this.buttons.imageReChoose, 'click', function() {this.buttons.imageInput.click()}.bind(this))
         this.on(this.buttons.imageRemove, 'click', this.API.removeImage.bind(this.API))
         this.on(this.buttons.figCaption, 'click', this.API.figCaption.bind(this.API))
@@ -735,6 +749,7 @@ MoreEditor.prototype = {
         this.sizeAlert.remove()
         this.anchorPreview.remove()
         this.loadingImg.remove()
+        this.buttons.imageInput.remove()
         console.log('销毁所有事件')
     }
 }

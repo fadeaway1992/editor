@@ -26,8 +26,7 @@
     <div>
       <button class="prompt-link">创建链接</button>
       <input class="url" type="input" placeholder="请输入链接地址"><button class="link">Link</button>
-      <input type="file" accept="image/jpg, image/png, image/jpeg, image/gif" class="file-upload" style="display:none;">
-      <button class="upload-image" onclick="document.querySelector('.file-upload').click()">上传图片</button>
+      <button class="upload-image">上传图片</button>
       <button class="destroy">销毁事件</button>
       <button class="range" onclick ="console.log(document.getSelection().getRangeAt(0))">当前选区</button>
     </div>
@@ -72,7 +71,6 @@
           link: '.link',
           promptLink:'.prompt-link',
           center: '.center',
-          imageInput: '.file-upload',
           imageButton: '.upload-image',
           imageOptions: '.image-options',
           imageRechoose: '.rechoose',
