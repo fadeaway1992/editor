@@ -3087,6 +3087,8 @@ var initialOptions = {
     spellcheck: false,
     shouldImageUpload: true,
     decorateOnlyWhenTextSelected: false,
+    fileDraggingEnabled: true,
+    autoLinkEnabled: true
 
 
 }
@@ -3227,8 +3229,8 @@ MoreEditor.prototype = {
         this.API = new MoreEditor.API(this)
         this.paste = new MoreEditor.Paste(this)
         this.undoManager = new MoreEditor.UndoManager(this)
-        this.autoLink = new MoreEditor.autoLink(this)
-        this.fileDragging = new MoreEditor.fileDragging(this)
+        if(this.options.autoLinkEnabled) this.autoLink = new MoreEditor.autoLink(this)
+        if(this.options.fileDraggingEnabled) this.fileDragging = new MoreEditor.fileDragging(this)
         this.activateButtons()
         attachHandlers.call(this)
     },
