@@ -593,8 +593,8 @@ var initialOptions = {
     autoLinkEnabled: true,
     imageOptionsEnabled: true,
 
-    anchorPreview: '.anchor-preview-default'  // 内置 anchorPreview
-
+    anchorPreview: '.anchor-preview-default',  // 内置 anchorPreview
+    loadingImg: '.loading-default',  // 内置 loadingImg
 
 }
 
@@ -737,23 +737,30 @@ MoreEditor.prototype = {
         }
         
 
-        /* 找到 anchor-preview 并把其放入 body 下 */
-
-        // 内置 anchorpreview
+        /* 内置 anchorPreview */
         if(this.options.anchorPreview === '.anchor-preview-default') {
             var anchorPreview = document.createElement('div')
             anchorPreview.className = 'anchor-preview-default'
-            anchorPreview.style.display = 'none'
             document.body.appendChild(anchorPreview)
         }
-
+        /* 找到 anchorPreview 并放到 body 下 */
         this.anchorPreview = document.querySelector(this.options.anchorPreview)
         this.anchorPreview.setAttribute('data-type', 'anchor-preview')
+        this.anchorPreview.style.display = 'none'
         document.body.appendChild(this.anchorPreview)
 
+
+        /* 内置 loadingImg */
+        if(this.options.loadingImg === '.loading-default') {
+            var loadingImg = document.createElement('div')
+            loadingImg.className = 'loading-default'
+            loadingImg.innerHTML = '<div class="double-bounce1"></div><div class="double-bounce2"></div>'
+            document.body.appendChild(loadingImg)
+        }
         /* 找到 loadingImg 并把其放入 body 下 */
         this.loadingImg = document.querySelector(this.options.loadingImg)
         this.loadingImg.setAttribute('data-type', 'loading')
+        this.loadingImg.style.display = 'none'
         document.body.appendChild(this.loadingImg)
     },
     /* 

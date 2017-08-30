@@ -142,7 +142,7 @@
         -ms-transform: translate(-10px, 0);
             transform: translate(-10px, 0); }
 
-.spinner {
+.loading-default {
   width: 30px;
   height: 30px;
   left: 50%;
