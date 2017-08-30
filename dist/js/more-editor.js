@@ -3161,8 +3161,39 @@ MoreEditor.prototype = {
         imageInput.classList.add("file-upload")
         imageInput.style.display = 'none'
         document.body.appendChild(imageInput)
-
         this.buttons.imageInput = imageInput
+
+
+        /* 设置图片选项 */
+        if(this.options.imageOptionsEnabled) {
+            if(!this.options.buttons.imageOptions) {
+                /* 使用内置 imageOptions */
+                var imageOptions = document.createElement('div')
+                imageOptions.className = 'image-options-default'
+                
+                imageOptions.innerHTML = '<button class="rechoose">替换</button><button class="figure-caption">注释</button><button class="delete">移除</button>'
+                this.buttons.imageOptions = imageOptions
+                this.buttons.imageReChoose = imageOptions.querySelector('.rechoose')
+                this.buttons.imageRemove = imageOptions.querySelector('.delete')
+                this.buttons.figCaption = imageOptions.querySelector('.figure-caption')
+            } else if(this.options.buttons.imageOptions) {
+                /* 使用用户自定义 imageOptions */
+                this.buttons.imageOptions  = document.querySelector(this.options.buttons.imageOptions)
+                this.buttons.imageReChoose = this.options.buttons.imageRechoose ? document.querySelector(this.options.buttons.imageRechoose) : false
+                this.buttons.imageRemove   = this.options.buttons.imageRemove ? document.querySelector(this.options.buttons.imageRemove) : false
+                this.buttons.figCaption    = this.options.buttons.figCaption ? document.querySelector(this.options.buttons.figCaption) : false
+            }
+    
+            /* 将 image-options 放到 body 下 */
+            this.buttons.imageOptions.style.display = 'none'
+            this.buttons.imageOptions.setAttribute('data-type', 'image-options')
+            document.body.appendChild(this.buttons.imageOptions)
+
+            if(this.buttons.imageReChoose) this.on(this.buttons.imageReChoose, 'click', function() {this.buttons.imageInput.click()}.bind(this))
+            if(this.buttons.imageRemove) this.on(this.buttons.imageRemove, 'click', this.API.removeImage.bind(this.API))
+            if(this.buttons.figCaption) this.on(this.buttons.figCaption, 'click', this.API.figCaption.bind(this.API))
+        }
+    
 
 
         this.buttons.h3            = this.options.buttons.h3 ? document.querySelector(this.options.buttons.h3) : agentBtn
@@ -3178,12 +3209,8 @@ MoreEditor.prototype = {
         this.buttons.link          = this.options.buttons.link ? document.querySelector(this.options.buttons.link) : agentBtn
         this.buttons.promptLink    = this.options.buttons.promptLink ? document.querySelector(this.options.buttons.promptLink) : agentBtn
         this.buttons.center        = this.options.buttons.center ? document.querySelector(this.options.buttons.center) : agentBtn
-        // this.buttons.imageInput    = document.querySelector(this.options.buttons.imageInput)
         this.buttons.imageButton   = this.options.buttons.imageButton ? document.querySelector(this.options.buttons.imageButton) : agentBtn
-        this.buttons.imageOptions  = document.querySelector(this.options.buttons.imageOptions)
-        this.buttons.imageReChoose = document.querySelector(this.options.buttons.imageRechoose)
-        this.buttons.imageRemove   = document.querySelector(this.options.buttons.imageRemove)
-        this.buttons.figCaption    = document.querySelector(this.options.buttons.figCaption)
+        
 
 
         this.on(this.buttons.h2, 'click', this.API.h2.bind(this.API))
@@ -3198,9 +3225,7 @@ MoreEditor.prototype = {
         this.on(this.buttons.center, 'click', this.API.center.bind(this.API))
         this.on(this.buttons.imageInput, 'change', this.API.insertImage.bind(this.API))
         this.on(this.buttons.imageButton, 'click', function() {this.buttons.imageInput.click()}.bind(this))
-        this.on(this.buttons.imageReChoose, 'click', function() {this.buttons.imageInput.click()}.bind(this))
-        this.on(this.buttons.imageRemove, 'click', this.API.removeImage.bind(this.API))
-        this.on(this.buttons.figCaption, 'click', this.API.figCaption.bind(this.API))
+        
 
         this.on(this.buttons.promptLink, 'click', this.API.promptLink.bind(this.API))
 
@@ -3237,10 +3262,6 @@ MoreEditor.prototype = {
         this.loadingImg = document.querySelector(this.options.loadingImg)
         this.loadingImg.setAttribute('data-type', 'loading')
         document.body.appendChild(this.loadingImg)
-
-        /* 将 image-options 放到 body 下 */
-        this.buttons.imageOptions.setAttribute('data-type', 'image-options')
-        document.body.appendChild(this.buttons.imageOptions)
     },
     /* 
         setup 方法：
