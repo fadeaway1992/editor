@@ -40,24 +40,20 @@
     window.onload = function() {
 
       var editor = new MoreEditor('.editable', {
-        imageUpload: function(image, updateURL, failAlert){
-          return
-          console.log(image, '这是我要上传的图片，请在这个函数中把这个文件上传到服务器，调用 updateURL, 把线上地址传进去。')
-        },
 
         initReedit: function() {
           // 重新编辑的时候调用这个函数
           return
         },
 
-        shouldImageUpload: false,  
+        shouldImageUpload: false,
         canListsBeAligned: false,
         decorateOnlyWhenTextSelected: false,
         fileDraggingEnabled: true,
         autoLinkEnabled: true,
 
-        sizeAlert: '.size-alert',
-        anchorPreview: '.anchor-preview',
+        // sizeAlert: '.size-alert',
+        // anchorPreview: '.anchor-preview',
         loadingImg: '.spinner',
 
         buttons: {
@@ -94,9 +90,9 @@
     
 </script>
 
-<div class="size-alert" style="display:none;"><p>上传的图片大小不能超过 10Mb </p><button onclick = "this.parentNode.style.display = 'none'">确定</button></div>
+<!-- <div class="size-alert" style="display:none;"><p>上传的图片大小不能超过 10Mb </p><button onclick = "this.parentNode.style.display = 'none'">确定</button></div> -->
 <div class="image-options" style="display:none;"><button class="rechoose">替换</button><button class="figure-caption">注释</button><button class="delete">移除</button></div>
-<div class="anchor-preview" style="display:none;"></div>
+<!-- <div class="anchor-preview" style="display:none;"></div> -->
 <div class="spinner" style="display:none;"><div class="double-bounce1"></div><div class="double-bounce2"></div></div>
 </body>
 </html>

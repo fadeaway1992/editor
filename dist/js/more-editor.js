@@ -1905,20 +1905,22 @@ var MoreEditor = function(elements, options) {
       fileReader.addEventListener('load', function (e) {
         addImageElement.src = e.target.result
         
-        this.options.imageUpload(
-          file, 
-
-          function(result) {
-            addImageElement.src = result
-          }.bind(this),
-
-          function() {
-            this.base.loadingImg.style.display = "none"
-            document.body.appendChild(this.base.loadingImg)
-            theFigure.remove()
-            alert('图片上传失败')
-          }.bind(this)
-        )
+        if(this.options.shouldImageUpload) {
+          this.options.imageUpload(
+            file, 
+  
+            function(result) {
+              addImageElement.src = result
+            }.bind(this),
+  
+            function() {
+              this.base.loadingImg.style.display = "none"
+              document.body.appendChild(this.base.loadingImg)
+              theFigure.remove()
+              alert('图片上传失败')
+            }.bind(this)
+          )
+        }
       }.bind(this))
 
       fileReader.readAsDataURL(file)
@@ -2087,7 +2089,7 @@ var MoreEditor = function(elements, options) {
         var maxFileSize = 10 * 1024 * 1024
         if(file.size > maxFileSize) {
           this.sizeAlert()
-          line.parentNode.removeChild(line)
+          line.remove()
           return
         }
         
@@ -2111,7 +2113,7 @@ var MoreEditor = function(elements, options) {
         }
 
         /* 根据是否需要将图片上传到服务器分为两种情况 */
-        if(this.base.options.shouldImageUpload) {
+        if(this.options.shouldImageUpload) {
           addImageElement.onload = function() {
             if(addImageElement.src.indexOf('http') !== -1) {
               addImageElement.style.opacity = 1
@@ -2135,21 +2137,22 @@ var MoreEditor = function(elements, options) {
         fileReader.addEventListener('load', function (e) {
           addImageElement.src = e.target.result
 
-          this.options.imageUpload(
-            file,
-
-            function(result) {
-              addImageElement.src = result
-            }.bind(this),
-
-            function() {
-              this.base.loadingImg.style.display = "none"
-              document.body.appendChild(this.base.loadingImg)
-              theFigure.remove()
-              alert('图片上传失败')
-            }.bind(this)
-          )
-
+          if(this.options.shouldImageUpload) {
+            this.options.imageUpload(
+              file,
+  
+              function(result) {
+                addImageElement.src = result
+              }.bind(this),
+  
+              function() {
+                this.base.loadingImg.style.display = "none"
+                document.body.appendChild(this.base.loadingImg)
+                theFigure.remove()
+                alert('图片上传失败')
+              }.bind(this)
+            )
+          }
         }.bind(this))
 
         fileReader.readAsDataURL(file)
@@ -2162,9 +2165,11 @@ var MoreEditor = function(elements, options) {
     },
 
     sizeAlert: function() {
-      // var sizeAlert = document.querySelector(this.base.sizeAlert)
-      // sizeAlert.style.display = "block"
-      alert('上传的图片大小不能超过 10Mb')
+      if(this.base.sizeAlert === 'default') {
+        alert('上传的图片大小不能超过 10Mb')
+      } else {
+        this.base.sizeAlert.style.display = "block"
+      }
     }
 
   }
@@ -2817,25 +2822,23 @@ function handleMouseover(event) {
     })
     if((event.target.nodeName.toLowerCase() === 'a' && this.editableElement.contains(event.target)) || isInAnchorPreview) {
         clearTimeout(timer)
-        var anchorPreview = document.querySelector('.anchor-preview')
-        anchorPreview.style.display = 'block'
+        this.anchorPreview.style.display = 'block'
         if(event.target.nodeName.toLowerCase() === 'a' && event.target.parentNode.getAttribute('data-type') !== 'anchor-preview') {
             var view = document.createElement('a')
             view.href = event.target.href
             view.target = '_blank'
             view.innerHTML = event.target.href
-            anchorPreview.innerHTML = ''
-            anchorPreview.appendChild(view)
+            this.anchorPreview.innerHTML = ''
+            this.anchorPreview.appendChild(view)
             var rect = event.target.getClientRects()[0]
-            var anchorWidth = anchorPreview.offsetWidth
+            var anchorWidth = this.anchorPreview.offsetWidth
             var left = rect.left + rect.width/2 - anchorWidth/2
-            anchorPreview.style.left = left + 'px'
+            this.anchorPreview.style.left = left + 'px'
 
             var scrollTop = document.documentElement.scrollTop || document.body.scrollTop
             var top = rect.bottom + scrollTop + 10
-            anchorPreview.style.top = top + 'px'
+            this.anchorPreview.style.top = top + 'px'
         }
-
     }
 
     /* 移动到图片中的时候显示图片选项 */
@@ -2852,9 +2855,8 @@ function handleMouseover(event) {
 function handleMouseout(event) {
     if(event.target.nodeName.toLowerCase() === 'a' || event.target.getAttribute('data-type') === 'anchor-preview') {
         timer = setTimeout(function() {
-            var anchorPreview = document.querySelector('.anchor-preview')
-            anchorPreview.style.display = 'none'
-        }, 500)
+            this.anchorPreview.style.display = 'none'
+        }.bind(this), 500)
     }
 
     /* 移出图片的时候隐藏图片选项 */
@@ -3088,7 +3090,9 @@ var initialOptions = {
     shouldImageUpload: true,
     decorateOnlyWhenTextSelected: false,
     fileDraggingEnabled: true,
-    autoLinkEnabled: true
+    autoLinkEnabled: true,
+
+    anchorPreview: '.anchor-preview-default'  // 内置 anchorPreview
 
 
 }
@@ -3152,7 +3156,6 @@ MoreEditor.prototype = {
 
         this.buttons.imageInput = imageInput
 
-        
 
         this.buttons.h3            = this.options.buttons.h3 ? document.querySelector(this.options.buttons.h3) : agentBtn
         this.buttons.h2            = this.options.buttons.h2 ? document.querySelector(this.options.buttons.h2) : agentBtn
@@ -3199,11 +3202,25 @@ MoreEditor.prototype = {
             _this.buttons.url.value = ''
         })
         
-
-        this.sizeAlert = document.querySelector(this.options.sizeAlert)
-        document.body.appendChild(this.sizeAlert)
+        /* 如果用户设置了 sizeAlert, 就使用用户自定义的 ui，否则使用我们默认的 alert 窗口 */
+        if(this.options.sizeAlert) {
+            this.sizeAlert = document.querySelector(this.options.sizeAlert)
+            document.body.appendChild(this.sizeAlert)
+        } else {
+            this.sizeAlert = 'default'
+        }
+        
 
         /* 找到 anchor-preview 并把其放入 body 下 */
+
+        // 内置 anchorpreview
+        if(this.options.anchorPreview === '.anchor-preview-default') {
+            var anchorPreview = document.createElement('div')
+            anchorPreview.className = 'anchor-preview-default'
+            anchorPreview.style.display = 'none'
+            document.body.appendChild(anchorPreview)
+        }
+
         this.anchorPreview = document.querySelector(this.options.anchorPreview)
         this.anchorPreview.setAttribute('data-type', 'anchor-preview')
         document.body.appendChild(this.anchorPreview)
@@ -3249,10 +3266,22 @@ MoreEditor.prototype = {
     destroy: function() {
         console.log('调用 destroy')
         this.events.detachAllDOMEvents()
+
+        /* 删除 sizeAlert 元素 */
+        if(this.sizeAlert !== 'default') {
+            this.sizeAlert.remove()
+        }
+
+        /* 删除 imageOptions 元素 */
         this.buttons.imageOptions.remove()
-        this.sizeAlert.remove()
+
+        /* 删除 anchorPreview 元素 */
         this.anchorPreview.remove()
+
+        /* 删除 loadingImg 元素 */
         this.loadingImg.remove()
+
+        /* 删除 imgInput 元素 */
         this.buttons.imageInput.remove()
         console.log('销毁所有事件')
     }

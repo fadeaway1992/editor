@@ -780,20 +780,22 @@
       fileReader.addEventListener('load', function (e) {
         addImageElement.src = e.target.result
         
-        this.options.imageUpload(
-          file, 
-
-          function(result) {
-            addImageElement.src = result
-          }.bind(this),
-
-          function() {
-            this.base.loadingImg.style.display = "none"
-            document.body.appendChild(this.base.loadingImg)
-            theFigure.remove()
-            alert('图片上传失败')
-          }.bind(this)
-        )
+        if(this.options.shouldImageUpload) {
+          this.options.imageUpload(
+            file, 
+  
+            function(result) {
+              addImageElement.src = result
+            }.bind(this),
+  
+            function() {
+              this.base.loadingImg.style.display = "none"
+              document.body.appendChild(this.base.loadingImg)
+              theFigure.remove()
+              alert('图片上传失败')
+            }.bind(this)
+          )
+        }
       }.bind(this))
 
       fileReader.readAsDataURL(file)

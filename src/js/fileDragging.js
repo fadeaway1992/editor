@@ -67,7 +67,7 @@
         var maxFileSize = 10 * 1024 * 1024
         if(file.size > maxFileSize) {
           this.sizeAlert()
-          line.parentNode.removeChild(line)
+          line.remove()
           return
         }
         
@@ -91,7 +91,7 @@
         }
 
         /* 根据是否需要将图片上传到服务器分为两种情况 */
-        if(this.base.options.shouldImageUpload) {
+        if(this.options.shouldImageUpload) {
           addImageElement.onload = function() {
             if(addImageElement.src.indexOf('http') !== -1) {
               addImageElement.style.opacity = 1
@@ -115,21 +115,22 @@
         fileReader.addEventListener('load', function (e) {
           addImageElement.src = e.target.result
 
-          this.options.imageUpload(
-            file,
-
-            function(result) {
-              addImageElement.src = result
-            }.bind(this),
-
-            function() {
-              this.base.loadingImg.style.display = "none"
-              document.body.appendChild(this.base.loadingImg)
-              theFigure.remove()
-              alert('图片上传失败')
-            }.bind(this)
-          )
-
+          if(this.options.shouldImageUpload) {
+            this.options.imageUpload(
+              file,
+  
+              function(result) {
+                addImageElement.src = result
+              }.bind(this),
+  
+              function() {
+                this.base.loadingImg.style.display = "none"
+                document.body.appendChild(this.base.loadingImg)
+                theFigure.remove()
+                alert('图片上传失败')
+              }.bind(this)
+            )
+          }
         }.bind(this))
 
         fileReader.readAsDataURL(file)
@@ -142,9 +143,11 @@
     },
 
     sizeAlert: function() {
-      // var sizeAlert = document.querySelector(this.base.sizeAlert)
-      // sizeAlert.style.display = "block"
-      alert('上传的图片大小不能超过 10Mb')
+      if(this.base.sizeAlert === 'default') {
+        alert('上传的图片大小不能超过 10Mb')
+      } else {
+        this.base.sizeAlert.style.display = "block"
+      }
     }
 
   }

@@ -86,7 +86,7 @@
     float: right;
     margin-right: 5px; }
 
-.anchor-preview {
+.anchor-preview-default {
   position: absolute;
   display: inline-block;
   left: 50%;
@@ -98,11 +98,11 @@
           border-radius: 5px;
   line-height: 40px;
   text-align: center; }
-  .anchor-preview a {
+  .anchor-preview-default a {
     color: white;
     font-weight: bold;
     text-decoration: none; }
-  .anchor-preview::after {
+  .anchor-preview-default::after {
     content: '';
     display: block;
     position: absolute;
