@@ -2842,6 +2842,7 @@ function handleMouseover(event) {
     }
 
     /* 移动到图片中的时候显示图片选项 */
+    if(!this.options.imageOptionsEnabled) return
     var theFigure = MoreEditor.util.traverseUp(event.target, function(current){
         return current.nodeName.toLowerCase() === 'figure'
     })
@@ -2860,6 +2861,7 @@ function handleMouseout(event) {
     }
 
     /* 移出图片的时候隐藏图片选项 */
+    if(!this.options.imageOptionsEnabled) return
     var toTarget = event.toElement || event.relatedTarget  // FF 不支持 event.toElement, 要用 relatedTarget
     var theFigure = MoreEditor.util.traverseUp(toTarget, function(current){
         return current.nodeName.toLowerCase() === 'figure'
@@ -3055,15 +3057,20 @@ function checkoutIfFocusedImage() {
         }
         
         image.classList.add('insert-image-active')
-        image.parentNode.appendChild(this.buttons.imageOptions)
-        this.buttons.imageOptions.style.display = 'block'
+        if(this.options.imageOptionsEnabled) {
+            image.parentNode.appendChild(this.buttons.imageOptions)
+            this.buttons.imageOptions.style.display = 'block'
+        }
+        
     } else {
         var activeImage = document.querySelector('.insert-image-active')
         if(activeImage) {
             console.log('准备移除已经聚焦的图片')
             activeImage.classList.remove('insert-image-active')
-            this.buttons.imageOptions.style.display = 'none'
-            document.body.appendChild(this.buttons.imageOptions)
+            if(this.options.imageOptionsEnabled) {
+                this.buttons.imageOptions.style.display = 'none'
+                document.body.appendChild(this.buttons.imageOptions)
+            }
         }
         return
     }
@@ -3091,6 +3098,7 @@ var initialOptions = {
     decorateOnlyWhenTextSelected: false,
     fileDraggingEnabled: true,
     autoLinkEnabled: true,
+    imageOptionsEnabled: true,
 
     anchorPreview: '.anchor-preview-default'  // 内置 anchorPreview
 
