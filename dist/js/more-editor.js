@@ -2842,13 +2842,15 @@ function handleMouseover(event) {
     }
 
     /* 移动到图片中的时候显示图片选项 */
-    if(!this.options.imageOptionsEnabled) return
     var theFigure = MoreEditor.util.traverseUp(event.target, function(current){
         return current.nodeName.toLowerCase() === 'figure'
     })
     if(theFigure){
-        theFigure.querySelector('.image-wrapper').appendChild(this.buttons.imageOptions)
-        this.buttons.imageOptions.style.display = 'block'
+        if(this.options.imageOptionsEnabled) {
+            theFigure.querySelector('.image-wrapper').appendChild(this.buttons.imageOptions)
+            this.buttons.imageOptions.style.display = 'block'
+        }
+        theFigure.querySelector('.insert-image').classList.add('hover')
     }
     
 }
@@ -2861,14 +2863,19 @@ function handleMouseout(event) {
     }
 
     /* 移出图片的时候隐藏图片选项 */
-    if(!this.options.imageOptionsEnabled) return
     var toTarget = event.toElement || event.relatedTarget  // FF 不支持 event.toElement, 要用 relatedTarget
-    var theFigure = MoreEditor.util.traverseUp(toTarget, function(current){
+    var toFigure = MoreEditor.util.traverseUp(toTarget, function(current){
         return current.nodeName.toLowerCase() === 'figure'
     })
-    if(!theFigure){
-        this.buttons.imageOptions.style.display = 'none'
-        document.body.appendChild(this.buttons.imageOptions)
+    var fromFigure = MoreEditor.util.traverseUp(event.target, function(current){
+        return current.nodeName.toLowerCase() === 'figure'
+    })
+    if(!toFigure && fromFigure){
+        if(this.options.imageOptionsEnabled) {
+            this.buttons.imageOptions.style.display = 'none'
+            document.body.appendChild(this.buttons.imageOptions)
+        }
+        fromFigure.querySelector('.insert-image').classList.remove('hover')
     }
 }
 
