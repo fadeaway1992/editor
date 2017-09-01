@@ -1891,7 +1891,7 @@ var MoreEditor = function(elements, options) {
               this.base.loadingImg.style.display = 'none'
               document.body.appendChild(this.base.loadingImg)
               theFigure.remove()
-              alert("图片插入失败，请重试")
+              alert("图片上传失败，请再试一次！")
               return
             }
             this.base.loadingImg.style.display = 'none'
@@ -1924,7 +1924,7 @@ var MoreEditor = function(elements, options) {
               this.base.loadingImg.style.display = "none"
               document.body.appendChild(this.base.loadingImg)
               theFigure.remove()
-              alert('图片上传失败')
+              alert('图片上传失败，请再试一次！')
             }.bind(this)
           )
         }
@@ -2130,7 +2130,7 @@ var MoreEditor = function(elements, options) {
                 this.base.loadingImg.style.display = 'none'
                 document.body.appendChild(this.base.loadingImg)
                 theFigure.remove()
-                alert("图片插入失败，请重试")
+                alert("图片上传失败，请再试一次！")
                 return
               }
               this.base.loadingImg.style.display = 'none'
@@ -2163,7 +2163,7 @@ var MoreEditor = function(elements, options) {
                 this.base.loadingImg.style.display = "none"
                 document.body.appendChild(this.base.loadingImg)
                 theFigure.remove()
-                alert('图片上传失败')
+                alert('图片上传失败，请再试一次！')
               }.bind(this)
             )
           }
