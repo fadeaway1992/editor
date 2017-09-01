@@ -1885,8 +1885,15 @@ var MoreEditor = function(elements, options) {
         addImageElement.onload = function() {
           if(addImageElement.src.indexOf('http') !== -1) {
             addImageElement.style.opacity = 1
-            addImageElement.setAttribute('realwidth', addImageElement.naturalWidth)
-            addImageElement.setAttribute('realheight', addImageElement.naturalHeight)
+            addImageElement.setAttribute('realwidth', addImageElement.width)
+            addImageElement.setAttribute('realheight', addImageElement.height)
+            if(addImageElement.getAttribute('realwidth') == 0 || addImageElement.getAttribute('realheight') == 0) {
+              this.base.loadingImg.style.display = 'none'
+              document.body.appendChild(this.base.loadingImg)
+              theFigure.remove()
+              alert("图片插入失败，请重试")
+              return
+            }
             this.base.loadingImg.style.display = 'none'
             document.body.appendChild(this.base.loadingImg)
             this.base.saveScene()  // 设立撤销点
@@ -2117,8 +2124,15 @@ var MoreEditor = function(elements, options) {
           addImageElement.onload = function() {
             if(addImageElement.src.indexOf('http') !== -1) {
               addImageElement.style.opacity = 1
-              addImageElement.setAttribute('realwidth', addImageElement.naturalWidth)
-              addImageElement.setAttribute('realheight', addImageElement.naturalHeight)
+              addImageElement.setAttribute('realwidth', addImageElement.width)
+              addImageElement.setAttribute('realheight', addImageElement.width)
+              if(addImageElement.getAttribute('realwidth') == 0 || addImageElement.getAttribute('realheight') == 0) {
+                this.base.loadingImg.style.display = 'none'
+                document.body.appendChild(this.base.loadingImg)
+                theFigure.remove()
+                alert("图片插入失败，请重试")
+                return
+              }
               this.base.loadingImg.style.display = 'none'
               document.body.appendChild(this.base.loadingImg)
               this.base.saveScene()  // 设立撤销点
