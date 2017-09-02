@@ -19,7 +19,7 @@
         delegate.closestBlock.innerHTML = delegate.closestBlock.textContent
       }
 
-      MoreEditor.util.execFormatBlock(document, 'h2')
+      MoreEditor.util.execFormatBlock(document, 'h2')   
 
       updateButtonStatus.call(this.base)
 
