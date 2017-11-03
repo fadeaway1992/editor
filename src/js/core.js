@@ -242,13 +242,12 @@ function checkCaretPosition (event) {
     if(selection.rangeCount>0) {                               
         var range = selection.getRangeAt(0)                    
         var rects = range.getClientRects()                       // 获取选区／光标 clientRect 对象  对于光标换行，如果是从文本中间断句换行，可以获取到 rect 对象，如果是在文本末尾另起一行，这样是获取不到 rect 对象的。
-        var clineHeight = document.documentElement.clientHeight || document.body.clientHeight  // 获取当前客户端窗口高度
+        var clineHeight = this.editableElement.getBoundingClientRect().bottom  // 获取编辑区客户端窗口高度
         if(rects[0]) {
             var bottom = clineHeight - rects[0].bottom           // 获取光标距离窗口底部的高度
             if(bottom < 50) {
-                var scrollTop = this.options.ownerDocument.documentElement.scrollTop || this.options.ownerDocument.body.scrollTop  // 文档获取向上滚动的距离
-                this.options.ownerDocument.documentElement.scrollTop = scrollTop + rects[0].height    
-                this.options.ownerDocument.body.scrollTop = scrollTop + rects[0].height
+                var scrollTop = this.editableElement.scrollTop  // 编辑区获取向上滚动的距离
+                this.editableElement.scrollTop = scrollTop + rects[0].height    
             }                                                                                  // 这一段是讲如果当前光标距离窗口底部很近了（<50），就将文档向上滚动一个光标的距离。
         } else if (event.keyCode == 13) {    // 当前按下的键是 enter， 但是却没有获取到光标的 rect 对象。有些场景下无法获取到光标的 rect 对象，这时我们使用光标所在节点的父元素的 rect 对象。
             var parentNode = MoreEditor.util.getClosestBlockContainer(node)  
@@ -256,10 +255,9 @@ function checkCaretPosition (event) {
             var rect = parentNode.getBoundingClientRect()
             var bottom = clineHeight - rect.bottom
             if(bottom < 50) {
-                var scrollTop = this.options.ownerDocument.documentElement.scrollTop || this.options.ownerDocument.body.scrollTop
+                var scrollTop = this.editableElement.scrollTop  // 编辑区获取向上滚动的距离
                 var height = rect.height + parseInt(getComputedStyle(parentNode).marginTop) + parseInt(getComputedStyle(parentNode).marginBottom)
-                this.options.ownerDocument.documentElement.scrollTop = scrollTop + height
-                this.options.ownerDocument.body.scrollTop = scrollTop + height    
+                this.editableElement.scrollTop = scrollTop + height
             }
         }
     }
@@ -658,10 +656,19 @@ MoreEditor.prototype = {
         var imageInput = document.createElement('input')
         imageInput.type = 'file'
         imageInput.accept = "image/jpg, image/png, image/jpeg, image/gif"
-        imageInput.classList.add("file-upload")
+        imageInput.classList.add("image-input")
         imageInput.style.display = 'none'
         document.body.appendChild(imageInput)
         this.buttons.imageInput = imageInput
+
+        /* 创建上传文件的 input 按钮 */
+        var fileInput = document.createElement('input')
+        fileInput.type = 'file'
+        fileInput.accept = "application/pdf"
+        fileInput.classList.add("file-input")
+        fileInput.style.display = 'none'
+        document.body.appendChild(fileInput)
+        this.buttons.fileInput = fileInput
 
 
         /* 设置图片选项 */
@@ -710,6 +717,7 @@ MoreEditor.prototype = {
         this.buttons.promptLink    = this.options.buttons.promptLink ? document.querySelector(this.options.buttons.promptLink) : agentBtn
         this.buttons.center        = this.options.buttons.center ? document.querySelector(this.options.buttons.center) : agentBtn
         this.buttons.imageButton   = this.options.buttons.imageButton ? document.querySelector(this.options.buttons.imageButton) : agentBtn
+        this.buttons.fileButton   = this.options.buttons.fileButton ? document.querySelector(this.options.buttons.fileButton) : agentBtn
         
 
 
@@ -724,8 +732,15 @@ MoreEditor.prototype = {
         this.on(this.buttons.strike, 'click', this.API.strike.bind(this.API))
         this.on(this.buttons.center, 'click', this.API.center.bind(this.API))
         this.on(this.buttons.imageInput, 'change', this.API.insertImage.bind(this.API))
-        this.on(this.buttons.imageButton, 'click', function() {this.buttons.imageInput.click()}.bind(this))
-        
+        this.on(this.buttons.imageButton, 'click', function() {
+            this.API.exportSelection()
+            this.buttons.imageInput.click()
+        }.bind(this))
+        this.on(this.buttons.fileButton, 'click', function() {
+            this.API.exportSelection()
+            this.buttons.fileInput.click()
+        }.bind(this))
+        this.on(this.buttons.fileInput, 'change', this.API.insertFile.bind(this.API))
 
         this.on(this.buttons.promptLink, 'click', this.API.promptLink.bind(this.API))
 

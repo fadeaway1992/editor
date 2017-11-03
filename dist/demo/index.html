@@ -27,6 +27,7 @@
       <button class="prompt-link">创建链接</button>
       <div class="link-wrapper"><input class="url" type="input" placeholder="请输入链接地址"><button class="link">Link</button></div>
       <button class="upload-image">上传图片</button>
+      <button class="upload-file">上传文件</button>
       <button class="destroy">销毁事件</button>
       <button class="range" onclick ="console.log(document.getSelection().getRangeAt(0))">当前选区</button>
     </div>
@@ -53,9 +54,9 @@
         autoLinkEnabled: true,
         imageOptionsEnabled: true,
 
-        // sizeAlert: '.size-alert',
-        // anchorPreview: '.anchor-preview',
-        // loadingImg: '.loading',
+        sizeAlert: '.size-alert',
+        anchorPreview: '.anchor-preview',
+        loadingImg: '.loading',
 
         buttons: {
           h2: '.h2',
@@ -72,10 +73,11 @@
           promptLink:'.prompt-link',
           center: '.center',
           imageButton: '.upload-image',
-          // imageOptions: '.image-options',
-          // imageRechoose: '.rechoose',
-          // imageRemove: '.delete',
-          // figCaption: '.figure-caption'
+          fileButton: '.upload-file',
+          imageOptions: '.image-options',
+          imageRechoose: '.rechoose',
+          imageRemove: '.delete',
+          figCaption: '.figure-caption'
         }
       })
       console.log(editor)
@@ -91,10 +93,10 @@
     
 </script>
 
-<!-- <div class="size-alert" style="display:none;"><p>上传的图片大小不能超过 10Mb </p><button onclick = "this.parentNode.style.display = 'none'">确定</button></div> -->
-<!-- <div class="image-options" style="display:none;"><button class="rechoose">替换</button><button class="figure-caption">注释</button><button class="delete">移除</button></div> -->
-<!-- <div class="anchor-preview" style="display:none;"></div> -->
-<!-- <div class="loading" style="display:none;"><div class="double-bounce1"></div><div class="double-bounce2"></div></div> -->
+<div class="size-alert" style="display:none;"><p>上传的图片大小不能超过 10Mb </p><button onclick = "this.parentNode.style.display = 'none'">确定</button></div>
+<div class="image-options" style="display:none;"><button class="rechoose">替换</button><button class="figure-caption">注释</button><button class="delete">移除</button></div>
+<div class="anchor-preview" style="display:none;"></div>
+<div class="loading" style="display:none;"><div class="double-bounce1"></div><div class="double-bounce2"></div></div>
 </body>
 </html>
 

@@ -1144,7 +1144,7 @@ var MoreEditor = function(elements, options) {
         delegate.closestBlock.innerHTML = delegate.closestBlock.textContent
       }
 
-      MoreEditor.util.execFormatBlock(document, 'h2')
+      MoreEditor.util.execFormatBlock(document, 'h2')   
 
       updateButtonStatus.call(this.base)
 
@@ -1864,7 +1864,7 @@ var MoreEditor = function(elements, options) {
         this.base.fileDragging.sizeAlert()
         return
       }
-
+      this.importSelection()
       var delegate = this.base.delegate
       delegate.updateStatus()
 
@@ -1958,6 +1958,79 @@ var MoreEditor = function(elements, options) {
         MoreEditor.util.unwrap(imageWrapper, document)
       }
 
+    },
+    /* 插入文件 */
+    insertFile: function(event) {
+      console.log(event.target.files, 'insert files')
+      var file = event.target.files[0]
+      event.target.value = ''
+      if(!file) {
+        return
+      }
+
+      /* 判断文件大小是否超限 */
+      var maxFileSize = 10 * 1024 * 1024 * 1024  // 基本无限大
+      if(file.size > maxFileSize) {
+        this.base.fileDragging.sizeAlert()
+        return
+      }
+
+      this.importSelection()
+      var delegate = this.base.delegate
+      delegate.updateStatus()
+
+      /* 基本判断 */
+      if(!delegate.range || delegate.crossBlock ) {return}
+
+      var name = file.name
+      var size = file.size
+      // var type = file.type
+
+      /* 生成 UI */
+      var fileWrapper = document.createElement('div')
+      fileWrapper.innerHTML = '<div data-type="file" class="file-container" contenteditable="false"><div class="file-type">PDF</div><div class="file-info"><p class="file-name">' + name + '</p><p class="file-size">文件大小：' + size + 'B</p></div><span class="remove-file">X</span></div>'
+      var theFile = fileWrapper.firstChild
+      var removeBtn = theFile.querySelector('.remove-file')
+      this.base.on(removeBtn, 'click', this.removeFile.bind(this))
+      
+        
+        if(this.options.shouldImageUpload) {
+          this.options.imageUpload(
+            file, 
+  
+            function() {
+              return
+            }.bind(this),
+  
+            function() {
+              theFile.remove()
+              alert('文件上传失败，请再试一次！')
+            }.bind(this)
+          )
+        }
+
+      /* 后面插入文件 */
+        MoreEditor.util.after(delegate.topBlock, fileWrapper)
+
+        /* 在后面插入新的一行 */
+        var newLine = document.createElement('p')
+        newLine.innerHTML = '<br>'
+        MoreEditor.util.after(fileWrapper, newLine)
+
+        MoreEditor.util.unwrap(fileWrapper, document)
+        MoreEditor.selection.moveCursor(document, newLine, 0)
+        this.base.saveScene() // 设立撤销栈
+    },
+
+    /* 删除文件 */
+    removeFile: function(ev) {
+      var targetFile = ev.target.parentNode
+      var newLine = document.createElement('p')
+      newLine.innerHTML = '<br>'
+      this.base.editableElement.insertBefore(newLine, targetFile)
+      targetFile.remove()
+      MoreEditor.selection.moveCursor(document, newLine, 0)
+      this.base.saveScene() // 设立撤销点
     },
     
     /* 点击按钮删除选中的图片 */
@@ -3179,10 +3252,19 @@ MoreEditor.prototype = {
         var imageInput = document.createElement('input')
         imageInput.type = 'file'
         imageInput.accept = "image/jpg, image/png, image/jpeg, image/gif"
-        imageInput.classList.add("file-upload")
+        imageInput.classList.add("image-input")
         imageInput.style.display = 'none'
         document.body.appendChild(imageInput)
         this.buttons.imageInput = imageInput
+
+        /* 创建上传文件的 input 按钮 */
+        var fileInput = document.createElement('input')
+        fileInput.type = 'file'
+        fileInput.accept = "application/pdf"
+        fileInput.classList.add("file-input")
+        fileInput.style.display = 'none'
+        document.body.appendChild(fileInput)
+        this.buttons.fileInput = fileInput
 
 
         /* 设置图片选项 */
@@ -3231,6 +3313,7 @@ MoreEditor.prototype = {
         this.buttons.promptLink    = this.options.buttons.promptLink ? document.querySelector(this.options.buttons.promptLink) : agentBtn
         this.buttons.center        = this.options.buttons.center ? document.querySelector(this.options.buttons.center) : agentBtn
         this.buttons.imageButton   = this.options.buttons.imageButton ? document.querySelector(this.options.buttons.imageButton) : agentBtn
+        this.buttons.fileButton   = this.options.buttons.fileButton ? document.querySelector(this.options.buttons.fileButton) : agentBtn
         
 
 
@@ -3245,8 +3328,15 @@ MoreEditor.prototype = {
         this.on(this.buttons.strike, 'click', this.API.strike.bind(this.API))
         this.on(this.buttons.center, 'click', this.API.center.bind(this.API))
         this.on(this.buttons.imageInput, 'change', this.API.insertImage.bind(this.API))
-        this.on(this.buttons.imageButton, 'click', function() {this.buttons.imageInput.click()}.bind(this))
-        
+        this.on(this.buttons.imageButton, 'click', function() {
+            this.API.exportSelection()
+            this.buttons.imageInput.click()
+        }.bind(this))
+        this.on(this.buttons.fileButton, 'click', function() {
+            this.API.exportSelection()
+            this.buttons.fileInput.click()
+        }.bind(this))
+        this.on(this.buttons.fileInput, 'change', this.API.insertFile.bind(this.API))
 
         this.on(this.buttons.promptLink, 'click', this.API.promptLink.bind(this.API))
 
